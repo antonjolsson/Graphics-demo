@@ -16,6 +16,7 @@ SDL_Window* g_window = nullptr;
 
 #include <glm/glm.hpp>
 #include <glm/gtx/transform.hpp>
+#include "lab2_main.h"
 using namespace glm;
 
 int mag = 1;
@@ -29,7 +30,7 @@ GLuint shaderProgram;
 
 // The vertexArrayObject here will hold the pointers to
 // the vertex data (in positionBuffer) and color data per vertex (in colorBuffer)
-GLuint positionBuffer, colorBuffer, indexBuffer, textureBuffer, vertexArrayObject;
+GLuint roadPosBuffer, explPosBuffer, colorBuffer, indexBuffer, roadTexBuffer, explTexBuffer, roadVAO, explosionVAO;
 
 void initGL()
 {
@@ -37,26 +38,26 @@ void initGL()
 	// Create the vertex array object
 	///////////////////////////////////////////////////////////////////////////
 	// Create a handle for the vertex array object
-	glGenVertexArrays(1, &vertexArrayObject);
+	glGenVertexArrays(1, &roadVAO);
 	// Set it as current, i.e., related calls will affect this object
-	glBindVertexArray(vertexArrayObject);
+	glBindVertexArray(roadVAO);
 
 	///////////////////////////////////////////////////////////////////////////
 	// Create the positions buffer object
 	///////////////////////////////////////////////////////////////////////////
-	const float positions[] = {
+	const float roadPositions[] = {
 		// X      Y       Z
-		-10.0f, -5.0f,  -10.0f,  // v0
-		-10.0f, 100.0f, -330.0f, // v1
-		10.0f,  100.0f, -330.0f, // v2
-		10.0f,  -5.0f,  -10.0f   // v3
+		-10.0f, -4.2f,  -10.0f,  // v0
+		-10.0f, 20.0f, -330.0f, // v1
+		10.0f,  20.0f, -330.0f, // v2
+		10.0f,  -4.2f,  -10.0f   // v3
 	};
 	// Create a handle for the vertex position buffer
-	glGenBuffers(1, &positionBuffer);
+	glGenBuffers(1, &roadPosBuffer);
 	// Set the newly created buffer as the current one
-	glBindBuffer(GL_ARRAY_BUFFER, positionBuffer);
+	glBindBuffer(GL_ARRAY_BUFFER, roadPosBuffer);
 	// Send the vetex position data to the current buffer
-	glBufferData(GL_ARRAY_BUFFER, sizeof(positions), positions, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(roadPositions), roadPositions, GL_STATIC_DRAW);
 	glVertexAttribPointer(0, 3, GL_FLOAT, false /*normalized*/, 0 /*stride*/, 0 /*offset*/);
 	// Enable the attribute
 	glEnableVertexAttribArray(0);
@@ -68,16 +69,16 @@ void initGL()
 	//				 Enable the vertex attrib array.
 	///////////////////////////////////////////////////////////////////////////
 
-	float texcoords[] = {
+	float roadTexCoords[] = {
 	0.0f, 0.0f,    // (u,v) for v0
     0.0f, 15.0f,   // (u,v) for v1
     1.0f, 15.0f,   // (u,v) for v2
     1.0f, 0.0f     // (u,v) for v3
 	};
 
-	glGenBuffers(1, &textureBuffer);
-	glBindBuffer(GL_ARRAY_BUFFER, textureBuffer);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(texcoords), texcoords, GL_STATIC_DRAW);
+	glGenBuffers(1, &roadTexBuffer);
+	glBindBuffer(GL_ARRAY_BUFFER, roadTexBuffer);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(roadTexCoords), roadTexCoords, GL_STATIC_DRAW);
 	glVertexAttribPointer(2, 2, GL_FLOAT, false/*normalized*/, 0/*stride*/, 0/*offset*/);
 	glEnableVertexAttribArray(2);
 
@@ -106,11 +107,11 @@ void initGL()
 	// >>> @task 2
 	// >>> @task 2.1
 	int w, h, comp;
-	unsigned char* image = stbi_load("../scenes/asphalt.jpg", &w, &h, &comp, STBI_rgb_alpha);
-	glGenTextures(1, &textureBuffer);
-	glBindTexture(GL_TEXTURE_2D, textureBuffer);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, image);
-	free(image);
+	unsigned char* roadImage = stbi_load("../scenes/asphalt.jpg", &w, &h, &comp, STBI_rgb_alpha);
+	glGenTextures(1, &roadTexBuffer);
+	glBindTexture(GL_TEXTURE_2D, roadTexBuffer);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, roadImage);
+	free(roadImage);
 
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
@@ -121,6 +122,55 @@ void initGL()
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, 16.0f);
+
+	//************************************
+	//			Init explosion!
+	//************************************
+
+	glGenVertexArrays(1, &explosionVAO);
+	glBindVertexArray(explosionVAO);
+
+	const float explPositions[] = {
+		// X      Y       Z
+		-40.0f, -20.0f,  -170.0,  // v0
+		-40.0f, 60.0f, -170.0f, // v1
+		40.0f,  60.0f, -170.0f, // v2
+		40.0f,  -20.0f, -170.0f   // v3
+	};
+
+	glGenBuffers(1, &explPosBuffer);
+	glBindBuffer(GL_ARRAY_BUFFER, explPosBuffer);
+	glBindBuffer(GL_ARRAY_BUFFER, explPosBuffer);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(explPositions), explPositions, GL_STATIC_DRAW);
+	glVertexAttribPointer(0, 3, GL_FLOAT, false, 0, 0);
+	glEnableVertexAttribArray(0);
+
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+
+	float explTexCoords[] = {
+	0.0f, 0.0f, // (u,v) for v0 
+	0.0f, 1.0f, // (u,v) for v1
+	1.0f, 1.0f, // (u,v) for v2
+	1.0f, 0.0f // (u,v) for v3
+	};
+
+	glGenBuffers(1, &explTexBuffer);
+	glBindBuffer(GL_ARRAY_BUFFER, explTexBuffer);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(explTexCoords), explTexCoords, GL_STATIC_DRAW);
+	glVertexAttribPointer(2, 2, GL_FLOAT, false, 0, 0);
+	glEnableVertexAttribArray(2);
+
+	unsigned char* explImage = stbi_load("../scenes/explosion.png", &w, &h, &comp, STBI_rgb_alpha);
+	glGenTextures(1, &explTexBuffer);
+	glBindTexture(GL_TEXTURE_2D, explTexBuffer);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, explImage);
+	free(explImage);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 }
 
 void display(void)
@@ -157,15 +207,26 @@ void display(void)
 	loc = glGetUniformLocation(shaderProgram, "cameraPosition");
 	glUniform3f(loc, camera_pan, 0, 0);
 
+	glBindVertexArray(roadVAO);
+	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
 	// >>> @task 3.1
 	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, textureBuffer);
+	glBindTexture(GL_TEXTURE_2D, roadTexBuffer);
 
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST + mag);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, mini + (mini < 2 ? GL_NEAREST : GL_NEAREST_MIPMAP_NEAREST - 2));
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, anisotropy);
 
-	glBindVertexArray(vertexArrayObject);
+	glBindVertexArray(roadVAO);
+	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, explTexBuffer);
+
+	glBindVertexArray(explosionVAO);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
 	glUseProgram(0); // "unsets" the current shader program. Not really necessary.
@@ -218,7 +279,7 @@ int main(int argc, char* argv[])
 		display();
 
 		// Render overlay GUI.
-		//if(showUI)
+		if (showUI)
 		{
 			gui();
 		}

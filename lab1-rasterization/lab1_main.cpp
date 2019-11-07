@@ -16,8 +16,8 @@ SDL_Window* g_window = nullptr;
 // `vertexArrayObject' holds the data for each vertex. Data for each vertex
 // consists of positions (from positionBuffer) and color (from colorBuffer)
 // in this example.
-GLuint vertexArrayObject;
-GLuint vertexArrayObject2;
+GLuint roadVAO;
+GLuint explosionVAO;
 
 // The shaderProgram combines a vertex shader (vertexShader) and a
 // fragment shader (fragmentShader) into a single GLSL program that can
@@ -75,10 +75,10 @@ void initGL()
 	// See OpenGL Spec §2.10
 	// - http://www.cse.chalmers.se/edu/course/TDA361/glspec30.20080923.pdf#page=64
 	//////////////////////////////////////////////////////////////////////////////
-	glGenVertexArrays(1, &vertexArrayObject);
+	glGenVertexArrays(1, &roadVAO);
 	// Bind the vertex array object
 	// The following calls will affect this vertex array object.
-	glBindVertexArray(vertexArrayObject);
+	glBindVertexArray(roadVAO);
 	// Makes positionBuffer the current array buffer for subsequent calls.
 	glBindBuffer(GL_ARRAY_BUFFER, positionBuffer);
 	// Attaches positionBuffer to vertexArrayObject, in the 0th attribute location
@@ -132,8 +132,8 @@ void initGL()
 	glBindBuffer(GL_ARRAY_BUFFER, colorBuffer);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(colors2), colors2, GL_STATIC_DRAW);
 
-	glGenVertexArrays(1, &vertexArrayObject2);
-	glBindVertexArray(vertexArrayObject2);
+	glGenVertexArrays(1, &explosionVAO);
+	glBindVertexArray(explosionVAO);
 
 	glBindBuffer(GL_ARRAY_BUFFER, positionBuffer2);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(positions3), positions3, GL_STATIC_DRAW);
@@ -237,11 +237,11 @@ void display(void)
 	// Shader Program
 	glUseProgram(shaderProgram); // Set the shader program to use for this draw call
 	// Bind the vertex array object that contains all the vertex data.
-	glBindVertexArray(vertexArrayObject);
+	glBindVertexArray(roadVAO);
 	// Submit triangles from currently bound vertex array object.
 	glDrawArrays(GL_TRIANGLES, 0, 6); // Render 2 triangles
 
-	glBindVertexArray(vertexArrayObject2);
+	glBindVertexArray(explosionVAO);
 	glDrawArrays(GL_TRIANGLES, 0, 3); // Render 1 triangles
 
 	glUseProgram(0); // "unsets" the current shader program. Not really necessary.
