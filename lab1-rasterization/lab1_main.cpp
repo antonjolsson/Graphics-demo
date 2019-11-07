@@ -24,7 +24,7 @@ GLuint vertexArrayObject2;
 // be activated (glUseProgram()).
 GLuint shaderProgram;
 
-float g_clearColor[3] = { 0.2f, 0.2f, 0.8f };
+float g_clearColor[3] = { 0.4f, 0.4f, 0.4f };
 
 void initGL()
 {
@@ -57,9 +57,9 @@ void initGL()
 	// Define the colors for each of the three vertices of the triangle
 	const float colors[] = {
 		//   R     G     B
-		0.0f, 1.0f, 0.7f, // White
-		1.0f, 0.5f, 0.5f, // White
-		1.0f, 0.5f, 0.5f  // White
+		1.0f, 0.5f, 0.5f,
+		0.75f, 0.675f, 0.55f,
+		0.5f, 0.75f, 0.6f
 	};
 	// Create a handle for the vertex color buffer
 	GLuint colorBuffer;
@@ -116,19 +116,12 @@ void initGL()
 
 	const float colors2[] = {
 		//   R     G     B
-		0.0f, 1.0f, 0.7f, // White
-		1.0f, 0.5f, 0.5f, // White
-		1.0f, 0.5f, 0.5f,  // White
-		0.0f, 1.0f, 0.7f, // White
-		1.0f, 0.5f, 0.5f, // White
-		1.0f, 0.5f, 0.5f  // White
-	};
-
-	const float colors3[] = {
-		//   R     G     B
-		0.0f, 1.0f, 0.7f, // White
-		1.0f, 0.5f, 0.5f, // White
-		1.0f, 0.5f, 0.5f,  // White
+		0.0f, 1.0f, 0.7f, 
+		0.25f, 0.875f, 0.65f, 
+		0.5f, 0.75f, 0.6f,  
+		0.5f, 0.75f, 0.6f, 
+		0.25f, 0.875f, 0.65f, 
+		0.75f, 0.675f, 0.55f
 	};
 
 	GLuint colorBuffer2;
@@ -139,24 +132,16 @@ void initGL()
 	glBindBuffer(GL_ARRAY_BUFFER, colorBuffer);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(colors2), colors2, GL_STATIC_DRAW);
 
-	glBindBuffer(GL_ARRAY_BUFFER, positionBuffer);
-	glVertexAttribPointer(0, 3, GL_FLOAT, false /*normalized*/, 0 /*stride*/, 0 /*offset*/);
-	glBindBuffer(GL_ARRAY_BUFFER, colorBuffer);
-	glVertexAttribPointer(1, 3, GL_FLOAT, false /*normalized*/, 0 /*stride*/, 0 /*offset*/);
-
 	glGenVertexArrays(1, &vertexArrayObject2);
 	glBindVertexArray(vertexArrayObject2);
 
 	glBindBuffer(GL_ARRAY_BUFFER, positionBuffer2);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(positions3), positions3, GL_STATIC_DRAW);
-	glBindBuffer(GL_ARRAY_BUFFER, colorBuffer2);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(colors3), colors3, GL_STATIC_DRAW);
-
-
-	glBindBuffer(GL_ARRAY_BUFFER, positionBuffer2);
 	glVertexAttribPointer(0, 3, GL_FLOAT, false /*normalized*/, 0 /*stride*/, 0 /*offset*/);
 	glBindBuffer(GL_ARRAY_BUFFER, colorBuffer2);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(colors), colors, GL_STATIC_DRAW);
 	glVertexAttribPointer(1, 3, GL_FLOAT, false /*normalized*/, 0 /*stride*/, 0 /*offset*/);
+	
 	glEnableVertexAttribArray(0); // Enable the vertex position attribute
 	glEnableVertexAttribArray(1); // Enable the vertex color attribute
 
