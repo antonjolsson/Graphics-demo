@@ -16,6 +16,8 @@
 
 #include <iostream>
 #include <cmath>
+#include <vector>
+#include "lab3_main.h"
 
 using namespace glm;
 using namespace labhelper;
@@ -35,7 +37,9 @@ struct PerspectiveParams
 	float far;
 };
 
-PerspectiveParams pp = { 45.0f, 1280, 720, 0.1f, 300.0f };
+PerspectiveParams ppStatic = { 45.0f, 1280, 720, 0.1f, 300.0f };
+PerspectiveParams pp1stPers = { 60.0f, 1280, 720, 0.60f, 300.0f };
+PerspectiveParams* pp = &ppStatic;
 
 // The window we'll be rendering to
 SDL_Window* g_window = nullptr;
@@ -62,10 +66,15 @@ vec3 worldUp = vec3(0.0f, 1.0f, 0.0f);
 vec3 zAxis(0, 0, 1.0f);
 
 // Camera parameters
-vec3 cameraPosition(13.0f, 13.0f, 13.0f);
-vec3 cameraDirection(-1.0f, -1.0f, -1.0f);
+enum CameraType {STATIC, CAR_1ST_PERS, CAR_3D_PERS};
+CameraType camera = CAR_3D_PERS;
+vec3 cameraPosition(13.0f, 13.0f, 13.0f), statCamPos = cameraPosition;
+vec3 cameraDirection(-1.0f, -1.0f, -1.0f), statCamDirection = cameraDirection;
 mat4 T(1.0f), T2(1.0f), R(1.0f), R2(1.0f);
 float zoomSpeed = 0.3f;
+bool vKeyDown = false;
+const vec3 CAR_1ST_PERS_OFFSET{ 0.2f, 2.0f, 0.47f };
+const vec3 CAR_3RD_PERS_OFFSET{ 0.0f, 3.0f, -9.0f };
 
 void initCar2(void) {
 	carModelMatrix2[3] = vec4(-15.0f, 0, 0, 1);
@@ -123,19 +132,42 @@ void moveCar2(void) {
 	carModelMatrix2 = translate(carModelMatrix2, car2Speed * zAxis);
 }
 
+void setCamParam(void) {
+	switch (camera)
+	{
+	case CAR_1ST_PERS:
+		vec4 offsVec1stPers = carModelMatrix1 * vec4{ CAR_1ST_PERS_OFFSET, 0 };
+		cameraPosition = vec3{ carModelMatrix1[3][0], carModelMatrix1[3][1], carModelMatrix1[3][2] } + vec3{offsVec1stPers[0], offsVec1stPers[1] , offsVec1stPers[2]};
+		cameraDirection = vec3{ carModelMatrix1[2][0], carModelMatrix1[2][1], carModelMatrix1[2][2] };
+		pp = &pp1stPers;
+		break;
+	case CAR_3D_PERS:
+		vec4 offsVec3rdPers = carModelMatrix1 * vec4{ CAR_3RD_PERS_OFFSET, 0 };
+		cameraPosition = vec3{ carModelMatrix1[3][0], carModelMatrix1[3][1], carModelMatrix1[3][2] } + vec3{ offsVec3rdPers[0], offsVec3rdPers[1] , offsVec3rdPers[2] };
+		cameraDirection = vec3{ carModelMatrix1[2][0], carModelMatrix1[2][1], carModelMatrix1[2][2]};
+		pp = &ppStatic;
+		break;
+	default:
+		cameraPosition = statCamPos;
+		cameraDirection = statCamDirection;
+		pp = &ppStatic;
+		break;
+	}
+}
+
 void display()
 {
 	// Set up
 	int w, h;
 	SDL_GetWindowSize(g_window, &w, &h);
 
-	if(pp.w != old_w || pp.h != old_h)
+	if(pp->w != old_w || pp->h != old_h)
 	{
-		SDL_SetWindowSize(g_window, pp.w, pp.h);
-		w = pp.w;
-		h = pp.h;
-		old_w = pp.w;
-		old_h = pp.h;
+		SDL_SetWindowSize(g_window, pp->w, pp->h);
+		w = pp->w;
+		h = pp->h;
+		old_w = pp->w;
+		old_h = pp->h;
 	}
 
 	glViewport(0, 0, w, h);                             // Set viewport
@@ -149,6 +181,8 @@ void display()
 
 	// Set up model matrices
 	mat4 cityModelMatrix(1.0f);
+
+	setCamParam();
 
 	// Set up the view matrix
 	// The view matrix defines where the viewer is looking
@@ -168,12 +202,12 @@ void display()
 	// Setup the projection matrix
 	if(w != old_w || h != old_h)
 	{
-		pp.h = h;
-		pp.w = w;
+		pp->h = h;
+		pp->w = w;
 		old_w = w;
 		old_h = h;
 	}
-	mat4 projectionMatrix = perspective(radians(pp.fov), float(pp.w) / float(pp.h), pp.near, pp.far);
+	mat4 projectionMatrix = perspective(radians(pp->fov), float(pp->w) / float(pp->h), pp->near, pp->far);
 
 	// Concatenate the three matrices and pass the final transform to the vertex shader
 
@@ -208,19 +242,19 @@ void gui()
 	ImGui_ImplSdlGL3_NewFrame(g_window);
 
 	// ----------------- Set variables --------------------------
-	ImGui::SliderFloat("Field Of View", &pp.fov, 1.0f, 180.0f, "%.0f");
-	ImGui::SliderInt("Width", &pp.w, 256, 1920);
-	ImGui::SliderInt("Height", &pp.h, 256, 1080);
-	ImGui::Text("Aspect Ratio: %.2f", float(pp.w) / float(pp.h));
-	ImGui::SliderFloat("Near Plane", &pp.near, 0.1f, 300.0f, "%.2f", 2.f);
-	ImGui::SliderFloat("Far Plane", &pp.far, 0.1f, 300.0f, "%.2f", 2.f);
+	ImGui::SliderFloat("Field Of View", &pp->fov, 1.0f, 180.0f, "%.0f");
+	ImGui::SliderInt("Width", &pp->w, 256, 1920);
+	ImGui::SliderInt("Height", &pp->h, 256, 1080);
+	ImGui::Text("Aspect Ratio: %.2f", float(pp->w) / float(pp->h));
+	ImGui::SliderFloat("Near Plane", &pp->near, 0.1f, 300.0f, "%.2f", 2.f);
+	ImGui::SliderFloat("Far Plane", &pp->far, 0.1f, 300.0f, "%.2f", 2.f);
 	if(ImGui::Button("Reset"))
 	{
-		pp.fov = 45.0f;
-		pp.w = 1280;
-		pp.h = 720;
-		pp.near = 0.1f;
-		pp.far = 300.0f;
+		pp->fov = 45.0f;
+		pp->w = 1280;
+		pp->h = 720;
+		pp->near = 0.1f;
+		pp->far = 300.0f;
 	}
 	ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate,
 	            ImGui::GetIO().Framerate);
@@ -228,6 +262,17 @@ void gui()
 
 	// Render the GUI.
 	ImGui::Render();
+}
+
+void setCameraType()
+{
+	if (camera == CameraType::STATIC) {
+		camera = CameraType::CAR_1ST_PERS;
+	}
+	else if (camera == CameraType::CAR_1ST_PERS) {
+		camera = CameraType::CAR_3D_PERS;
+	}
+	else camera = CameraType::STATIC;
 }
 
 int main(int argc, char* argv[])
@@ -304,8 +349,8 @@ int main(int argc, char* argv[])
 				{
 					float rotationSpeed = 0.005f;
 					mat4 yaw = rotate(rotationSpeed * -delta_x, worldUp);
-					mat4 pitch = rotate(rotationSpeed * -delta_y, normalize(cross(cameraDirection, worldUp)));
-					cameraDirection = vec3(pitch * yaw * vec4(cameraDirection, 0.0f));
+					mat4 pitch = rotate(rotationSpeed * -delta_y, normalize(cross(statCamDirection, worldUp)));
+					statCamDirection = vec3(pitch * yaw * vec4(cameraDirection, 0.0f));
 				}
 				g_prevMouseCoords.x = event.motion.x;
 				g_prevMouseCoords.y = event.motion.y;
@@ -316,20 +361,19 @@ int main(int argc, char* argv[])
 		const uint8_t* state = SDL_GetKeyboardState(nullptr);
 
 		// implement camera controls based on key states
-		if(state[SDL_SCANCODE_W])
+		if(state[SDL_SCANCODE_W] && camera == STATIC)
 		{
-			cameraPosition += cameraDirection * zoomSpeed;
+			statCamPos += statCamDirection * zoomSpeed;
 		}
-		if(state[SDL_SCANCODE_S])
+		if(state[SDL_SCANCODE_S] && camera == STATIC)
 		{
-			cameraPosition -= cameraDirection * zoomSpeed;
+			statCamPos -= statCamDirection * zoomSpeed;
 		}
-		if(state[SDL_SCANCODE_LEFT])
-		{
+		if (state[SDL_SCANCODE_V] && !vKeyDown) {
+			setCameraType();
+			vKeyDown = true;
 		}
-		if(state[SDL_SCANCODE_RIGHT])
-		{
-		}
+		if (!state[SDL_SCANCODE_V]) vKeyDown = false;
 	}
 
 	// Shut down everything. This includes the window and all other subsystems.
