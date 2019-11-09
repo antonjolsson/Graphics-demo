@@ -13,6 +13,10 @@
 
 #include <glm/glm.hpp>
 #include <glm/gtx/transform.hpp>
+
+#include <iostream>
+#include <cmath>
+
 using namespace glm;
 using namespace labhelper;
 
@@ -50,14 +54,21 @@ bool showUI = false;
 Model* cityModel = nullptr;
 Model* carModel = nullptr;
 Model* groundModel = nullptr;
-mat4 carModelMatrix(1.0f);
+mat4 carModelMatrix1(1.0f), carModelMatrix2(1.0f);
+
+float car2Speed = 0.14f;
 
 vec3 worldUp = vec3(0.0f, 1.0f, 0.0f);
+vec3 zAxis(0, 0, 1.0f);
 
 // Camera parameters
 vec3 cameraPosition(15.0f, 15.0f, 15.0f);
 vec3 cameraDirection(-1.0f, -1.0f, -1.0f);
-mat4 T(1.0f), R(1.0f);
+mat4 T(1.0f), T2(1.0f), R(1.0f), R2(1.0f);
+
+void initCar2(void) {
+	carModelMatrix2[3] = vec4(-15.0f, 0, 0, 1);
+}
 
 void loadModels()
 {
@@ -67,6 +78,7 @@ void loadModels()
 	cityModel = loadModelFromOBJ("../scenes/city.obj");
 	carModel = loadModelFromOBJ("../scenes/car.obj");
 	groundModel = loadModelFromOBJ("../scenes/ground_plane.obj");
+	initCar2();
 }
 
 void drawGround(mat4 mvpMatrix)
@@ -75,6 +87,39 @@ void drawGround(mat4 mvpMatrix)
 	int loc = glGetUniformLocation(shaderProgram, "modelViewProjectionMatrix");
 	glUniformMatrix4fv(loc, 1, false, &mvpMatrix[0].x);
 	render(groundModel);
+}
+
+void moveCar1(void) {
+	// check keyboard state (which keys are still pressed)
+	const uint8_t* state = SDL_GetKeyboardState(nullptr);
+
+	const float rotateSpeed = 2.f;
+	if (state[SDL_SCANCODE_LEFT]) {
+		R[0] -= rotateSpeed * deltaTime * R[2];
+	}
+	if (state[SDL_SCANCODE_RIGHT]) {
+		R[0] += rotateSpeed * deltaTime * R[2];
+	}
+
+	// Make R orthonormal again
+	R[0] = normalize(R[0]);
+	R[2] = vec4(cross(vec3(R[0]), vec3(R[1])), 0.0f);
+
+	// implement controls based on key states
+	const float speed = 10.f;
+	if (state[SDL_SCANCODE_UP]) {
+		T[3] += speed * deltaTime * R[2];
+	}
+	if (state[SDL_SCANCODE_DOWN]) {
+		T[3] -= speed * deltaTime * R[2];
+	}
+}
+
+void moveCar2(void) {
+	R2 = rotate(mat4(1.0f), (float) -(M_PI + currentTime / M_PI * 2), worldUp);
+	carModelMatrix2[0] = R2[0];
+	carModelMatrix2[2] = R2[2];
+	carModelMatrix2 = translate(carModelMatrix2, car2Speed * zAxis);
 }
 
 void display()
@@ -135,11 +180,17 @@ void display()
 	// Task 5: Uncomment this
 	//drawGround(modelViewProjectionMatrix);
 
-	// car
-	modelViewProjectionMatrix = projectionMatrix * viewMatrix * carModelMatrix;
+	// cars
+	moveCar1();
+	carModelMatrix1 = T * R;
+	modelViewProjectionMatrix = projectionMatrix * viewMatrix * carModelMatrix1;
 	glUniformMatrix4fv(loc, 1, false, &modelViewProjectionMatrix[0].x);
 	render(carModel);
 
+	moveCar2();
+	modelViewProjectionMatrix = projectionMatrix * viewMatrix * carModelMatrix2;
+	glUniformMatrix4fv(loc, 1, false, &modelViewProjectionMatrix[0].x);
+	render(carModel);
 
 	glUseProgram(0);
 }
@@ -192,6 +243,7 @@ int main(int argc, char* argv[])
 		std::chrono::duration<float> timeSinceStart = std::chrono::system_clock::now() - startTime;
 		deltaTime = timeSinceStart.count() - currentTime;
 		currentTime = timeSinceStart.count();
+		std::cout << carModelMatrix2[2][0] << " " << carModelMatrix2[2][1] << " " << carModelMatrix2[2][2] << std::endl;
 
 		// render to window
 		display();
