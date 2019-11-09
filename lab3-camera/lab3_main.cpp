@@ -62,9 +62,10 @@ vec3 worldUp = vec3(0.0f, 1.0f, 0.0f);
 vec3 zAxis(0, 0, 1.0f);
 
 // Camera parameters
-vec3 cameraPosition(15.0f, 15.0f, 15.0f);
+vec3 cameraPosition(13.0f, 13.0f, 13.0f);
 vec3 cameraDirection(-1.0f, -1.0f, -1.0f);
 mat4 T(1.0f), T2(1.0f), R(1.0f), R2(1.0f);
+float zoomSpeed = 0.3f;
 
 void initCar2(void) {
 	carModelMatrix2[3] = vec4(-15.0f, 0, 0, 1);
@@ -156,7 +157,13 @@ void display()
 	                               0.816496551f, 1.00000000f, 0.000000000f, -0.707106769f, -0.408248276f,
 	                               1.00000000f, 0.000000000f, 0.000000000f, 0.000000000f, -30.0000000f,
 	                               1.00000000f);
-	mat4 viewMatrix = constantViewMatrix;
+
+	// use camera direction as -z axis and compute the x (cameraRight) and y (cameraUp) base vectors
+	vec3 cameraRight = normalize(cross(cameraDirection, worldUp));
+	vec3 cameraUp = normalize(cross(cameraRight, cameraDirection));
+	mat3 cameraBaseVectorsWorldSpace(cameraRight, cameraUp, -cameraDirection);
+	mat4 cameraRotation = mat4(transpose(cameraBaseVectorsWorldSpace));
+	mat4 viewMatrix = cameraRotation * translate(-cameraPosition);
 
 	// Setup the projection matrix
 	if(w != old_w || h != old_h)
@@ -243,7 +250,6 @@ int main(int argc, char* argv[])
 		std::chrono::duration<float> timeSinceStart = std::chrono::system_clock::now() - startTime;
 		deltaTime = timeSinceStart.count() - currentTime;
 		currentTime = timeSinceStart.count();
-		std::cout << carModelMatrix2[2][0] << " " << carModelMatrix2[2][1] << " " << carModelMatrix2[2][2] << std::endl;
 
 		// render to window
 		display();
@@ -296,7 +302,10 @@ int main(int argc, char* argv[])
 				int delta_y = event.motion.y - g_prevMouseCoords.y;
 				if(event.button.button == SDL_BUTTON_LEFT)
 				{
-					printf("Mouse motion while left button down (%i, %i)\n", event.motion.x, event.motion.y);
+					float rotationSpeed = 0.005f;
+					mat4 yaw = rotate(rotationSpeed * -delta_x, worldUp);
+					mat4 pitch = rotate(rotationSpeed * -delta_y, normalize(cross(cameraDirection, worldUp)));
+					cameraDirection = vec3(pitch * yaw * vec4(cameraDirection, 0.0f));
 				}
 				g_prevMouseCoords.x = event.motion.x;
 				g_prevMouseCoords.y = event.motion.y;
@@ -307,21 +316,19 @@ int main(int argc, char* argv[])
 		const uint8_t* state = SDL_GetKeyboardState(nullptr);
 
 		// implement camera controls based on key states
-		if(state[SDL_SCANCODE_UP])
+		if(state[SDL_SCANCODE_W])
 		{
-			printf("Key Up is pressed down\n");
+			cameraPosition += cameraDirection * zoomSpeed;
 		}
-		if(state[SDL_SCANCODE_DOWN])
+		if(state[SDL_SCANCODE_S])
 		{
-			printf("Key Down is pressed down\n");
+			cameraPosition -= cameraDirection * zoomSpeed;
 		}
 		if(state[SDL_SCANCODE_LEFT])
 		{
-			printf("Key Left is pressed down\n");
 		}
 		if(state[SDL_SCANCODE_RIGHT])
 		{
-			printf("Key Right is pressed down\n");
 		}
 	}
 
