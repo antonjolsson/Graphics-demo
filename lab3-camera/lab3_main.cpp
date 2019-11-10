@@ -18,9 +18,12 @@
 #include <cmath>
 #include <vector>
 #include "lab3_main.h"
+#include <limits>
+#include <glm/gtx/vector_angle.hpp>
 
 using namespace glm;
 using namespace labhelper;
+using namespace std;
 
 using std::min;
 using std::max;
@@ -37,8 +40,8 @@ struct PerspectiveParams
 	float far;
 };
 
-PerspectiveParams ppStatic = { 45.0f, 1280, 720, 0.1f, 300.0f };
-PerspectiveParams pp1stPers = { 60.0f, 1280, 720, 0.60f, 300.0f };
+PerspectiveParams ppStatic = { 45.0f, 1280, 720, 0.81f, 300.0f };
+PerspectiveParams pp1stPers = { 60.0f, 1280, 720, 0.81f, 300.0f };
 PerspectiveParams* pp = &ppStatic;
 
 // The window we'll be rendering to
@@ -59,22 +62,30 @@ Model* cityModel = nullptr;
 Model* carModel = nullptr;
 Model* groundModel = nullptr;
 mat4 carModelMatrix1(1.0f), carModelMatrix2(1.0f);
+vec3 scaleVec{ 1.0f };
 
 float car2Speed = 0.14f;
+vec4 car1Speed;
+const float ACC = 1.0f;
+const float MAX_SPEED = 0.5f;
+const float DRAG = 0.02f;
+float car1MoveAngle = 0.0f;
+bool car1GoingBackWards = false;
 
 vec3 worldUp = vec3(0.0f, 1.0f, 0.0f);
 vec3 zAxis(0, 0, 1.0f);
 
 // Camera parameters
-enum CameraType {STATIC, CAR_1ST_PERS, CAR_3D_PERS};
-CameraType camera = CAR_3D_PERS;
+enum CameraType {STATIC, CAR_1ST_PERS, CAR_3RD_PERS};
+CameraType camera = STATIC;
 vec3 cameraPosition(13.0f, 13.0f, 13.0f), statCamPos = cameraPosition;
 vec3 cameraDirection(-1.0f, -1.0f, -1.0f), statCamDirection = cameraDirection;
-mat4 T(1.0f), T2(1.0f), R(1.0f), R2(1.0f);
+mat4 T(1.0f), T2(1.0f), R(1.0f), R2(1.0f), R3(1.0f);
 float zoomSpeed = 0.3f;
 bool vKeyDown = false;
 const vec3 CAR_1ST_PERS_OFFSET{ 0.2f, 2.0f, 0.47f };
 const vec3 CAR_3RD_PERS_OFFSET{ 0.0f, 3.0f, -9.0f };
+vec4 offsVec3rdPers, offsVec1stPers;
 
 void initCar2(void) {
 	carModelMatrix2[3] = vec4(-15.0f, 0, 0, 1);
@@ -116,35 +127,53 @@ void moveCar1(void) {
 	R[2] = vec4(cross(vec3(R[0]), vec3(R[1])), 0.0f);
 
 	// implement controls based on key states
-	const float speed = 10.f;
+	//const float speed = 10.f;
 	if (state[SDL_SCANCODE_UP]) {
-		T[3] += speed * deltaTime * R[2];
+		//T[3] += speed * deltaTime * R[2];
+		car1Speed += ACC * deltaTime * R[2];
 	}
 	if (state[SDL_SCANCODE_DOWN]) {
-		T[3] -= speed * deltaTime * R[2];
+		//T[3] -= speed * deltaTime * R[2];
+		car1Speed -= ACC * deltaTime * R[2];
 	}
+	if (length(car1Speed) > MAX_SPEED) {
+		car1Speed = MAX_SPEED * normalize(car1Speed);
+	}
+	else if (length(car1Speed) > 0) {
+		car1Speed *= (1.0f - DRAG);
+	}
+	T[3] += car1Speed;
 }
 
 void moveCar2(void) {
-	R2 = rotate(mat4(1.0f), (float) -(M_PI + currentTime / M_PI * 2), worldUp);
+	R2 = rotate(mat4{1.0f}, (float) -(M_PI + currentTime / M_PI * 2), worldUp);
 	carModelMatrix2[0] = R2[0];
 	carModelMatrix2[2] = R2[2];
 	carModelMatrix2 = translate(carModelMatrix2, car2Speed * zAxis);
 }
 
 void setCamParam(void) {
+	bool car1Moving = length(car1Speed) > 0.01;
+	vec3 car1SpeedVec3{ normalize(car1Speed)[0], 0, normalize(car1Speed)[2] };
+	car1MoveAngle = car1Moving ? orientedAngle(zAxis, car1SpeedVec3, worldUp) : 0;
+	vec3 carPos{ carModelMatrix1[3][0], carModelMatrix1[3][1], carModelMatrix1[3][2] };
+	vec3 zCar{ carModelMatrix1[2][0], carModelMatrix1[2][1], carModelMatrix1[2][2] };
+	car1GoingBackWards = angle(zCar, car1SpeedVec3) > M_PI - 0.5;
 	switch (camera)
 	{
 	case CAR_1ST_PERS:
-		vec4 offsVec1stPers = carModelMatrix1 * vec4{ CAR_1ST_PERS_OFFSET, 0 };
-		cameraPosition = vec3{ carModelMatrix1[3][0], carModelMatrix1[3][1], carModelMatrix1[3][2] } + vec3{offsVec1stPers[0], offsVec1stPers[1] , offsVec1stPers[2]};
-		cameraDirection = vec3{ carModelMatrix1[2][0], carModelMatrix1[2][1], carModelMatrix1[2][2] };
+		offsVec1stPers = carModelMatrix1 * vec4{ CAR_1ST_PERS_OFFSET, 0 };
+		cameraPosition = carPos + vec3{offsVec1stPers[0], offsVec1stPers[1] , offsVec1stPers[2]};
+		cameraDirection = zCar;
 		pp = &pp1stPers;
 		break;
-	case CAR_3D_PERS:
-		vec4 offsVec3rdPers = carModelMatrix1 * vec4{ CAR_3RD_PERS_OFFSET, 0 };
-		cameraPosition = vec3{ carModelMatrix1[3][0], carModelMatrix1[3][1], carModelMatrix1[3][2] } + vec3{ offsVec3rdPers[0], offsVec3rdPers[1] , offsVec3rdPers[2] };
-		cameraDirection = vec3{ carModelMatrix1[2][0], carModelMatrix1[2][1], carModelMatrix1[2][2]};
+	case CAR_3RD_PERS:
+		if (car1Moving) {
+			R3 = rotate(mat4{ 1.0f }, car1MoveAngle, worldUp);
+		}
+		offsVec3rdPers = (car1Moving && !car1GoingBackWards ? R3 : carModelMatrix1) * vec4{ CAR_3RD_PERS_OFFSET, 0 };
+		cameraPosition = carPos + vec3{ offsVec3rdPers[0], offsVec3rdPers[1] , offsVec3rdPers[2] };
+		cameraDirection = car1Moving && !car1GoingBackWards ? normalize(car1Speed) : zCar;
 		pp = &ppStatic;
 		break;
 	default:
@@ -219,7 +248,7 @@ void display()
 
 	// Ground
 	// Task 5: Uncomment this
-	//drawGround(modelViewProjectionMatrix);
+	drawGround(modelViewProjectionMatrix);
 
 	// cars
 	moveCar1();
@@ -270,9 +299,12 @@ void setCameraType()
 		camera = CameraType::CAR_1ST_PERS;
 	}
 	else if (camera == CameraType::CAR_1ST_PERS) {
-		camera = CameraType::CAR_3D_PERS;
+		camera = CameraType::CAR_3RD_PERS;
 	}
 	else camera = CameraType::STATIC;
+}
+
+void printState(void) {
 }
 
 int main(int argc, char* argv[])
@@ -291,6 +323,7 @@ int main(int argc, char* argv[])
 
 	while(!stopRendering)
 	{
+		//printState();
 		// update currentTime
 		std::chrono::duration<float> timeSinceStart = std::chrono::system_clock::now() - startTime;
 		deltaTime = timeSinceStart.count() - currentTime;
