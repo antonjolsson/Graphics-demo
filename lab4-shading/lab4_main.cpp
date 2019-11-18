@@ -20,7 +20,7 @@ SDL_Window* g_window = nullptr;
 static float currentTime = 0.0f;
 static float deltaTime = 0.0f;
 static int windowWidth, windowHeight;
-bool showUI = true;
+bool showUI = false;
 
 // Mouse input
 ivec2 g_prevMouseCoords = { -1, -1 };
@@ -58,17 +58,17 @@ vec3 point_light_color = vec3(1.f, 1.f, 1.f);
 ///////////////////////////////////////////////////////////////////////////////
 
 //// MaterialTest ///////////////////////////////////////////////////////////////
-vec3 cameraPosition(0.0f, 30.0f, 30.0f);
+/*vec3 cameraPosition(0.0f, 30.0f, 30.0f);
 vec3 cameraDirection = normalize(vec3(0.0f) - cameraPosition);
 vec3 worldUp(0.0f, 1.0f, 0.0f);
-const std::string model_filename = "../scenes/materialtest.obj";
+const std::string model_filename = "../scenes/materialtest.obj";*/
 /////////////////////////////////////////////////////////////////////////////////
 
 // NewShip ////////////////////////////////////////////////////////////////////
-/*vec3 cameraPosition(-30.0f, 10.0f, 30.0f);
+vec3 cameraPosition(-30.0f, 10.0f, 30.0f);
 vec3 cameraDirection = normalize(vec3(0.0f) - cameraPosition);
 vec3 worldUp(0.0f, 1.0f, 0.0f);
-const std::string model_filename = "../scenes/NewShip.obj";*/
+const std::string model_filename = "../scenes/NewShip.obj";
 ///////////////////////////////////////////////////////////////////////////////
 
 

@@ -64,24 +64,37 @@ vec3 calculateDirectIllumiunation(vec3 wo, vec3 n, vec3 base_color)
 	//            return vec3(0);
 	///////////////////////////////////////////////////////////////////////////
 	float d = distance(viewSpaceLightPosition, viewSpacePosition);
-	vec3 w1 = normalize(viewSpaceLightPosition - viewSpacePosition);
-	if (dot(n, w1) <= 0) return black_color;
+	vec3 wi = normalize(viewSpaceLightPosition - viewSpacePosition);
+	if (dot(n, wi) <= 0) return black_color;
 	vec3 li = point_light_intensity_multiplier * point_light_color * (1.f / (d * d));
 		///////////////////////////////////////////////////////////////////////////
 		// Task 1.3 - Calculate the diffuse term and return that as the result
 		///////////////////////////////////////////////////////////////////////////
-	vec3 diffuse_term = material_color * (1.f / PI) * dot(n, w1) * li;
-	return diffuse_term;
+	vec3 diffuse_term = material_color * (1.f / PI) * dot(n, wi) * li;
 
 	///////////////////////////////////////////////////////////////////////////
 	// Task 2 - Calculate the Torrance Sparrow BRDF and return the light
 	//          reflected from that instead
 	///////////////////////////////////////////////////////////////////////////
+	vec3 wh = normalize(wi + wo);
+	float f = material_fresnel + (1 - material_fresnel) * pow(1 - dot(wh, wi), 5);
+	float distrib = dot(n, wh) < 0 ? 0 : (material_shininess + 2.f) / (PI * 2.f) * pow(dot(n, wh), material_shininess); 
+
+	float g1 = 2.f * dot(n, wh) * dot(n, wo) / dot(wo, wh);
+	float g2 = 2.f * dot(n, wh) * dot(n, wi) / dot(wo, wh);
+	float g = min(1.f, min(g1, g2));
+
+	float brdf = f * distrib * g / (4 * dot(n, wo) * dot(n, wi));
+
 	///////////////////////////////////////////////////////////////////////////
 	// Task 3 - Make your shader respect the parameters of our material model.
 	///////////////////////////////////////////////////////////////////////////
 
-	return direct_illum;
+	vec3 dielectric_term = brdf * dot(n, wi) * li + (1 - f) * diffuse_term;
+	vec3 metal_term = brdf * material_color * dot(n, wi) * li;
+	vec3 microfacet_term = material_metalness * metal_term + (1 - material_metalness) * dielectric_term;
+
+	return material_reflectivity * microfacet_term + (1 - material_reflectivity) * diffuse_term;
 }
 
 vec3 calculateIndirectIllumination(vec3 wo, vec3 n, vec3 base_color)
@@ -100,14 +113,13 @@ vec3 calculateIndirectIllumination(vec3 wo, vec3 n, vec3 base_color)
 	return indirect_illum;
 }
 
-
 void main()
 {
 	///////////////////////////////////////////////////////////////////////////
 	// Task 1.1 - Fill in the outgoing direction, wo, and the normal, n. Both
 	//            shall be normalized vectors in view-space.
 	///////////////////////////////////////////////////////////////////////////
-	vec3 wo = normalize(viewSpacePosition);
+	vec3 wo = normalize(-viewSpacePosition);
 	vec3 n = normalize(viewSpaceNormal);
 
 	vec3 base_color = material_color;
