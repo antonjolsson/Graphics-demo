@@ -16,6 +16,8 @@ using namespace std;
 ///////////////////////////////////////////////////////////////////////////////
 // Various globals
 ///////////////////////////////////////////////////////////////////////////////
+bool showShip = true;
+
 SDL_Window* g_window = nullptr;
 static float currentTime = 0.0f;
 static float deltaTime = 0.0f;
@@ -53,28 +55,30 @@ bool lightManualOnly = true;
 float point_light_intensity_multiplier = 1000.0f;
 vec3 point_light_color = vec3(1.f, 1.f, 1.f);
 
-
 ///////////////////////////////////////////////////////////////////////////////
 // Models
 ///////////////////////////////////////////////////////////////////////////////
 
-//// MaterialTest ///////////////////////////////////////////////////////////////
-vec3 cameraPosition(0.0f, 30.0f, 30.0f);
-vec3 cameraDirection = normalize(vec3(0.0f) - cameraPosition);
+vec3 cameraPosition;
+vec3 cameraDirection;
 vec3 worldUp(0.0f, 1.0f, 0.0f);
-const std::string model_filename = "../scenes/materialtest.obj";
-/////////////////////////////////////////////////////////////////////////////////
-
-// NewShip ////////////////////////////////////////////////////////////////////
-/*vec3 cameraPosition(-30.0f, 10.0f, 30.0f);
-vec3 cameraDirection = normalize(vec3(0.0f) - cameraPosition);
-vec3 worldUp(0.0f, 1.0f, 0.0f);
-const std::string model_filename = "../scenes/NewShip.obj";*/
-///////////////////////////////////////////////////////////////////////////////
-
+std::string model_filename;
 
 labhelper::Model* fighterModel = nullptr;
 labhelper::Model* sphereModel = nullptr;
+
+void setModel(void) {
+	if (showShip) {
+		cameraPosition = vec3(-30.0f, 10.0f, 30.0f);
+		cameraDirection = normalize(vec3(0.0f) - cameraPosition);
+		model_filename = "../scenes/NewShip.obj";
+	}
+	else {
+		cameraPosition = vec3(0.0f, 30.0f, 30.0f);
+		cameraDirection = normalize(vec3(0.0f) - cameraPosition);
+		model_filename = "../scenes/materialtest.obj";
+	}
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 // The load shaders function is called once from initialize() and then
@@ -95,10 +99,10 @@ void loadShaders(bool is_reload)
 ///////////////////////////////////////////////////////////////////////////////
 // Create buffer to render a full screen quad
 ///////////////////////////////////////////////////////////////////////////////
-const int indices[] = {
+/*const int indices[] = {
 		0, 1, 3, // Triangle 1
 		1, 2, 3  // Triangle 2
-};
+};*/
 
 void initFullScreenQuad()
 {
@@ -159,6 +163,7 @@ void drawFullScreenQuad()
 ///////////////////////////////////////////////////////////////////////////////
 void initialize()
 {
+	setModel();
 	///////////////////////////////////////////////////////////////////////////
 	// Load shaders first time. Do not allow errors.
 	///////////////////////////////////////////////////////////////////////////

@@ -31,6 +31,11 @@ uniform vec3 point_light_color = vec3(1.0, 1.0, 1.0);
 uniform vec3 black_color = vec3(0.0, 0.0, 0.0);
 uniform float point_light_intensity_multiplier = 50.0;
 
+bool dirIllum = true;
+bool indIllum = true;
+bool indDiffTerm = true;
+bool indMicroFacTerm = true;
+
 ///////////////////////////////////////////////////////////////////////////////
 // Constants
 ///////////////////////////////////////////////////////////////////////////////
@@ -54,6 +59,9 @@ uniform vec3 viewSpaceLightPosition;
 ///////////////////////////////////////////////////////////////////////////////
 layout(location = 0) out vec4 fragmentColor;
 
+float getFresnel(vec3 wh, vec3 wi, vec3 wo) {
+	return material_fresnel + (1 - material_fresnel) * pow(1 - dot(wh, wi), 5);
+}
 
 vec3 calculateDirectIllumiunation(vec3 wo, vec3 n, vec3 base_color)
 {
@@ -77,7 +85,7 @@ vec3 calculateDirectIllumiunation(vec3 wo, vec3 n, vec3 base_color)
 	//          reflected from that instead
 	///////////////////////////////////////////////////////////////////////////
 	vec3 wh = normalize(wi + wo);
-	float f = material_fresnel + (1 - material_fresnel) * pow(1 - dot(wh, wi), 5);
+	float f = getFresnel(wh, wi, wo);
 	float distrib = dot(n, wh) < 0 ? 0 : (material_shininess + 2.f) / (PI * 2.f) * pow(dot(n, wh), material_shininess); 
 
 	float g1 = 2.f * dot(n, wh) * dot(n, wo) / dot(wo, wh);
@@ -97,9 +105,22 @@ vec3 calculateDirectIllumiunation(vec3 wo, vec3 n, vec3 base_color)
 	return material_reflectivity * microfacet_term + (1 - material_reflectivity) * diffuse_term;
 }
 
+vec2 getSphericalCoords(vec3 v){
+	// Calculate the spherical coordinates of the direction
+
+	float theta = acos(max(-1.0f, min(1.0f, v.y)));
+	float phi = atan(v.z, v.x);
+	if(phi < 0.0f)
+	{
+		phi = phi + 2.0f * PI;
+	}
+
+	return vec2(phi / (2.0 * PI), theta / PI);
+}
+
 vec3 calculateIndirectIllumination(vec3 wo, vec3 n, vec3 base_color)
 {
-	vec3 indirect_illum = vec3(0.f);
+	
 	///////////////////////////////////////////////////////////////////////////
 	// Task 5 - Lookup the irradiance from the irradiance map and calculate
 	//          the diffuse reflection
@@ -107,27 +128,30 @@ vec3 calculateIndirectIllumination(vec3 wo, vec3 n, vec3 base_color)
 
 	vec3 nws = (viewInverse * vec4(n, 0)).xyz;
 
-	// Calculate the spherical coordinates of the direction
-
-	float theta = acos(max(-1.0f, min(1.0f, nws.y)));
-	float phi = atan(nws.z, nws.x);
-	if(phi < 0.0f)
-	{
-		phi = phi + 2.0f * PI;
-	}
-
-	vec2 lookup = vec2(phi / (2.0 * PI), theta / PI);
+	vec2 lookup = getSphericalCoords(nws);
 	vec3 irradiance = (environment_multiplier * texture(irradianceMap, lookup)).xyz;
 
-	vec3 diffuse_term = material_color * (1.0 / PI) * irradiance;
+	vec3 diffuse_term = indDiffTerm ? material_color * (1.0 / PI) * irradiance : vec3(0);
 
-	return diffuse_term;
+	//return diffuse_term;
+
 	///////////////////////////////////////////////////////////////////////////
 	// Task 6 - Look up in the reflection map from the perfect specular
 	//          direction and calculate the dielectric and metal terms.
 	///////////////////////////////////////////////////////////////////////////
 
-	return indirect_illum;
+	vec3 wi = -(viewInverse * vec4(reflect(wo, n), 0)).xyz;
+	lookup = getSphericalCoords(wi);
+	float roughness = pow(2.0 / (material_shininess + 2), 0.25f);
+	vec3 li = environment_multiplier * textureLod(reflectionMap, lookup, roughness * 7.0).xyz;
+	vec3 wh = normalize(wi + wo);
+	float f = getFresnel(wh, wi, wo);
+	vec3 dielectric_term = f * li + (1 - f) * diffuse_term;
+	vec3 metal_term = f * material_color * li;
+	vec3 microfacet_term = indMicroFacTerm ? material_metalness * metal_term + (1 - material_metalness) * dielectric_term : vec3(0);
+
+	return material_reflectivity * microfacet_term + (1 - material_reflectivity) * diffuse_term;
+
 }
 
 void main()
@@ -136,6 +160,7 @@ void main()
 	// Task 1.1 - Fill in the outgoing direction, wo, and the normal, n. Both
 	//            shall be normalized vectors in view-space.
 	///////////////////////////////////////////////////////////////////////////
+
 	vec3 wo = normalize(-viewSpacePosition);
 	vec3 n = normalize(viewSpaceNormal);
 
@@ -147,12 +172,12 @@ void main()
 
 	vec3 direct_illumination_term = vec3(0.0);
 	{ // Direct illumination
-		direct_illumination_term = calculateDirectIllumiunation(wo, n, base_color);
+		if (dirIllum) direct_illumination_term = calculateDirectIllumiunation(wo, n, base_color);
 	}
 
 	vec3 indirect_illumination_term = vec3(0.0);
 	{ // Indirect illumination
-		indirect_illumination_term = calculateIndirectIllumination(wo, n, base_color);
+		if (indIllum) indirect_illumination_term = calculateIndirectIllumination(wo, n, base_color);
 	}
 
 	///////////////////////////////////////////////////////////////////////////
