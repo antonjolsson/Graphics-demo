@@ -37,6 +37,7 @@ GLuint backgroundProgram;
 // Environment
 ///////////////////////////////////////////////////////////////////////////////
 GLuint fullScreenQuadVAO = 0;
+GLuint indexBuffer, positionBuffer;
 float environment_multiplier = 1.0f;
 GLuint environmentMap;
 GLuint irradianceMap;
@@ -94,6 +95,11 @@ void loadShaders(bool is_reload)
 ///////////////////////////////////////////////////////////////////////////////
 // Create buffer to render a full screen quad
 ///////////////////////////////////////////////////////////////////////////////
+const int indices[] = {
+		0, 1, 3, // Triangle 1
+		1, 2, 3  // Triangle 2
+};
+
 void initFullScreenQuad()
 {
 	///////////////////////////////////////////////////////////////////////////
@@ -103,6 +109,29 @@ void initFullScreenQuad()
 	{
 		// >>> @task 4.1
 		// ...
+		glGenVertexArrays(1, &fullScreenQuadVAO);
+		glBindVertexArray(fullScreenQuadVAO);
+		
+		const float positions[] = {
+			// X      Y   
+			-1.0f, 1.0f, 
+			-1.0f, -1.0f, 
+			1.0f, -1.0f,
+			1.0f,  1.0f,
+			-1.0f,  1.0f,
+			1.0f,  -1.0f,
+		};
+		
+		glGenBuffers(1, &positionBuffer);
+		glBindBuffer(GL_ARRAY_BUFFER, positionBuffer);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(positions), positions, GL_STATIC_DRAW);
+		glVertexAttribPointer(0, 2, GL_FLOAT, false /*normalized*/, 0 /*stride*/, 0 /*offset*/);
+		glEnableVertexAttribArray(0);
+
+		//glGenBuffers(1, &indexBuffer);
+		//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
+		//glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+		
 	}
 }
 
@@ -116,8 +145,14 @@ void drawFullScreenQuad()
 	///////////////////////////////////////////////////////////////////////////
 	// >>> @task 4.2
 	// ...
+	GLboolean depth_test_enabled;
+	glGetBooleanv(GL_DEPTH_TEST, &depth_test_enabled);
+	glDisable(GL_DEPTH_TEST);
+	glBindVertexArray(fullScreenQuadVAO);
+	//glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+	glDrawArrays(GL_TRIANGLES, 0, 6);
+	if (depth_test_enabled) glEnable(GL_DEPTH_TEST);
 }
-
 
 ///////////////////////////////////////////////////////////////////////////////
 // Load shaders, environment maps, models and so on
@@ -257,7 +292,11 @@ void display(void)
 	// Task 4.3 - Render a fullscreen quad, to generate the background from the
 	//            environment map.
 	///////////////////////////////////////////////////////////////////////////
-
+	glUseProgram(backgroundProgram);
+	labhelper::setUniformSlow(backgroundProgram, "environment_multiplier", environment_multiplier);
+	labhelper::setUniformSlow(backgroundProgram, "inv_PV", inverse(projectionMatrix * viewMatrix));
+	labhelper::setUniformSlow(backgroundProgram, "camera_pos", cameraPosition);
+	drawFullScreenQuad();
 	///////////////////////////////////////////////////////////////////////////
 	// Render the .obj models
 	///////////////////////////////////////////////////////////////////////////
@@ -515,6 +554,14 @@ void gui()
 	ImGui::Render();
 }
 
+void printErrors(void) {
+	GLenum err;
+	while ((err = glGetError()) != GL_NO_ERROR)
+	{
+		std::cout << err << endl;
+	}
+}
+
 int main(int argc, char* argv[])
 {
 	g_window = labhelper::init_window_SDL("OpenGL Lab 4", 1280, 720);
@@ -545,6 +592,8 @@ int main(int argc, char* argv[])
 
 		// check events (keyboard among other)
 		stopRendering = handleEvents();
+
+		printErrors();
 	}
 
 	// Delete Models
