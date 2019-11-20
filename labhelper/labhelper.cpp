@@ -42,7 +42,7 @@ using std::vector;
 
 namespace labhelper
 {
-SDL_Window* init_window_SDL(std::string caption, int width, int height)
+SDL_Window* init_window_SDL(std::string caption, int width, int height, int antiAliasSamples)
 {
 	// Initialize SDL
 	if(SDL_Init(SDL_INIT_VIDEO) < 0)
@@ -69,6 +69,12 @@ SDL_Window* init_window_SDL(std::string caption, int width, int height)
 	// Also request a depth buffer
 	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
 	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
+
+	if (antiAliasSamples > 0) {
+		SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
+		SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, antiAliasSamples);
+	}
+	
 
 	// Create the window
 	SDL_Window* window = SDL_CreateWindow(caption.c_str(), SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,

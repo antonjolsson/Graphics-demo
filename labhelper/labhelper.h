@@ -78,7 +78,7 @@ void non_fatal_error(std::string errorString, std::string title = std::string())
 /**
 	* Initialize a window, an openGL context, and initiate async debug output.
 	*/
-SDL_Window* init_window_SDL(std::string caption, int width = 1280, int height = 720);
+SDL_Window* init_window_SDL(std::string caption, int width = 1280, int height = 720, int antiAliasSamples = 0);
 
 /**
 	* Destroys that which have been initialized.

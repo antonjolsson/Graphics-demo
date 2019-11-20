@@ -30,6 +30,7 @@ SDL_Window* g_window = nullptr;
 static float currentTime = 0.0f;
 static float deltaTime = 0.0f;
 bool showUI = true;
+int antiAliasSamples = 16;
 
 // Mouse input
 ivec2 g_prevMouseCoords = { -1, -1 };
@@ -390,7 +391,7 @@ void display()
 	///////////////////////////////////////////////////////////////////////////
 	// draw scene from camera
 	///////////////////////////////////////////////////////////////////////////
-	glBindFramebuffer(GL_FRAMEBUFFER, fboList[1].framebufferId); // to be replaced with another framebuffer when doing post processing
+	glBindFramebuffer(GL_FRAMEBUFFER, fboList[1].framebufferId);
 	glViewport(0, 0, w, h);
 	glClearColor(0.2f, 0.2f, 0.8f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -546,7 +547,7 @@ void gui()
 
 int main(int argc, char* argv[])
 {
-	g_window = labhelper::init_window_SDL("OpenGL Lab 5");
+	g_window = labhelper::init_window_SDL("OpenGL Lab 5", 1280, 720, 0);
 
 	initGL();
 

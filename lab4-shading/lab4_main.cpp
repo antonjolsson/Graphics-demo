@@ -17,6 +17,7 @@ using namespace std;
 // Various globals
 ///////////////////////////////////////////////////////////////////////////////
 bool showShip = true;
+int antiAliasSamples = 16;
 
 SDL_Window* g_window = nullptr;
 static float currentTime = 0.0f;
@@ -569,7 +570,7 @@ void printErrors(void) {
 
 int main(int argc, char* argv[])
 {
-	g_window = labhelper::init_window_SDL("OpenGL Lab 4", 1280, 720);
+	g_window = labhelper::init_window_SDL("OpenGL Lab 4", 1280, 720, antiAliasSamples);
 
 	initialize();
 
