@@ -5,6 +5,7 @@ precision highp float;
 
 layout(binding = 0) uniform sampler2D frameBufferTexture;
 layout(binding = 1) uniform sampler2D blurredFrameBufferTexture;
+layout(binding = 2) uniform sampler2D bloomFrameBufferTexture;
 uniform float time = 0.f;
 uniform int currentEffect = 0;
 uniform int filterSize = 1;
@@ -47,6 +48,7 @@ vec3 grayscale(vec3 rgbSample);
  */
 vec3 toSepiaTone(vec3 rgbSample);
 vec2 mosaic(vec2 inCoord);
+vec3 bloom(vec3 normalSample, vec3 glowSample);
 
 void main()
 {
@@ -78,9 +80,17 @@ void main()
 		fragmentColor = textureRect(blurredFrameBufferTexture, gl_FragCoord.xy);
 		break;
 	case 8:
-		fragmentColor = vec4(0.0); // place holder
+		fragmentColor = vec4(bloom(textureRect(frameBufferTexture, gl_FragCoord.xy).xyz, textureRect(bloomFrameBufferTexture, gl_FragCoord.xy).xyz), 1.0);
 		break;
 	}
+}
+
+vec3 bloom(vec3 normalSample, vec3 glowSample) {
+	vec3 result;
+	for (int i = 0; i < normalSample.length; i++) {
+		result[i] = normalSample[i] + glowSample[i];
+	}
+	return result;
 }
 
 vec2 mosaic(vec2 inCoord) {

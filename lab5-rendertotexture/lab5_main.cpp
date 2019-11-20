@@ -39,7 +39,7 @@ bool g_isMouseDragging = false;
 // Shader programs
 ///////////////////////////////////////////////////////////////////////////////
 GLuint backgroundProgram, shaderProgram, postFxShader, horizontalBlurShader, 
-verticalBlurShader;
+verticalBlurShader, cutOffShader;
 
 ///////////////////////////////////////////////////////////////////////////////
 // Environment
@@ -215,6 +215,8 @@ void initGL()
 												"../lab5-rendertotexture/shaders/horizontal_blur.frag");
 	verticalBlurShader = labhelper::loadShaderProgram("../lab5-rendertotexture/shaders/postFx.vert",
 		"../lab5-rendertotexture/shaders/vertical_blur.frag");
+	cutOffShader = labhelper::loadShaderProgram("../lab5-rendertotexture/shaders/postFx.vert",
+		"../lab5-rendertotexture/shaders/cutoff.frag");
 
 	///////////////////////////////////////////////////////////////////////////
 	// Load environment map
@@ -291,23 +293,49 @@ void drawCamera(const mat4& camView, const mat4& view, const mat4& projection)
 	labhelper::render(cameraModel);
 }
 
-void renderIntoBlurFbos(void) {
+void renderIntoFbos(void) {
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, fboList[1].colorTextureTarget);
 
-	for (size_t i = 2; i <= 3; i++)
+	//Render bloom
+	glUseProgram(cutOffShader);
+	glBindFramebuffer(GL_FRAMEBUFFER, fboList[2].framebufferId);
+	glViewport(0, 0, fboList[2].width, fboList[2].height);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	labhelper::drawFullScreenQuad();
+
+	for (size_t i = 3; i <= 4; i++)
 	{
-		glUseProgram(i == 2 ? verticalBlurShader : horizontalBlurShader);
+		glUseProgram(i == 3 ? verticalBlurShader : horizontalBlurShader);
 		glBindFramebuffer(GL_FRAMEBUFFER, fboList[i].framebufferId);
 		glViewport(0, 0, fboList[i].width, fboList[i].height);
-		glClearColor(0.2, 0.2, 0.8, 1.0);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		if (i == 3) glBindTexture(GL_TEXTURE_2D, fboList[2].colorTextureTarget);
+		glBindTexture(GL_TEXTURE_2D, fboList[i - 1].colorTextureTarget);
+		labhelper::drawFullScreenQuad();
+	}
+
+	glBindFramebuffer(GL_FRAMEBUFFER, fboList[2].framebufferId);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	labhelper::drawFullScreenQuad();
+	glActiveTexture(GL_TEXTURE2);
+	glBindTexture(GL_TEXTURE_2D, fboList[2].colorTextureTarget);
+
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, fboList[1].colorTextureTarget);
+
+	//Render gaussian blur
+	for (size_t i = 3; i <= 4; i++)
+	{
+		glUseProgram(i == 3 ? verticalBlurShader : horizontalBlurShader);
+		glBindFramebuffer(GL_FRAMEBUFFER, fboList[i].framebufferId);
+		glViewport(0, 0, fboList[i].width, fboList[i].height);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		if (i == 4) glBindTexture(GL_TEXTURE_2D, fboList[3].colorTextureTarget);
 		labhelper::drawFullScreenQuad();
 	}
 
 	glActiveTexture(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_2D, fboList[3].colorTextureTarget);
+	glBindTexture(GL_TEXTURE_2D, fboList[4].colorTextureTarget);
 }
 
 void display()
@@ -372,7 +400,7 @@ void display()
 	// camera (obj-model)
 	drawCamera(securityCamViewMatrix, viewMatrix, projectionMatrix);
 
-	renderIntoBlurFbos();
+	renderIntoFbos();
 
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, fboList[1].colorTextureTarget);
