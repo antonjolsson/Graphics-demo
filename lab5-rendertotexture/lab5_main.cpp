@@ -38,7 +38,8 @@ bool g_isMouseDragging = false;
 ///////////////////////////////////////////////////////////////////////////////
 // Shader programs
 ///////////////////////////////////////////////////////////////////////////////
-GLuint backgroundProgram, shaderProgram, postFxShader;
+GLuint backgroundProgram, shaderProgram, postFxShader, horizontalBlurShader, 
+verticalBlurShader;
 
 ///////////////////////////////////////////////////////////////////////////////
 // Environment
@@ -210,6 +211,10 @@ void initGL()
 	                                             "../lab5-rendertotexture/shaders/shading.frag");
 	postFxShader = labhelper::loadShaderProgram("../lab5-rendertotexture/shaders/postFx.vert",
 	                                            "../lab5-rendertotexture/shaders/postFx.frag");
+	horizontalBlurShader = labhelper::loadShaderProgram("../lab5-rendertotexture/shaders/postFx.vert",
+												"../lab5-rendertotexture/shaders/horizontal_blur.frag");
+	verticalBlurShader = labhelper::loadShaderProgram("../lab5-rendertotexture/shaders/postFx.vert",
+		"../lab5-rendertotexture/shaders/vertical_blur.frag");
 
 	///////////////////////////////////////////////////////////////////////////
 	// Load environment map
@@ -286,6 +291,24 @@ void drawCamera(const mat4& camView, const mat4& view, const mat4& projection)
 	labhelper::render(cameraModel);
 }
 
+void renderIntoBlurFbos(void) {
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, fboList[1].colorTextureTarget);
+
+	for (size_t i = 2; i <= 3; i++)
+	{
+		glUseProgram(i == 2 ? verticalBlurShader : horizontalBlurShader);
+		glBindFramebuffer(GL_FRAMEBUFFER, fboList[i].framebufferId);
+		glViewport(0, 0, fboList[i].width, fboList[i].height);
+		glClearColor(0.2, 0.2, 0.8, 1.0);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		if (i == 3) glBindTexture(GL_TEXTURE_2D, fboList[2].colorTextureTarget);
+		labhelper::drawFullScreenQuad();
+	}
+
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D, fboList[3].colorTextureTarget);
+}
 
 void display()
 {
@@ -349,14 +372,15 @@ void display()
 	// camera (obj-model)
 	drawCamera(securityCamViewMatrix, viewMatrix, projectionMatrix);
 
+	renderIntoBlurFbos();
+
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, fboList[1].colorTextureTarget);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	glUseProgram(postFxShader);
-
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, fboList[1].colorTextureTarget);
-
+	
 	labhelper::setUniformSlow(postFxShader, "time", currentTime);
 	labhelper::setUniformSlow(postFxShader, "currentEffect", currentEffect);
 	labhelper::setUniformSlow(postFxShader, "filterSize", filterSizes[filterSize - 1]);
@@ -367,9 +391,7 @@ void display()
 	// Post processing pass(es)
 	///////////////////////////////////////////////////////////////////////////
 
-
 	glUseProgram(0);
-
 	CHECK_GL_ERROR();
 }
 
