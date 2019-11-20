@@ -46,8 +46,7 @@ vec3 grayscale(vec3 rgbSample);
  * Converts the color sample to sepia tone (by transformation to the yiq color space).
  */
 vec3 toSepiaTone(vec3 rgbSample);
-
-
+vec2 mosaic(vec2 inCoord);
 
 void main()
 {
@@ -73,7 +72,7 @@ void main()
 		fragmentColor = vec4(toSepiaTone(blur(mushrooms(gl_FragCoord.xy))), 1.0);
 		break;
 	case 6:
-		fragmentColor = vec4(0.0); // place holder
+		fragmentColor = textureRect(frameBufferTexture, mosaic(gl_FragCoord.xy));
 		break;
 	case 7:
 		fragmentColor = vec4(0.0); // place holder
@@ -84,6 +83,12 @@ void main()
 	}
 }
 
+vec2 mosaic(vec2 inCoord) {
+	uint blockSize = 20;
+	uint newX = int(inCoord.x / blockSize) * blockSize + blockSize / 2;
+	uint newY = int(inCoord.y / blockSize) * blockSize + blockSize / 2;
+	return vec2(newX, newY);
+}
 
 vec3 toSepiaTone(vec3 rgbSample)
 {
