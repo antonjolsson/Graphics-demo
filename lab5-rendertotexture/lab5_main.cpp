@@ -339,7 +339,7 @@ void display()
 	///////////////////////////////////////////////////////////////////////////
 	// draw scene from camera
 	///////////////////////////////////////////////////////////////////////////
-	glBindFramebuffer(GL_FRAMEBUFFER, 0); // to be replaced with another framebuffer when doing post processing
+	glBindFramebuffer(GL_FRAMEBUFFER, fboList[1].framebufferId); // to be replaced with another framebuffer when doing post processing
 	glViewport(0, 0, w, h);
 	glClearColor(0.2f, 0.2f, 0.8f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -348,6 +348,16 @@ void display()
 
 	// camera (obj-model)
 	drawCamera(securityCamViewMatrix, viewMatrix, projectionMatrix);
+
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	glUseProgram(postFxShader);
+
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, fboList[1].colorTextureTarget);
+
+	labhelper::drawFullScreenQuad();
 
 	///////////////////////////////////////////////////////////////////////////
 	// Post processing pass(es)
