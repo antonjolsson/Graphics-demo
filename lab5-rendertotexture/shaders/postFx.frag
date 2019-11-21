@@ -7,8 +7,9 @@ layout(binding = 0) uniform sampler2D frameBufferTexture;
 layout(binding = 1) uniform sampler2D blurredFrameBufferTexture;
 layout(binding = 2) uniform sampler2D bloomFrameBufferTexture;
 uniform float time = 0.f;
-uniform int currentEffect = 0;
+uniform int currentEffect = 9;
 uniform int filterSize = 1;
+uniform int mosaicSize = 1;
 layout(location = 0) out vec4 fragmentColor;
 
 
@@ -49,6 +50,7 @@ vec3 grayscale(vec3 rgbSample);
 vec3 toSepiaTone(vec3 rgbSample);
 vec2 mosaic(vec2 inCoord);
 vec3 bloom(vec3 normalSample, vec3 glowSample);
+vec2 median(vec2 inCoord);
 
 void main()
 {
@@ -82,7 +84,43 @@ void main()
 	case 8:
 		fragmentColor = vec4(bloom(textureRect(frameBufferTexture, gl_FragCoord.xy).xyz, textureRect(bloomFrameBufferTexture, gl_FragCoord.xy).xyz), 1.0);
 		break;
+	case 9:
+		fragmentColor = textureRect(frameBufferTexture, median(gl_FragCoord.xy));
+		break;
 	}
+}
+
+vec2 median(vec2 inCoord) {
+	const int dim = 10;
+	struct Pixel {
+		vec2 coord;
+		float luminance;
+	};
+	Pixel[100] pixels;
+	int[100] indices;
+	vec4 rgbSample;
+	for (int i = 0; i < dim * dim; i++) {
+		ivec2 textureSize2d = textureSize(frameBufferTexture, 0);
+		int xCoord = clamp(int(inCoord.x) + (i % dim) - dim / 2, 0, textureSize2d.x);
+		int yCoord = clamp(int(inCoord.y) + (i / dim) - dim / 2, 0, textureSize2d.y);
+		rgbSample = textureRect(frameBufferTexture, vec2(xCoord, yCoord));
+		pixels[i].coord = vec2(xCoord, yCoord);
+		pixels[i].luminance = rgbSample.r + rgbSample.g + rgbSample.b;
+	}
+	float lowest = 3.0f;
+	int lowestIndex = 0;
+	for (int i = 0; i < dim * dim; i++) {
+		for (int j = 0; j < dim * dim; j++) {
+			if (pixels[j].luminance >= 0 && pixels[j].luminance <= lowest) {
+				lowest = pixels[j].luminance;
+				lowestIndex = j;
+			}
+		}
+		indices[i] = lowestIndex;
+		pixels[lowestIndex].luminance = -1;
+		lowest = 3.0f;
+	}
+	return pixels[indices[dim * dim / 2]].coord;
 }
 
 vec3 bloom(vec3 normalSample, vec3 glowSample) {
@@ -94,7 +132,7 @@ vec3 bloom(vec3 normalSample, vec3 glowSample) {
 }
 
 vec2 mosaic(vec2 inCoord) {
-	uint blockSize = 20;
+	uint blockSize = mosaicSize;
 	uint newX = int(inCoord.x / blockSize) * blockSize + blockSize / 2;
 	uint newY = int(inCoord.y / blockSize) * blockSize + blockSize / 2;
 	return vec2(newX, newY);

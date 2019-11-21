@@ -89,12 +89,19 @@ enum PostProcessingEffect
 	Composition = 5,
 	Mosaic = 6,
 	Separable_blur = 7,
-	Bloom = 8
+	Bloom = 8,
+	Median = 9
 };
 
 int currentEffect = PostProcessingEffect::None;
 int filterSize = 1;
 int filterSizes[12] = { 3, 5, 7, 9, 11, 13, 15, 17, 19, 21, 23, 25 };
+
+int mosaicSize = 5;
+int mosaicSizes[12] = { 1, 2, 5, 7, 10, 20, 30, 40, 50, 60, 80, 100 };
+
+int medianSize = 5;
+int medianSizes[12] = { 0, 1, 2, 6, 10, 20, 30, 40, 50, 60, 80, 100 };
 
 ///////////////////////////////////////////////////////////////////////////////
 // Framebuffers
@@ -413,6 +420,7 @@ void display()
 	labhelper::setUniformSlow(postFxShader, "time", currentTime);
 	labhelper::setUniformSlow(postFxShader, "currentEffect", currentEffect);
 	labhelper::setUniformSlow(postFxShader, "filterSize", filterSizes[filterSize - 1]);
+	labhelper::setUniformSlow(postFxShader, "mosaicSize", mosaicSizes[mosaicSize - 1]);
 
 	labhelper::drawFullScreenQuad();
 
@@ -535,8 +543,11 @@ void gui()
 	ImGui::RadioButton("Grayscale", &currentEffect, PostProcessingEffect::Grayscale);
 	ImGui::RadioButton("All of the above", &currentEffect, PostProcessingEffect::Composition);
 	ImGui::RadioButton("Mosaic", &currentEffect, PostProcessingEffect::Mosaic);
+	ImGui::SameLine();
+	ImGui::SliderInt("Block size", &mosaicSize, 1, 12);
 	ImGui::RadioButton("Separable Blur", &currentEffect, PostProcessingEffect::Separable_blur);
 	ImGui::RadioButton("Bloom", &currentEffect, PostProcessingEffect::Bloom);
+	ImGui::RadioButton("Median", &currentEffect, PostProcessingEffect::Median);
 	ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate,
 	            ImGui::GetIO().Framerate);
 	// ----------------------------------------------------------
