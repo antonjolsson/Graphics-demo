@@ -43,13 +43,13 @@ layout(binding = 10) uniform sampler2D shadowMapTex;
 in vec2 texCoord;
 in vec3 viewSpaceNormal;
 in vec3 viewSpacePosition;
+in vec4 shadowMapCoord;
 
 ///////////////////////////////////////////////////////////////////////////////
 // Input uniform variables
 ///////////////////////////////////////////////////////////////////////////////
 uniform mat4 viewInverse;
 uniform vec3 viewSpaceLightPosition;
-uniform mat4 lightMatrix;
 uniform vec3 viewSpaceLightDir;
 uniform float spotOuterAngle;
 uniform float spotInnerAngle;
@@ -59,7 +59,6 @@ uniform float spotInnerAngle;
 ///////////////////////////////////////////////////////////////////////////////
 layout(location = 0) out vec4 fragmentColor;
 
-vec4 shadowMapCoord = lightMatrix * vec4(viewSpacePosition, 1.f);
 float depth = texture(shadowMapTex, shadowMapCoord.xy / shadowMapCoord.w).x;
 
 float getFresnel(vec3 wh, vec3 wi, vec3 wo) {
