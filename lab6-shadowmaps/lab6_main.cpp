@@ -27,7 +27,7 @@ using std::max;
 SDL_Window* g_window = nullptr;
 static float currentTime = 0.0f;
 static float deltaTime = 0.0f;
-bool showUI = false;
+bool showUI = true;
 
 // Mouse input
 ivec2 g_prevMouseCoords = { -1, -1 };
@@ -53,10 +53,10 @@ const std::string envmap_base_name = "001";
 ///////////////////////////////////////////////////////////////////////////////
 vec3 lightPosition;
 float lightRotation = 0.f;
-bool lightManualOnly = false;
+bool lightManualOnly = true;
 vec3 point_light_color = vec3(1.f, 1.f, 1.f);
-bool useSpotLight = false;
-float innerSpotlightAngle = 17.5f;
+bool useSpotLight = true;
+float innerSpotlightAngle = 20.3f;
 float outerSpotlightAngle = 22.5f;
 float point_light_intensity_multiplier = 10000.0f;
 
@@ -72,7 +72,7 @@ enum ClampMode
 
 FboInfo shadowMapFB;
 int shadowMapResolution = 1024;
-int shadowMapClampMode = ClampMode::Edge;
+int shadowMapClampMode = ClampMode::Border;
 bool shadowMapClampBorderShadowed = false;
 bool usePolygonOffset = true;
 bool useSoftFalloff = false;
@@ -182,6 +182,7 @@ void drawScene(GLuint currentShaderProgram,
 	labhelper::setUniformSlow(currentShaderProgram, "viewSpaceLightDir",
 	                          normalize(vec3(viewMatrix * vec4(-lightPosition, 0.0f))));
 	labhelper::setUniformSlow(currentShaderProgram, "spotOuterAngle", std::cos(radians(outerSpotlightAngle)));
+	labhelper::setUniformSlow(currentShaderProgram, "spotInnerAngle", std::cos(radians(innerSpotlightAngle)));
 
 	mat4 lightMatrix = translate(vec3(0.5f)) * scale(vec3(0.5f)) * lightProjectionMatrix * lightViewMatrix * inverse(viewMatrix);
 	labhelper::setUniformSlow(currentShaderProgram, "lightMatrix", lightMatrix);
@@ -259,6 +260,19 @@ void display(void)
 	}
 	///////////////////////////////////////////////////////////////////////////
 	// Draw Shadow Map
+	if (shadowMapClampMode == ClampMode::Edge) {
+		glBindTexture(GL_TEXTURE_2D, shadowMapFB.depthBuffer);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	}
+
+	if (shadowMapClampMode == ClampMode::Border) {
+		glBindTexture(GL_TEXTURE_2D, shadowMapFB.depthBuffer);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+		vec4 border(shadowMapClampBorderShadowed ? 0.f : 1.f);
+		glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, &border.x);
+	}
 	
 	if (usePolygonOffset) {
 		glEnable(GL_POLYGON_OFFSET_FILL);
