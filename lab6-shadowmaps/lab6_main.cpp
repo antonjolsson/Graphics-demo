@@ -28,6 +28,7 @@ SDL_Window* g_window = nullptr;
 static float currentTime = 0.0f;
 static float deltaTime = 0.0f;
 bool showUI = true;
+int antiAliasSamples = 16;
 
 // Mouse input
 ivec2 g_prevMouseCoords = { -1, -1 };
@@ -445,7 +446,7 @@ void gui()
 
 int main(int argc, char* argv[])
 {
-	g_window = labhelper::init_window_SDL("OpenGL Lab 6");
+	g_window = labhelper::init_window_SDL("OpenGL Lab 6", 1280, 720, antiAliasSamples);
 
 	initGL();
 
