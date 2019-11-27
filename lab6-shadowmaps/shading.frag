@@ -29,7 +29,8 @@ uniform float environment_multiplier;
 ///////////////////////////////////////////////////////////////////////////////
 uniform vec3 point_light_color = vec3(1.0, 1.0, 1.0);
 uniform vec3 black_color = vec3(0);
-uniform float point_light_intensity_multiplier = 50.0;
+uniform float point_light_intensity_multiplier = 70.0; // Was 50.0
+layout(binding = 10) uniform sampler2D shadowMapTex;
 
 ///////////////////////////////////////////////////////////////////////////////
 // Constants
@@ -48,13 +49,15 @@ in vec3 viewSpacePosition;
 ///////////////////////////////////////////////////////////////////////////////
 uniform mat4 viewInverse;
 uniform vec3 viewSpaceLightPosition;
+uniform mat4 lightMatrix;
 
 ///////////////////////////////////////////////////////////////////////////////
 // Output color
 ///////////////////////////////////////////////////////////////////////////////
 layout(location = 0) out vec4 fragmentColor;
 
-
+vec4 shadowMapCoord = lightMatrix * vec4(viewSpacePosition, 1.f);
+float depth = texture(shadowMapTex, shadowMapCoord.xy / shadowMapCoord.w).x;
 
 float getFresnel(vec3 wh, vec3 wi, vec3 wo) {
 	return material_fresnel + (1 - material_fresnel) * pow(1 - dot(wh, wi), 5);
@@ -127,7 +130,7 @@ vec3 calculateIndirectIllumination(vec3 wo, vec3 n)
 
 void main()
 {
-	float visibility = 1.0;
+	float visibility = (depth >= (shadowMapCoord.z / shadowMapCoord.w)) ? 1.0 : 0.0;
 	float attenuation = 1.0;
 
 

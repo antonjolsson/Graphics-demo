@@ -74,11 +74,11 @@ FboInfo shadowMapFB;
 int shadowMapResolution = 1024;
 int shadowMapClampMode = ClampMode::Edge;
 bool shadowMapClampBorderShadowed = false;
-bool usePolygonOffset = false;
+bool usePolygonOffset = true;
 bool useSoftFalloff = false;
 bool useHardwarePCF = false;
-float polygonOffset_factor = .25f;
-float polygonOffset_units = 1.0f;
+float polygonOffset_factor = 5.83f;
+float polygonOffset_units = 58.3f;
 
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -171,6 +171,7 @@ void drawScene(GLuint currentShaderProgram,
                const mat4& lightViewMatrix,
                const mat4& lightProjectionMatrix)
 {
+
 	glUseProgram(currentShaderProgram);
 	// Light source
 	vec4 viewSpaceLightPosition = viewMatrix * vec4(lightPosition, 1.0f);
@@ -182,7 +183,8 @@ void drawScene(GLuint currentShaderProgram,
 	                          normalize(vec3(viewMatrix * vec4(-lightPosition, 0.0f))));
 	labhelper::setUniformSlow(currentShaderProgram, "spotOuterAngle", std::cos(radians(outerSpotlightAngle)));
 
-
+	mat4 lightMatrix = translate(vec3(0.5f)) * scale(vec3(0.5f)) * lightProjectionMatrix * lightViewMatrix * inverse(viewMatrix);
+	labhelper::setUniformSlow(currentShaderProgram, "lightMatrix", lightMatrix);
 
 	// Environment
 	labhelper::setUniformSlow(currentShaderProgram, "environment_multiplier", environment_multiplier);
@@ -198,6 +200,9 @@ void drawScene(GLuint currentShaderProgram,
 	labhelper::setUniformSlow(currentShaderProgram, "normalMatrix",
 	                          inverse(transpose(viewMatrix * modelMatrix)));
 
+	glActiveTexture(GL_TEXTURE10);
+	glBindTexture(GL_TEXTURE_2D, shadowMapFB.depthBuffer);
+
 	labhelper::render(landingpadModel);
 
 	// Fighter
@@ -208,6 +213,8 @@ void drawScene(GLuint currentShaderProgram,
 	                          inverse(transpose(viewMatrix * fighterModelMatrix)));
 
 	labhelper::render(fighterModel);
+
+
 }
 
 
@@ -252,13 +259,22 @@ void display(void)
 	}
 	///////////////////////////////////////////////////////////////////////////
 	// Draw Shadow Map
-	///////////////////////////////////////////////////////////////////////////
+	
+	if (usePolygonOffset) {
+		glEnable(GL_POLYGON_OFFSET_FILL);
+		glPolygonOffset(polygonOffset_factor, polygonOffset_units);
+	}
+
 	glBindFramebuffer(GL_FRAMEBUFFER, shadowMapFB.framebufferId);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glViewport(0, 0, shadowMapFB.width, shadowMapFB.height);
 	drawScene(simpleShaderProgram, lightViewMatrix, lightProjMatrix, lightViewMatrix, lightProjMatrix);
 	labhelper::Material& screen = landingpadModel->m_materials[8];
 	screen.m_emission_texture.gl_id = shadowMapFB.colorTextureTarget;
+
+	if (usePolygonOffset) {
+		glDisable(GL_POLYGON_OFFSET_FILL);
+	}
 
 	///////////////////////////////////////////////////////////////////////////
 	// Draw from camera
