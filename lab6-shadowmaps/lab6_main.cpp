@@ -71,12 +71,12 @@ enum ClampMode
 };
 
 FboInfo shadowMapFB;
-int shadowMapResolution = 1024;
+int shadowMapResolution = 128;
 int shadowMapClampMode = ClampMode::Border;
 bool shadowMapClampBorderShadowed = false;
 bool usePolygonOffset = true;
 bool useSoftFalloff = false;
-bool useHardwarePCF = false;
+bool useHardwarePCF = true;
 float polygonOffset_factor = 5.83f;
 float polygonOffset_units = 58.3f;
 
