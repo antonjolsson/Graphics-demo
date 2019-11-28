@@ -117,6 +117,7 @@ void initGL()
 	// Load models and set up model matrices
 	///////////////////////////////////////////////////////////////////////
 	fighterModel = labhelper::loadModelFromOBJ("../scenes/NewShip.obj");
+	fighterModel->m_materials[4].m_metalness = 0.8f;
 	landingpadModel = labhelper::loadModelFromOBJ("../scenes/landingpad.obj");
 	sphereModel = labhelper::loadModelFromOBJ("../scenes/sphere.obj");
 
