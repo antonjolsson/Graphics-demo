@@ -219,10 +219,7 @@ void drawScene(GLuint currentShaderProgram,
 	                          inverse(transpose(viewMatrix * fighterModelMatrix)));
 
 	labhelper::render(fighterModel);
-
-
 }
-
 
 void display(void)
 {

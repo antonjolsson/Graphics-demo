@@ -14,8 +14,6 @@ uniform float material_shininess;
 uniform float material_emission;
 
 uniform int has_emission_texture;
-uniform int has_color_texture;
-layout(binding = 0) uniform sampler2D colorMap;
 layout(binding = 5) uniform sampler2D emissiveMap;
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -30,7 +28,9 @@ uniform float environment_multiplier;
 // Light source
 ///////////////////////////////////////////////////////////////////////////////
 uniform vec3 point_light_color = vec3(1.0, 1.0, 1.0);
+uniform vec3 black_color = vec3(0);
 uniform float point_light_intensity_multiplier = 50.0;
+layout(binding = 10) uniform sampler2DShadow shadowMapTex;
 
 ///////////////////////////////////////////////////////////////////////////////
 // Constants
@@ -43,37 +43,108 @@ uniform float point_light_intensity_multiplier = 50.0;
 in vec2 texCoord;
 in vec3 viewSpaceNormal;
 in vec3 viewSpacePosition;
+in vec4 shadowMapCoord;
 
 ///////////////////////////////////////////////////////////////////////////////
 // Input uniform variables
 ///////////////////////////////////////////////////////////////////////////////
 uniform mat4 viewInverse;
 uniform vec3 viewSpaceLightPosition;
+uniform vec3 viewSpaceLightDir;
+uniform float spotOuterAngle;
+uniform float spotInnerAngle;
 
 ///////////////////////////////////////////////////////////////////////////////
 // Output color
 ///////////////////////////////////////////////////////////////////////////////
 layout(location = 0) out vec4 fragmentColor;
 
+float getFresnel(vec3 wh, vec3 wi, vec3 wo) {
+	return material_fresnel + (1 - material_fresnel) * pow(1 - dot(wh, wi), 5);
+}
 
+float highlightMultiplier = 2;
 
 vec3 calculateDirectIllumiunation(vec3 wo, vec3 n)
 {
-	return vec3(material_color);
+	vec3 direct_illum = point_light_color;
+	
+	float d = distance(viewSpaceLightPosition, viewSpacePosition);
+	vec3 wi = normalize(viewSpaceLightPosition - viewSpacePosition);
+	if (dot(n, wi) <= 0) return black_color;
+	vec3 li = point_light_intensity_multiplier * point_light_color * (1.f / (d * d));
+	
+	vec3 diffuse_term = material_color * (1.f / PI) * dot(n, wi) * li;
+
+	vec3 wh = normalize(wi + wo);
+	float f = getFresnel(wh, wi, wo);
+	float distrib = dot(n, wh) < 0 ? 0 : (material_shininess + 2.f) / (PI * 2.f) * pow(dot(n, wh), material_shininess); 
+
+	float g1 = 2.f * dot(n, wh) * dot(n, wo) / dot(wo, wh);
+	float g2 = 2.f * dot(n, wh) * dot(n, wi) / dot(wo, wh);
+	float g = min(1.f, min(g1, g2));
+
+	float brdf = f * distrib * g / (4 * dot(n, wo) * dot(n, wi));
+
+	vec3 dielectric_term = brdf * dot(n, wi) * li + (1 - f) * diffuse_term;
+	vec3 metal_term = brdf * material_color * dot(n, wi) * li;
+	vec3 microfacet_term = material_metalness * metal_term + (1 - material_metalness) * dielectric_term;
+
+	return highlightMultiplier * (material_reflectivity * microfacet_term + (1 - material_reflectivity) * diffuse_term); // Added multiplier here
+}
+
+vec2 getSphericalCoords(vec3 v){
+	// Calculate the spherical coordinates of the direction
+
+	float theta = acos(max(-1.0f, min(1.0f, v.y)));
+	float phi = atan(v.z, v.x);
+	if(phi < 0.0f)
+	{
+		phi = phi + 2.0f * PI;
+	}
+
+	return vec2(phi / (2.0 * PI), theta / PI);
 }
 
 vec3 calculateIndirectIllumination(vec3 wo, vec3 n)
 {
-	return vec3(0.0);
+	vec3 nws = (viewInverse * vec4(n, 0)).xyz;
+
+	vec2 lookup = getSphericalCoords(nws);
+	vec3 irradiance = (environment_multiplier * texture(irradianceMap, lookup)).xyz;
+
+	vec3 diffuse_term = material_color * (1.0 / PI) * irradiance;
+
+	//return diffuse_term;
+
+	vec3 wi = -(viewInverse * vec4(reflect(wo, n), 0)).xyz;
+	lookup = getSphericalCoords(wi);
+	float roughness = pow(2.0 / (material_shininess + 2), 0.25f);
+	vec3 li = environment_multiplier * textureLod(reflectionMap, lookup, roughness * 7.0).xyz;
+	vec3 wh = normalize(wi + wo);
+	float f = getFresnel(wh, wi, wo);
+	vec3 dielectric_term = f * li + (1 - f) * diffuse_term;
+	vec3 metal_term = f * material_color * li;
+	vec3 microfacet_term = material_metalness * metal_term + (1 - material_metalness) * dielectric_term;
+
+	return material_reflectivity * microfacet_term + (1 - material_reflectivity) * diffuse_term;
 }
 
 void main()
 {
-	float visibility = 1.0;
+	float visibility = textureProj( shadowMapTex, shadowMapCoord );
 	float attenuation = 1.0;
+
+	vec3 posToLight = normalize(viewSpaceLightPosition - viewSpacePosition);
+	float cosAngle = dot(posToLight, -viewSpaceLightDir);
 
 	vec3 wo = -normalize(viewSpacePosition);
 	vec3 n = normalize(viewSpaceNormal);
+
+	// Spotlight with hard border:
+	
+	float spotAttenuation = smoothstep(spotOuterAngle, spotInnerAngle, cosAngle);
+	visibility *= spotAttenuation;
 
 	// Direct illumination
 	vec3 direct_illumination_term = visibility * calculateDirectIllumiunation(wo, n);
