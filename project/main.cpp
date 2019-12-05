@@ -21,6 +21,8 @@ using namespace glm;
 #include <Model.h>
 #include "hdr.h"
 #include "fbo.h"
+#include "ParticleSystem.h"
+#include "main.h"
 
 using std::min;
 using std::max;
@@ -47,6 +49,8 @@ bool g_isMouseRightDragging = false;
 ///////////////////////////////////////////////////////////////////////////////
 GLuint shaderProgram;       // Shader for rendering the final image
 GLuint simpleShaderProgram; // Shader used to draw the shadow map
+GLuint simpleParticleProgram;
+GLuint particleProgram;
 GLuint backgroundProgram;
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -107,23 +111,36 @@ mat4 roomModelMatrix;
 mat4 landingPadModelMatrix;
 mat4 fighterModelMatrix;
 
+///////////////////////////////////////////////////////////////////////////////
+// Particle system
+///////////////////////////////////////////////////////////////////////////////
+ParticleSystem particleSystem;
+const uint MAX_PARTICLES = 160000;
+
 void loadShaders(bool is_reload)
 {
 	GLuint shader = labhelper::loadShaderProgram("../project/simple.vert", "../project/simple.frag",
-	                                             is_reload);
+                                             is_reload);
 	if(shader != 0)
 		simpleShaderProgram = shader;
+
 	shader = labhelper::loadShaderProgram("../project/background.vert", "../project/background.frag",
 	                                      is_reload);
 	if(shader != 0)
 		backgroundProgram = shader;
+
 	shader = labhelper::loadShaderProgram("../project/shading.vert", "../project/shading.frag", is_reload);
 	if(shader != 0)
 		shaderProgram = shader;
+
+	shader = labhelper::loadShaderProgram("../project/particle.vert", "../project/particle.frag", is_reload);
+	if (shader != 0)
+		simpleParticleProgram = shader;
 }
 
 void initGL()
 {
+	particleSystem = ParticleSystem::ParticleSystem(MAX_PARTICLES);
 	///////////////////////////////////////////////////////////////////////
 	//		Load Shaders
 	///////////////////////////////////////////////////////////////////////
@@ -131,6 +148,7 @@ void initGL()
 	                                                 "../project/background.frag");
 	shaderProgram = labhelper::loadShaderProgram("../project/shading.vert", "../project/shading.frag");
 	simpleShaderProgram = labhelper::loadShaderProgram("../project/simple.vert", "../project/simple.frag");
+	simpleParticleProgram = labhelper::loadShaderProgram("../project/particle.vert", "../project/particle.frag");
 
 	///////////////////////////////////////////////////////////////////////
 	// Load models and set up model matrices
@@ -199,7 +217,6 @@ void drawScene(GLuint currentShaderProgram,
 	const mat4& lightViewMatrix,
 	const mat4& lightProjectionMatrix)
 {
-
 	glUseProgram(currentShaderProgram);
 	// Light source
 	vec4 viewSpaceLightPosition = viewMatrix * vec4(lightPosition, 1.0f);
@@ -240,8 +257,13 @@ void drawScene(GLuint currentShaderProgram,
 	labhelper::setUniformSlow(currentShaderProgram, "modelViewMatrix", viewMatrix * fighterModelMatrix);
 	labhelper::setUniformSlow(currentShaderProgram, "normalMatrix",
 		inverse(transpose(viewMatrix * fighterModelMatrix)));
-
 	labhelper::render(fighterModel);
+}
+
+void drawFire(const mat4& projMatrix, const mat4& viewMatrix) {
+	glUseProgram(simpleParticleProgram);
+	labhelper::setUniformSlow(simpleParticleProgram, "projectionMatrix",projMatrix);
+	particleSystem.update(viewMatrix, deltaTime);
 }
 
 void display(void)
@@ -336,6 +358,7 @@ void display(void)
 	drawBackground(viewMatrix, projMatrix);
 	drawScene(shaderProgram, viewMatrix, projMatrix, lightViewMatrix, lightProjMatrix);
 	debugDrawLight(viewMatrix, projMatrix, vec3(lightPosition));
+	drawFire(projMatrix, viewMatrix);
 }
 
 bool handleEvents(void)
