@@ -115,7 +115,7 @@ mat4 fighterModelMatrix;
 // Particle system
 ///////////////////////////////////////////////////////////////////////////////
 ParticleSystem particleSystem;
-const uint MAX_PARTICLES = 160000;
+const uint MAX_PARTICLES = 100000;
 
 void loadShaders(bool is_reload)
 {

@@ -8,8 +8,15 @@ ParticleSystem::ParticleSystem(int size) : max_size(size)
 	glBindBuffer(GL_ARRAY_BUFFER, posBuffer);
 	glVertexAttribPointer(0, 4, GL_FLOAT, false, 0, 0);
 	glEnableVertexAttribArray(0);
-	glBufferData(GL_ARRAY_BUFFER, max_size, nullptr, GL_STATIC_DRAW);
-	dummySpawn();
+	glBufferData(GL_ARRAY_BUFFER, (GLsizeiptr) 4 * max_size, nullptr, GL_STATIC_DRAW);
+	//dummySpawn();
+}
+
+vec3 ParticleSystem::getRandVelocity(void)
+{
+	const float theta = labhelper::uniform_randf(0.f, 2.f * M_PI);
+	const float u = labhelper::uniform_randf(0.95f, 1.f);
+	return glm::mat3(10.0f) * vec3(u, sqrt(1.f - u * u) * cosf(theta), sqrt(1.f - u * u) * sinf(theta));
 }
 
 void ParticleSystem::dummySpawn(void)
@@ -17,28 +24,41 @@ void ParticleSystem::dummySpawn(void)
 	for (size_t i = 0; i < 10000; i++)
 	{
 		Particle particle;
-		const float theta = labhelper::uniform_randf(0.f, 2.f * M_PI);
-		const float u = labhelper::uniform_randf(-1.f, 1.f);
-		particle.pos = glm::mat3(10.0f) * glm::vec3(sqrt(1.f - u * u) * cosf(theta), u, sqrt(1.f - u * u) * sinf(theta));
+		particle.pos = getRandVelocity();
 		particles.push_back(particle);
 	}
 }
 
 void ParticleSystem::kill(int id)
 {
+	particles.erase(particles.begin() + id);
 }
 
 void ParticleSystem::spawn(Particle particle)
 {
+	if (particles.size() < max_size) particles.push_back(particle);
 }
 
 void ParticleSystem::process_particles(float dt)
 {
 	for (unsigned i = 0; i < particles.size(); ++i) {
-		// Kill dead particles!
+		if (particles.at(i).lifetime > particles.at(i).life_length) kill(i);
 	}
 	for (unsigned i = 0; i < particles.size(); ++i) {
-		// Update alive particles!
+		particles.at(i).pos += dt * particles.at(i).velocity;
+		particles.at(i).lifetime += dt;
+	}
+}
+
+void ParticleSystem::spawnParticles(void) {
+	for (size_t i = 0; i < SPAWNED_PARTICLES; i++)
+	{
+		Particle particle;
+		particle.pos = vec3(0.f);
+		particle.velocity = getRandVelocity();
+		particle.lifetime = 0;
+		particle.life_length = PARTICLE_LIFE_LENGTH;
+		spawn(particle);
 	}
 }
 
@@ -54,7 +74,7 @@ void ParticleSystem::render(void) {
 
 void ParticleSystem::update(const glm::mat4& viewMatrix, float dt)
 {
-	// spawn(Particle particle);
+	spawnParticles();
 	process_particles(dt);
 	updateReducedData(viewMatrix);
 	uploadToGPU();
