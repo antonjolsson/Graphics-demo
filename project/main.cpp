@@ -9,6 +9,7 @@ extern "C" _declspec(dllexport) unsigned int NvOptimusEnablement = 0x00000001;
 #include <cstdlib>
 #include <algorithm>
 #include <chrono>
+#include <iostream>
 
 #include <labhelper.h>
 #include <imgui.h>
@@ -16,6 +17,7 @@ extern "C" _declspec(dllexport) unsigned int NvOptimusEnablement = 0x00000001;
 
 #include <glm/glm.hpp>
 #include <glm/gtx/transform.hpp>
+#include <glm/gtx/vector_angle.hpp>
 using namespace glm;
 
 #include <Model.h>
@@ -34,7 +36,7 @@ using std::max;
 SDL_Window* g_window = nullptr;
 static float currentTime = 0.0f;
 static float deltaTime = 0.0f;
-bool showUI = false;
+bool showUI = true;
 int antiAliasSamples = 16;
 float previousTime = 0.0f;
 int windowWidth, windowHeight;
@@ -43,6 +45,21 @@ int windowWidth, windowHeight;
 ivec2 g_prevMouseCoords = { -1, -1 };
 bool g_isMouseDragging = false;
 bool g_isMouseRightDragging = false;
+
+//Ship
+bool xRotation = false;
+const float MAX_SHIP_X_ROT = M_PI / 6;;
+const float MAX_SHIP_Y_ROTATION_SPEED = M_PI / 50;
+const float MAX_SHIP_X_ROTATION_SPEED = MAX_SHIP_X_ROT / 5;
+const float CLAMP_ROT_TO_ZERO_SPEED = 0.05f;
+float acceleration = 0.3f;
+float shipSpeed = 0.f;
+float shipYRotationSpeed = 0.f;
+float shipXRotationSpeed = 0.f;
+float dragCoeff = 1.1f;
+float yTranslation = 15.0f;
+float shipXRotation = 0.f;
+
 
 ///////////////////////////////////////////////////////////////////////////////
 // Shader programs
@@ -99,6 +116,7 @@ vec3 cameraDirection = normalize(vec3(0.0f) - cameraPosition);
 float cameraSpeed = 30.f;
 
 vec3 worldUp(0.0f, 1.0f, 0.0f);
+vec3 xAxis(1.0f, 0.0f, 0.0f);
 
 ///////////////////////////////////////////////////////////////////////////////
 // Models
@@ -158,7 +176,7 @@ void initGL()
 	sphereModel = labhelper::loadModelFromOBJ("../scenes/sphere.obj");
 
 	roomModelMatrix = mat4(1.0f);
-	fighterModelMatrix = translate(15.0f * worldUp);
+	fighterModelMatrix = translate(yTranslation * worldUp);
 	landingPadModelMatrix = mat4(1.0f);
 
 	///////////////////////////////////////////////////////////////////////
@@ -260,10 +278,10 @@ void drawScene(GLuint currentShaderProgram,
 	labhelper::render(fighterModel);
 }
 
-void drawFire(const mat4& projMatrix, const mat4& viewMatrix) {
+void drawFire(const mat4& projMatrix, const mat4& viewMatrix, mat4& fighterModelMatrix) {
 	glUseProgram(simpleParticleProgram);
 	labhelper::setUniformSlow(simpleParticleProgram, "projectionMatrix",projMatrix);
-	particleSystem.update(viewMatrix, deltaTime);
+	particleSystem.update(viewMatrix, deltaTime, fighterModelMatrix);
 }
 
 void display(void)
@@ -358,7 +376,7 @@ void display(void)
 	drawBackground(viewMatrix, projMatrix);
 	drawScene(shaderProgram, viewMatrix, projMatrix, lightViewMatrix, lightProjMatrix);
 	debugDrawLight(viewMatrix, projMatrix, vec3(lightPosition));
-	drawFire(projMatrix, viewMatrix);
+	drawFire(projMatrix, viewMatrix, fighterModelMatrix);
 }
 
 bool handleEvents(void)
@@ -461,8 +479,31 @@ bool handleEvents(void)
 		{
 			cameraPosition += deltaTime * cameraSpeed * worldUp;
 		}
+		if (state[SDL_SCANCODE_UP])
+		{
+			shipSpeed += acceleration;
+		}
+		if (state[SDL_SCANCODE_DOWN])
+		{
+			shipSpeed -= acceleration;
+		}
+		if (state[SDL_SCANCODE_LEFT])
+		{
+			shipYRotationSpeed = MAX_SHIP_Y_ROTATION_SPEED;
+			shipXRotationSpeed = shipXRotation >= MAX_SHIP_X_ROT ? 0 : MAX_SHIP_X_ROTATION_SPEED;
+		}
+		else if (state[SDL_SCANCODE_RIGHT])
+		{
+			shipYRotationSpeed = -MAX_SHIP_Y_ROTATION_SPEED;
+			shipXRotationSpeed = shipXRotation <= -MAX_SHIP_X_ROT ? 0 : -MAX_SHIP_X_ROTATION_SPEED;
+		}
+		else {
+			shipYRotationSpeed = 0;
+			if (shipXRotation > CLAMP_ROT_TO_ZERO_SPEED) shipXRotationSpeed = -MAX_SHIP_X_ROTATION_SPEED;
+			else if (shipXRotation < -CLAMP_ROT_TO_ZERO_SPEED) shipXRotationSpeed = MAX_SHIP_X_ROTATION_SPEED;
+			else shipXRotationSpeed = 0;
+		}
 	}
-
 	return quitEvent;
 }
 
@@ -489,10 +530,31 @@ void gui()
 	ImGui::Checkbox("Manual light only (right-click drag to move)", &lightManualOnly);
 	ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate,
 		ImGui::GetIO().Framerate);
+	ImGui::SliderFloat("Acceleration", &acceleration, 0.0f, 10.0f);
+	ImGui::SliderFloat("Drag coeff.", &dragCoeff, 0.0f, 10.0f);
+	ImGui::SliderFloat("Y-translation: ", &yTranslation, 0.0f, 50.0f);
+	ImGui::Text("Current ship speed: %.3f", shipSpeed);
+	ImGui::Text("Ship x-rotation: %.3f", shipXRotation);
+	ImGui::Text("Ship x-rotation speed: %.3f", shipXRotationSpeed);
+	ImGui::Text("Ship x-axis: %.3f %.3f %.3f", fighterModelMatrix[0].x, fighterModelMatrix[0].y, fighterModelMatrix[0].z);
+	ImGui::Text("Ship y-axis: %.3f %.3f %.3f", fighterModelMatrix[1].x, fighterModelMatrix[1].y, fighterModelMatrix[1].z);
+	ImGui::Text("Ship z-axis: %.3f %.3f %.3f", fighterModelMatrix[2].x, fighterModelMatrix[2].y, fighterModelMatrix[2].z);
 	// ----------------------------------------------------------
 
 	// Render the GUI.
 	ImGui::Render();
+}
+
+void updateShip(void) {
+	shipSpeed *= pow(dragCoeff, -abs(shipSpeed));
+	shipXRotation += shipXRotationSpeed;
+	vec3 zAxis(0.0f, 0.0f, 1.0f);
+
+	fighterModelMatrix = rotate(fighterModelMatrix, shipYRotationSpeed, worldUp);
+	if (xRotation) {
+		fighterModelMatrix = rotate(fighterModelMatrix, shipXRotationSpeed, xAxis);
+	}
+	fighterModelMatrix = translate(fighterModelMatrix, shipSpeed * -xAxis);
 }
 
 int main(int argc, char* argv[])
@@ -511,6 +573,7 @@ int main(int argc, char* argv[])
 		previousTime = currentTime;
 		currentTime = timeSinceStart.count();
 		deltaTime = currentTime - previousTime;
+		updateShip();
 		// render to window
 		display();
 

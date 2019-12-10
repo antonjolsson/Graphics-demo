@@ -50,11 +50,11 @@ void ParticleSystem::process_particles(float dt)
 	}
 }
 
-void ParticleSystem::spawnParticles(void) {
+void ParticleSystem::spawnParticles(glm::mat4& fighterModelMatrix) {
 	for (size_t i = 0; i < SPAWNED_PARTICLES; i++)
 	{
 		Particle particle;
-		particle.pos = vec3(0.f);
+		particle.pos = vec3(fighterModelMatrix * vec4(0.f, 0.f, 0.f, 1.f));
 		particle.velocity = getRandVelocity();
 		particle.lifetime = 0;
 		particle.life_length = PARTICLE_LIFE_LENGTH;
@@ -72,9 +72,9 @@ void ParticleSystem::render(void) {
 	glDrawArrays(GL_POINTS, 0, reducedData.size());
 }
 
-void ParticleSystem::update(const glm::mat4& viewMatrix, float dt)
+void ParticleSystem::update(const glm::mat4& viewMatrix, float dt, glm::mat4& fighterModelMatrix)
 {
-	spawnParticles();
+	spawnParticles(fighterModelMatrix);
 	process_particles(dt);
 	updateReducedData(viewMatrix);
 	uploadToGPU();

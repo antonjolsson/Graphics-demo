@@ -31,7 +31,7 @@ private:
 	void kill(int id);
 	void spawn(Particle particle);
 	void process_particles(float dt);
-	void spawnParticles(void);
+	void spawnParticles(glm::mat4& fighterModelMatrix);
 	void uploadToGPU(void);
 	void render(void);
 	vec3 getRandVelocity(void);
@@ -49,7 +49,7 @@ public:
 	~ParticleSystem()
 	{
 	}
-	void update(const glm::mat4& viewMatrix, float dt);
+	void ParticleSystem::update(const glm::mat4& viewMatrix, float dt, glm::mat4& fighterModelMatrix);
 };
 
 
