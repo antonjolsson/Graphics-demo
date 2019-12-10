@@ -19,6 +19,7 @@ struct Particle
 
 static const uint SPAWNED_PARTICLES = 64;
 static const uint PARTICLE_LIFE_LENGTH = 5;
+static vec3 exhaustOffset = vec3(0.f);
 
 class ParticleSystem
 {
@@ -49,7 +50,8 @@ public:
 	~ParticleSystem()
 	{
 	}
-	void ParticleSystem::update(const glm::mat4& viewMatrix, float dt, glm::mat4& fighterModelMatrix);
+	void update(const glm::mat4& viewMatrix, float dt, glm::mat4& fighterModelMatrix, bool accelerating);
+	void setExhaustOffset(glm::vec3& offset);
 };
 
 

@@ -59,7 +59,10 @@ float shipXRotationSpeed = 0.f;
 float dragCoeff = 1.1f;
 float yTranslation = 15.0f;
 float shipXRotation = 0.f;
-
+float exhZOffset = 0.33f;
+float exhYOffset = 3.1f;
+float exhXOffset = 17.25f;
+bool accelerating = false;
 
 ///////////////////////////////////////////////////////////////////////////////
 // Shader programs
@@ -281,7 +284,7 @@ void drawScene(GLuint currentShaderProgram,
 void drawFire(const mat4& projMatrix, const mat4& viewMatrix, mat4& fighterModelMatrix) {
 	glUseProgram(simpleParticleProgram);
 	labhelper::setUniformSlow(simpleParticleProgram, "projectionMatrix",projMatrix);
-	particleSystem.update(viewMatrix, deltaTime, fighterModelMatrix);
+	particleSystem.update(viewMatrix, deltaTime, fighterModelMatrix, accelerating);
 }
 
 void display(void)
@@ -482,7 +485,9 @@ bool handleEvents(void)
 		if (state[SDL_SCANCODE_UP])
 		{
 			shipSpeed += acceleration;
+			accelerating = true;
 		}
+		else accelerating = false;
 		if (state[SDL_SCANCODE_DOWN])
 		{
 			shipSpeed -= acceleration;
@@ -539,6 +544,9 @@ void gui()
 	ImGui::Text("Ship x-axis: %.3f %.3f %.3f", fighterModelMatrix[0].x, fighterModelMatrix[0].y, fighterModelMatrix[0].z);
 	ImGui::Text("Ship y-axis: %.3f %.3f %.3f", fighterModelMatrix[1].x, fighterModelMatrix[1].y, fighterModelMatrix[1].z);
 	ImGui::Text("Ship z-axis: %.3f %.3f %.3f", fighterModelMatrix[2].x, fighterModelMatrix[2].y, fighterModelMatrix[2].z);
+	ImGui::SliderFloat("Exhaust x-offset", &exhXOffset, -20.0f, 20.0f);
+	ImGui::SliderFloat("Exhaust y-offset", &exhYOffset, -20.0f, 20.0f);
+	ImGui::SliderFloat("Exhaust z-offset", &exhZOffset, -2.0f, 2.0f);
 	// ----------------------------------------------------------
 
 	// Render the GUI.
@@ -555,6 +563,7 @@ void updateShip(void) {
 		fighterModelMatrix = rotate(fighterModelMatrix, shipXRotationSpeed, xAxis);
 	}
 	fighterModelMatrix = translate(fighterModelMatrix, shipSpeed * -xAxis);
+	particleSystem.setExhaustOffset(vec3(exhXOffset, exhYOffset, exhZOffset));
 }
 
 int main(int argc, char* argv[])

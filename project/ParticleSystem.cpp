@@ -1,4 +1,5 @@
 #include "ParticleSystem.h"
+#include <iostream>
 
 ParticleSystem::ParticleSystem(int size) : max_size(size)
 {
@@ -54,7 +55,7 @@ void ParticleSystem::spawnParticles(glm::mat4& fighterModelMatrix) {
 	for (size_t i = 0; i < SPAWNED_PARTICLES; i++)
 	{
 		Particle particle;
-		particle.pos = vec3(fighterModelMatrix * vec4(0.f, 0.f, 0.f, 1.f));
+		particle.pos = vec3(fighterModelMatrix * vec4(exhaustOffset, 1.f));
 		particle.velocity = getRandVelocity();
 		particle.lifetime = 0;
 		particle.life_length = PARTICLE_LIFE_LENGTH;
@@ -63,6 +64,7 @@ void ParticleSystem::spawnParticles(glm::mat4& fighterModelMatrix) {
 }
 
 void ParticleSystem::uploadToGPU(void) {
+	if (particles.size() == 0) return;
 	glBindBuffer(GL_ARRAY_BUFFER, posBuffer);
 	glBufferSubData(GL_ARRAY_BUFFER, 0, 16 * particles.size(), &reducedData[0]);
 }
@@ -72,13 +74,18 @@ void ParticleSystem::render(void) {
 	glDrawArrays(GL_POINTS, 0, reducedData.size());
 }
 
-void ParticleSystem::update(const glm::mat4& viewMatrix, float dt, glm::mat4& fighterModelMatrix)
+void ParticleSystem::update(const glm::mat4& viewMatrix, float dt, glm::mat4& fighterModelMatrix, bool accelerating)
 {
-	spawnParticles(fighterModelMatrix);
+	if (accelerating) spawnParticles(fighterModelMatrix);
 	process_particles(dt);
 	updateReducedData(viewMatrix);
 	uploadToGPU();
 	render();
+}
+
+void ParticleSystem::setExhaustOffset(glm::vec3& offset)
+{
+	exhaustOffset = offset;
 }
 
 void ParticleSystem::updateReducedData(const glm::mat4& viewMatrix)
