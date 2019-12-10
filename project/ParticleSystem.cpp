@@ -56,7 +56,7 @@ void ParticleSystem::spawnParticles(glm::mat4& fighterModelMatrix) {
 	{
 		Particle particle;
 		particle.pos = vec3(fighterModelMatrix * vec4(exhaustOffset, 1.f));
-		particle.velocity = getRandVelocity();
+		particle.velocity = mat3(fighterModelMatrix) * getRandVelocity();
 		particle.lifetime = 0;
 		particle.life_length = PARTICLE_LIFE_LENGTH;
 		spawn(particle);
