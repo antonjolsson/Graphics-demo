@@ -36,7 +36,7 @@ using std::max;
 SDL_Window* g_window = nullptr;
 static float currentTime = 0.0f;
 static float deltaTime = 0.0f;
-bool showUI = true;
+bool showUI = false;
 int antiAliasSamples = 16;
 float previousTime = 0.0f;
 int windowWidth, windowHeight;

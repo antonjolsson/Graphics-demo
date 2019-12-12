@@ -93,7 +93,6 @@ void ParticleSystem::uploadToGPU(void) {
 
 void ParticleSystem::render(void) {
 	glBindVertexArray(particleSysVAO);
-	glDisable(GL_DEPTH_TEST);
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, texBuffer);
 	//Enable shader program point size modulation.
@@ -103,7 +102,6 @@ void ParticleSystem::render(void) {
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glDrawArrays(GL_POINTS, 0, reducedData.size());
 	glBindVertexArray(0);
-	glEnable(GL_DEPTH_TEST);
 }
 
 void ParticleSystem::update(const glm::mat4& viewMatrix, float dt, glm::mat4& fighterModelMatrix, bool accelerating)
