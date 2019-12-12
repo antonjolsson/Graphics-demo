@@ -6,6 +6,7 @@
 #include <glm/mat4x4.hpp>
 #include <algorithm>
 #include "labhelper.h"
+#include <stb_image.h>
 
 using namespace glm;
 
@@ -25,7 +26,7 @@ class ParticleSystem
 {
 private:
 	// Members
-	GLuint particleSysVAO, posBuffer;
+	GLuint particleSysVAO, posBuffer, texBuffer;
 	
 	// Methods
 	void updateReducedData(const glm::mat4& viewMatrix);
@@ -46,6 +47,8 @@ public:
 	ParticleSystem() : max_size(0)
 	{
 	}
+	void initPosBuffer();
+	void initTexBuffer();
 	explicit ParticleSystem(int size);
 	~ParticleSystem()
 	{

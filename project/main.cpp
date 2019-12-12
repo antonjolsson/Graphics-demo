@@ -156,7 +156,7 @@ void loadShaders(bool is_reload)
 
 	shader = labhelper::loadShaderProgram("../project/particle.vert", "../project/particle.frag", is_reload);
 	if (shader != 0)
-		simpleParticleProgram = shader;
+		particleProgram = shader;
 }
 
 void initGL()
@@ -169,7 +169,7 @@ void initGL()
 	                                                 "../project/background.frag");
 	shaderProgram = labhelper::loadShaderProgram("../project/shading.vert", "../project/shading.frag");
 	simpleShaderProgram = labhelper::loadShaderProgram("../project/simple.vert", "../project/simple.frag");
-	simpleParticleProgram = labhelper::loadShaderProgram("../project/particle.vert", "../project/particle.frag");
+	particleProgram = labhelper::loadShaderProgram("../project/particle.vert", "../project/particle.frag");
 
 	///////////////////////////////////////////////////////////////////////
 	// Load models and set up model matrices
@@ -222,7 +222,6 @@ void debugDrawLight(const glm::mat4& viewMatrix,
 	labhelper::render(sphereModel);
 }
 
-
 void drawBackground(const mat4& viewMatrix, const mat4& projectionMatrix)
 {
 	glUseProgram(backgroundProgram);
@@ -230,6 +229,14 @@ void drawBackground(const mat4& viewMatrix, const mat4& projectionMatrix)
 	labhelper::setUniformSlow(backgroundProgram, "inv_PV", inverse(projectionMatrix * viewMatrix));
 	labhelper::setUniformSlow(backgroundProgram, "camera_pos", cameraPosition);
 	labhelper::drawFullScreenQuad();
+}
+
+void drawFire(const mat4& projMatrix, const mat4& viewMatrix, mat4& fighterModelMatrix) {
+	glUseProgram(particleProgram);
+	labhelper::setUniformSlow(particleProgram, "projectionMatrix", projMatrix);
+	labhelper::setUniformSlow(particleProgram, "screen_x", float(windowWidth));
+	labhelper::setUniformSlow(particleProgram, "screen_y", float(windowHeight));
+	particleSystem.update(viewMatrix, deltaTime, fighterModelMatrix, accelerating);
 }
 
 void drawScene(GLuint currentShaderProgram,
@@ -279,12 +286,8 @@ void drawScene(GLuint currentShaderProgram,
 	labhelper::setUniformSlow(currentShaderProgram, "normalMatrix",
 		inverse(transpose(viewMatrix * fighterModelMatrix)));
 	labhelper::render(fighterModel);
-}
 
-void drawFire(const mat4& projMatrix, const mat4& viewMatrix, mat4& fighterModelMatrix) {
-	glUseProgram(simpleParticleProgram);
-	labhelper::setUniformSlow(simpleParticleProgram, "projectionMatrix",projMatrix);
-	particleSystem.update(viewMatrix, deltaTime, fighterModelMatrix, accelerating);
+	//drawFire(projectionMatrix, viewMatrix, fighterModelMatrix);
 }
 
 void display(void)
@@ -377,9 +380,11 @@ void display(void)
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	drawBackground(viewMatrix, projMatrix);
+	
 	drawScene(shaderProgram, viewMatrix, projMatrix, lightViewMatrix, lightProjMatrix);
-	debugDrawLight(viewMatrix, projMatrix, vec3(lightPosition));
 	drawFire(projMatrix, viewMatrix, fighterModelMatrix);
+	debugDrawLight(viewMatrix, projMatrix, vec3(lightPosition));
+	
 }
 
 bool handleEvents(void)

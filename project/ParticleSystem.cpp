@@ -1,16 +1,48 @@
 #include "ParticleSystem.h"
-#include <iostream>
+
+void ParticleSystem::initPosBuffer()
+{
+	glGenBuffers(1, &posBuffer);
+	glBindBuffer(GL_ARRAY_BUFFER, posBuffer);
+	glVertexAttribPointer(0, 4, GL_FLOAT, false, 0, 0);
+	glEnableVertexAttribArray(0);
+	glBufferData(GL_ARRAY_BUFFER, (GLsizeiptr)4 * max_size, nullptr, GL_STATIC_DRAW);
+}
+
+void ParticleSystem::initTexBuffer()
+{
+	float fireTexCoords[] = {
+	0.0f, 0.0f, // (u,v) for v0 
+	0.0f, 1.0f, // (u,v) for v1
+	1.0f, 1.0f, // (u,v) for v2
+	1.0f, 0.0f // (u,v) for v3
+	};
+
+	glGenBuffers(1, &texBuffer);
+	glBindBuffer(GL_ARRAY_BUFFER, texBuffer);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(fireTexCoords), fireTexCoords, GL_STATIC_DRAW);
+	glVertexAttribPointer(1, 2, GL_FLOAT, false, 0, 0);
+	glEnableVertexAttribArray(1);
+
+	int w, h, comp;
+	unsigned char* explImage = stbi_load("../scenes/explosion.png", &w, &h, &comp, STBI_rgb_alpha);
+	glGenTextures(1, &texBuffer);
+	glBindTexture(GL_TEXTURE_2D, texBuffer);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, explImage);
+	free(explImage);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+}
 
 ParticleSystem::ParticleSystem(int size) : max_size(size)
 {
 	glGenVertexArrays(1, &particleSysVAO);
 	glBindVertexArray(particleSysVAO);
-	glGenBuffers(1, &posBuffer);
-	glBindBuffer(GL_ARRAY_BUFFER, posBuffer);
-	glVertexAttribPointer(0, 4, GL_FLOAT, false, 0, 0);
-	glEnableVertexAttribArray(0);
-	glBufferData(GL_ARRAY_BUFFER, (GLsizeiptr) 4 * max_size, nullptr, GL_STATIC_DRAW);
-	//dummySpawn();
+	initPosBuffer();
+	initTexBuffer();
 }
 
 vec3 ParticleSystem::getRandVelocity(void)
@@ -18,16 +50,6 @@ vec3 ParticleSystem::getRandVelocity(void)
 	const float theta = labhelper::uniform_randf(0.f, 2.f * M_PI);
 	const float u = labhelper::uniform_randf(0.95f, 1.f);
 	return glm::mat3(10.0f) * vec3(u, sqrt(1.f - u * u) * cosf(theta), sqrt(1.f - u * u) * sinf(theta));
-}
-
-void ParticleSystem::dummySpawn(void)
-{
-	for (size_t i = 0; i < 10000; i++)
-	{
-		Particle particle;
-		particle.pos = getRandVelocity();
-		particles.push_back(particle);
-	}
 }
 
 void ParticleSystem::kill(int id)
@@ -71,7 +93,17 @@ void ParticleSystem::uploadToGPU(void) {
 
 void ParticleSystem::render(void) {
 	glBindVertexArray(particleSysVAO);
+	glDisable(GL_DEPTH_TEST);
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, texBuffer);
+	//Enable shader program point size modulation.
+	glEnable(GL_PROGRAM_POINT_SIZE);
+	// Enable blending.
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glDrawArrays(GL_POINTS, 0, reducedData.size());
+	glBindVertexArray(0);
+	glEnable(GL_DEPTH_TEST);
 }
 
 void ParticleSystem::update(const glm::mat4& viewMatrix, float dt, glm::mat4& fighterModelMatrix, bool accelerating)
