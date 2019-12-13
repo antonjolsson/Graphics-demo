@@ -37,6 +37,7 @@ SDL_Window* g_window = nullptr;
 static float currentTime = 0.0f;
 static float deltaTime = 0.0f;
 bool showUI = false;
+bool logger = true;
 int antiAliasSamples = 16;
 float previousTime = 0.0f;
 int windowWidth, windowHeight;
@@ -47,11 +48,12 @@ bool g_isMouseDragging = false;
 bool g_isMouseRightDragging = false;
 
 //Ship
-bool xRotation = false;
+bool xRotation = true;
 const float MAX_SHIP_X_ROT = M_PI / 6;;
 const float MAX_SHIP_Y_ROTATION_SPEED = M_PI / 50;
 const float MAX_SHIP_X_ROTATION_SPEED = MAX_SHIP_X_ROT / 5;
-const float CLAMP_ROT_TO_ZERO_SPEED = 0.05f;
+//const float CLAMP_ROT_TO_ZERO_SPEED = 0.05f;
+const float CLAMP_ROT_TO_ZERO_SPEED = 0.2f;
 float acceleration = 0.3f;
 float shipSpeed = 0.f;
 float shipYRotationSpeed = 0.f;
@@ -59,6 +61,7 @@ float shipXRotationSpeed = 0.f;
 float dragCoeff = 1.1f;
 float yTranslation = 15.0f;
 float shipXRotation = 0.f;
+float shipZRotation = 0.f;
 float exhZOffset = 0.33f;
 float exhYOffset = 3.1f;
 float exhXOffset = 17.25f;
@@ -203,15 +206,15 @@ void initGL()
 	///////////////////////////////////////////////////////////////////////
 	shadowMapFB.resize(shadowMapResolution, shadowMapResolution);
 
-	glEnable(GL_DEPTH_TEST); // enable Z-buffering
-	glEnable(GL_CULL_FACE);  // enables backface culling
+	//glEnable(GL_DEPTH_TEST); // enable Z-buffering
+	//glEnable(GL_CULL_FACE);  // enables backface culling
 
 	glBindTexture(GL_TEXTURE_2D, shadowMapFB.depthBuffer);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_FUNC, GL_LEQUAL);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_REF_TO_TEXTURE);
 }
 
-void debugDrawLight(const glm::mat4& viewMatrix,
+void drawLight(const glm::mat4& viewMatrix,
                     const glm::mat4& projectionMatrix,
                     const glm::vec3& worldSpaceLightPos)
 {
@@ -286,8 +289,6 @@ void drawScene(GLuint currentShaderProgram,
 	labhelper::setUniformSlow(currentShaderProgram, "normalMatrix",
 		inverse(transpose(viewMatrix * fighterModelMatrix)));
 	labhelper::render(fighterModel);
-
-	//drawFire(projectionMatrix, viewMatrix, fighterModelMatrix);
 }
 
 void display(void)
@@ -383,7 +384,7 @@ void display(void)
 	
 	drawScene(shaderProgram, viewMatrix, projMatrix, lightViewMatrix, lightProjMatrix);
 	drawFire(projMatrix, viewMatrix, fighterModelMatrix);
-	debugDrawLight(viewMatrix, projMatrix, vec3(lightPosition));
+	drawLight(viewMatrix, projMatrix, vec3(lightPosition));
 	
 }
 
@@ -559,16 +560,34 @@ void gui()
 }
 
 void updateShip(void) {
+	vec3 zAxis(0.0f, 0.0f, 1.0f);
 	shipSpeed *= pow(dragCoeff, -abs(shipSpeed));
 	shipXRotation += shipXRotationSpeed;
-	vec3 zAxis(0.0f, 0.0f, 1.0f);
-
+	shipZRotation = orientedAngle(worldUp, vec3(fighterModelMatrix[1]), zAxis);
+	fighterModelMatrix = rotate(fighterModelMatrix, -shipXRotation, xAxis);
 	fighterModelMatrix = rotate(fighterModelMatrix, shipYRotationSpeed, worldUp);
+	fighterModelMatrix = rotate(fighterModelMatrix, shipXRotation, xAxis);
 	if (xRotation) {
 		fighterModelMatrix = rotate(fighterModelMatrix, shipXRotationSpeed, xAxis);
+		fighterModelMatrix[3][1] = yTranslation;
 	}
 	fighterModelMatrix = translate(fighterModelMatrix, shipSpeed * -xAxis);
 	particleSystem.setExhaustOffset(vec3(exhXOffset, exhYOffset, exhZOffset));
+}
+
+void logStats() {
+	std::cout << "fighterModelMatrix" << std::endl;
+	for (size_t i = 0; i < fighterModelMatrix.length(); i++)
+	{
+		for (size_t j = 0; j < fighterModelMatrix.length(); j++)
+		{
+			std::cout << fighterModelMatrix[j][i] << " ";
+		}
+		std::cout << std::endl;
+	}
+	std::cout << "worldUp/local y angle: " << orientedAngle(worldUp, vec3(fighterModelMatrix[1]), xAxis) 
+		<< std::endl;
+	std::cout << "ShipZRotation: " << shipZRotation << std::endl;
 }
 
 int main(int argc, char* argv[])
@@ -596,6 +615,8 @@ int main(int argc, char* argv[])
 		{
 			gui();
 		}
+
+		if (logger) logStats();
 
 		// Swap front and back buffer. This frame will now been displayed.
 		SDL_GL_SwapWindow(g_window);

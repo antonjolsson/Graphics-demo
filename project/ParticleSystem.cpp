@@ -101,6 +101,8 @@ void ParticleSystem::render(void) {
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glDrawArrays(GL_POINTS, 0, reducedData.size());
+	glDisable(GL_PROGRAM_POINT_SIZE);
+
 	glBindVertexArray(0);
 }
 

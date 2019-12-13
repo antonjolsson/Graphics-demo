@@ -1,4 +1,6 @@
 #version 400 compatibility
+//#define DEBUG
+
 layout(location = 0) in vec4 particle;
 uniform mat4 projectionMatrix;
 uniform float screen_x;
@@ -6,6 +8,7 @@ uniform float screen_y;
 out float life;
 void main()
 {
+	#ifndef DEBUG
 	life = particle.w;
 	// Particle is already in view space.
 	vec4 particle_vs = vec4(particle.xyz, 1.0);
@@ -20,4 +23,16 @@ void main()
 	// Scale the point with regard to the previosly defined scale_factor
 	// and the life (it will get larger the older it is)
 	gl_PointSize = scale_factor * mix(0.0, 5.0, pow(life, 1.0 / 4.0));
+	#endif
+
+	#ifdef DEBUG
+	life = particle.w;
+	// Particle is already in view space.
+	vec4 particle_vs = vec4(particle.xyz, 1.0);
+	// Transform position.
+	gl_Position = projectionMatrix * particle_vs;
+	// Scale the point with regard to the previosly defined scale_factor
+	// and the life (it will get larger the older it is)
+	gl_PointSize = 1;
+	#endif
 }
