@@ -40,6 +40,7 @@ static float deltaTime = 0.0f;
 bool showUI = false;
 bool logger = true;
 int antiAliasSamples = 16;
+const float OPT_FRAMERATE = 60.f;
 float previousTime = 0.0f;
 int windowWidth, windowHeight;
 
@@ -53,7 +54,6 @@ bool xRotation = true;
 const float MAX_SHIP_X_ROT = M_PI / 6;;
 const float MAX_SHIP_Y_ROTATION_SPEED = M_PI / 50;
 const float MAX_SHIP_X_ROTATION_SPEED = MAX_SHIP_X_ROT / 5;
-//const float CLAMP_ROT_TO_ZERO_SPEED = 0.05f;
 const float CLAMP_ROT_TO_ZERO_SPEED = 0.2f;
 float acceleration = 0.3f;
 float shipSpeed = 0.f;
@@ -62,8 +62,6 @@ float shipXRotationSpeed = 0.f;
 float dragCoeff = 1.1f;
 vec4 shipTranslation(0.f, 15.f, 0.f, 1.f);
 const float Y_TRANSL = 15.0f;
-//float xTranslation = 0.0f;
-//float zTranslation = 0.f;
 float shipXRotation = 0.f;
 float shipZRotation = 0.f;
 float shipYRotation = 0.f;
@@ -567,6 +565,8 @@ void gui()
 void updateShip(void) {
 	vec3 zAxis(0.0f, 0.0f, 1.0f);
 	shipSpeed *= pow(dragCoeff, -abs(shipSpeed));
+	float fps = 1000.f / deltaTime / 1000.f;
+	shipSpeed = shipSpeed / (fps / OPT_FRAMERATE);
 	if (xRotation) {
 		if (shipXRotationSpeed == 0 && abs(shipXRotation) < CLAMP_ROT_TO_ZERO_SPEED) shipXRotation = 0.f;
 		else shipXRotation += shipXRotationSpeed;
@@ -595,6 +595,7 @@ void logStats() {
 	std::cout << "worldUp/local y angle: " << orientedAngle(worldUp, vec3(fighterModelMatrix[1]), xAxis) 
 		<< std::endl;
 	std::cout << "ShipZRotation: " << shipZRotation << std::endl;
+	std::cout << "FPS: " << 1000.f / deltaTime / 1000.f << std::endl;
 }
 
 int main(int argc, char* argv[])
