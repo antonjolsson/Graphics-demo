@@ -122,9 +122,10 @@ float polygonOffset_units = 58.3f;
 ///////////////////////////////////////////////////////////////////////////////
 // Camera parameters.
 ///////////////////////////////////////////////////////////////////////////////
-vec3 cameraPosition(-70.0f, 50.0f, 70.0f);
+vec3 cameraPosition(-120.0f, 70.0f, 90.0f);
 vec3 cameraDirection = normalize(vec3(0.0f) - cameraPosition);
 float cameraSpeed = 30.f;
+const float FOV = 35.f;
 
 vec3 worldUp(0.0f, 1.0f, 0.0f);
 vec3 xAxis(1.0f, 0.0f, 0.0f);
@@ -320,10 +321,10 @@ void display(void)
 	///////////////////////////////////////////////////////////////////////////
 	// setup matrices
 	///////////////////////////////////////////////////////////////////////////
-	mat4 projMatrix = perspective(radians(45.0f), float(windowWidth) / float(windowHeight), 5.0f, 500.0f);
+	mat4 projMatrix = perspective(radians(FOV), float(windowWidth) / float(windowHeight), 5.0f, 500.0f);
 	mat4 viewMatrix = lookAt(cameraPosition, cameraPosition + cameraDirection, worldUp);
 
-	vec4 lightStartPosition = vec4(40.0f, 40.0f, 0.0f, 1.0f);
+	vec4 lightStartPosition = vec4(40.0f, 50.0f, 0.0f, 1.0f);
 	float light_rotation_speed = 1.f;
 	if (!lightManualOnly && !g_isMouseRightDragging)
 	{

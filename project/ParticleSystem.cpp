@@ -26,7 +26,7 @@ void ParticleSystem::initTexBuffer()
 
 	int w, h, comp;
 	unsigned char* explImage = stbi_load("../scenes/explosion.png", &w, &h, &comp, STBI_rgb_alpha);
-	//glGenTextures(1, &texBuffer);
+	glGenTextures(1, &texBuffer);
 	glBindTexture(GL_TEXTURE_2D, texBuffer);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, explImage);
 	free(explImage);
