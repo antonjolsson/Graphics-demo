@@ -49,7 +49,8 @@ vec3 ParticleSystem::getRandVelocity(void)
 {
 	const float theta = labhelper::uniform_randf(0.f, 2.f * M_PI);
 	const float u = labhelper::uniform_randf(0.95f, 1.f);
-	return glm::mat3(30.0f) * vec3(u, sqrt(1.f - u * u) * cosf(theta), sqrt(1.f - u * u) * sinf(theta));
+	const float vel = labhelper::uniform_randf(20.f, 40.f);
+	return glm::mat3(vel) * vec3(u, sqrt(1.f - u * u) * cosf(theta), sqrt(1.f - u * u) * sinf(theta));
 }
 
 void ParticleSystem::kill(int id)
