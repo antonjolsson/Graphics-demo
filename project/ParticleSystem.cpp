@@ -11,30 +11,30 @@ void ParticleSystem::initPosBuffer()
 
 void ParticleSystem::initTexBuffer()
 {
-	float fireTexCoords[] = {
+	/*float fireTexCoords[] = {
 	0.0f, 0.0f, // (u,v) for v0 
 	0.0f, 1.0f, // (u,v) for v1
 	1.0f, 1.0f, // (u,v) for v2
 	1.0f, 0.0f // (u,v) for v3
-	};
+	};*/
 
 	glGenBuffers(1, &texBuffer);
 	glBindBuffer(GL_ARRAY_BUFFER, texBuffer);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(fireTexCoords), fireTexCoords, GL_STATIC_DRAW);
+	//glBufferData(GL_ARRAY_BUFFER, sizeof(fireTexCoords), fireTexCoords, GL_STATIC_DRAW);
 	glVertexAttribPointer(1, 2, GL_FLOAT, false, 0, 0);
 	glEnableVertexAttribArray(1);
 
 	int w, h, comp;
 	unsigned char* explImage = stbi_load("../scenes/explosion.png", &w, &h, &comp, STBI_rgb_alpha);
-	glGenTextures(1, &texBuffer);
+	//glGenTextures(1, &texBuffer);
 	glBindTexture(GL_TEXTURE_2D, texBuffer);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, explImage);
 	free(explImage);
 
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 }
 
 ParticleSystem::ParticleSystem(int size) : max_size(size)
