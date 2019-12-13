@@ -38,7 +38,7 @@ SDL_Window* g_window = nullptr;
 static float currentTime = 0.0f;
 static float deltaTime = 0.0f;
 bool showUI = false;
-bool logger = true;
+bool logger = false;
 int antiAliasSamples = 16;
 const float OPT_FRAMERATE = 60.f;
 float previousTime = 0.0f;
@@ -51,11 +51,13 @@ bool g_isMouseRightDragging = false;
 
 //Ship
 bool xRotation = true;
+const bool FPS_ADJ_SPEED = false;
+const float FPS_ADJ_SPEED_CONST = 1 / 5.f;
 const float MAX_SHIP_X_ROT = M_PI / 6;;
-const float MAX_SHIP_Y_ROTATION_SPEED = M_PI / 50;
+const float MAX_SHIP_Y_ROTATION_SPEED = M_PI / 40;
 const float MAX_SHIP_X_ROTATION_SPEED = MAX_SHIP_X_ROT / 5;
 const float CLAMP_ROT_TO_ZERO_SPEED = 0.2f;
-float acceleration = 0.3f;
+float acceleration = 0.8f;
 float shipSpeed = 0.f;
 float shipYRotationSpeed = 0.f;
 float shipXRotationSpeed = 0.f;
@@ -165,9 +167,15 @@ void loadShaders(bool is_reload)
 		particleProgram = shader;
 }
 
+void initShip(void) {
+	if (FPS_ADJ_SPEED) acceleration *= FPS_ADJ_SPEED_CONST;
+}
+
 void initGL()
 {
 	particleSystem = ParticleSystem::ParticleSystem(MAX_PARTICLES);
+	initShip();
+
 	///////////////////////////////////////////////////////////////////////
 	//		Load Shaders
 	///////////////////////////////////////////////////////////////////////
@@ -565,8 +573,7 @@ void gui()
 void updateShip(void) {
 	vec3 zAxis(0.0f, 0.0f, 1.0f);
 	shipSpeed *= pow(dragCoeff, -abs(shipSpeed));
-	float fps = 1000.f / deltaTime / 1000.f;
-	shipSpeed = shipSpeed / (fps / OPT_FRAMERATE);
+	if (FPS_ADJ_SPEED) shipSpeed = shipSpeed / (1000.f / deltaTime / 1000.f / OPT_FRAMERATE);
 	if (xRotation) {
 		if (shipXRotationSpeed == 0 && abs(shipXRotation) < CLAMP_ROT_TO_ZERO_SPEED) shipXRotation = 0.f;
 		else shipXRotation += shipXRotationSpeed;

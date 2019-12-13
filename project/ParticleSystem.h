@@ -20,6 +20,8 @@ struct Particle
 
 static const uint SPAWNED_PARTICLES = 64;
 static const uint PARTICLE_LIFE_LENGTH = 5;
+static const float GRAVITY_CONST = 9.8f;
+static const float DRAG_COEFF = 5.0f;
 static vec3 exhaustOffset = vec3(0.f);
 
 class ParticleSystem
@@ -32,12 +34,11 @@ private:
 	void updateReducedData(const glm::mat4& viewMatrix);
 	void kill(int id);
 	void spawn(Particle particle);
-	void process_particles(float dt);
+	void process_particles(float dt, glm::mat4& fighterModelMatrix);
 	void spawnParticles(glm::mat4& fighterModelMatrix);
 	void uploadToGPU(void);
 	void render(void);
 	vec3 getRandVelocity(void);
-	void dummySpawn(void);
 public:
 	// Members
 	std::vector<Particle> particles;
