@@ -37,7 +37,7 @@ using std::max;
 SDL_Window* g_window = nullptr;
 static float currentTime = 0.0f;
 static float deltaTime = 0.0f;
-bool showUI = false;
+bool showUI = true;
 bool logger = false;
 int antiAliasSamples = 16;
 const float OPT_FRAMERATE = 60.f;
@@ -125,7 +125,7 @@ float polygonOffset_units = 58.3f;
 vec3 cameraPosition(-120.0f, 70.0f, 90.0f);
 vec3 cameraDirection = normalize(vec3(0.0f) - cameraPosition);
 float cameraSpeed = 30.f;
-const float FOV = 35.f;
+float fieldOfView = 35.f;
 
 vec3 worldUp(0.0f, 1.0f, 0.0f);
 vec3 xAxis(1.0f, 0.0f, 0.0f);
@@ -217,9 +217,6 @@ void initGL()
 	// Setup Framebuffer for shadow map rendering
 	///////////////////////////////////////////////////////////////////////
 	shadowMapFB.resize(shadowMapResolution, shadowMapResolution);
-
-	//glEnable(GL_DEPTH_TEST); // enable Z-buffering
-	//glEnable(GL_CULL_FACE);  // enables backface culling
 
 	glBindTexture(GL_TEXTURE_2D, shadowMapFB.depthBuffer);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_FUNC, GL_LEQUAL);
@@ -321,7 +318,7 @@ void display(void)
 	///////////////////////////////////////////////////////////////////////////
 	// setup matrices
 	///////////////////////////////////////////////////////////////////////////
-	mat4 projMatrix = perspective(radians(FOV), float(windowWidth) / float(windowHeight), 5.0f, 500.0f);
+	mat4 projMatrix = perspective(radians(fieldOfView), float(windowWidth) / float(windowHeight), 5.0f, 500.0f);
 	mat4 viewMatrix = lookAt(cameraPosition, cameraPosition + cameraDirection, worldUp);
 
 	vec4 lightStartPosition = vec4(40.0f, 50.0f, 0.0f, 1.0f);
@@ -536,26 +533,30 @@ void gui()
 	ImGui_ImplSdlGL3_NewFrame(g_window);
 
 	// ----------------- Set variables --------------------------
-	ImGui::SliderInt("Shadow Map Resolution", &shadowMapResolution, 32, 2048);
-	ImGui::Text("Polygon Offset");
-	ImGui::Checkbox("Use polygon offset", &usePolygonOffset);
-	ImGui::SliderFloat("Factor", &polygonOffset_factor, 0.0f, 10.0f);
-	ImGui::SliderFloat("Units", &polygonOffset_units, 0.0f, 100.0f);
-	ImGui::Text("Clamp Mode");
-	ImGui::RadioButton("Clamp to edge", &shadowMapClampMode, ClampMode::Edge);
-	ImGui::RadioButton("Clamp to border", &shadowMapClampMode, ClampMode::Border);
-	ImGui::Checkbox("Border as shadow", &shadowMapClampBorderShadowed);
-	ImGui::Checkbox("Use spot light", &useSpotLight);
-	ImGui::Checkbox("Use soft falloff", &useSoftFalloff);
-	ImGui::SliderFloat("Inner Deg.", &innerSpotlightAngle, 0.0f, 90.0f);
-	ImGui::SliderFloat("Outer Deg.", &outerSpotlightAngle, 0.0f, 90.0f);
-	ImGui::Checkbox("Use hardware PCF", &useHardwarePCF);
-	ImGui::Checkbox("Manual light only (right-click drag to move)", &lightManualOnly);
+	if (ImGui::CollapsingHeader("Shadow variables", "shadow_ch", true, false))
+	{
+		ImGui::SliderInt("Shadow Map Resolution", &shadowMapResolution, 32, 2048);
+		ImGui::Text("Polygon Offset");
+		ImGui::Checkbox("Use polygon offset", &usePolygonOffset);
+		ImGui::SliderFloat("Factor", &polygonOffset_factor, 0.0f, 10.0f);
+		ImGui::SliderFloat("Units", &polygonOffset_units, 0.0f, 100.0f);
+		ImGui::Text("Clamp Mode");
+		ImGui::RadioButton("Clamp to edge", &shadowMapClampMode, ClampMode::Edge);
+		ImGui::RadioButton("Clamp to border", &shadowMapClampMode, ClampMode::Border);
+		ImGui::Checkbox("Border as shadow", &shadowMapClampBorderShadowed);
+		ImGui::Checkbox("Use spot light", &useSpotLight);
+		ImGui::Checkbox("Use soft falloff", &useSoftFalloff);
+		ImGui::SliderFloat("Inner Deg.", &innerSpotlightAngle, 0.0f, 90.0f);
+		ImGui::SliderFloat("Outer Deg.", &outerSpotlightAngle, 0.0f, 90.0f);
+		ImGui::Checkbox("Use hardware PCF", &useHardwarePCF);
+		ImGui::Checkbox("Manual light only (right-click drag to move)", &lightManualOnly);
+	}
+	
 	ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate,
 		ImGui::GetIO().Framerate);
+	ImGui::SliderFloat("Field of view: ", &fieldOfView, 10.0f, 70.0f);
 	ImGui::SliderFloat("Acceleration", &acceleration, 0.0f, 10.0f);
 	ImGui::SliderFloat("Drag coeff.", &dragCoeff, 0.0f, 10.0f);
-	ImGui::SliderFloat("Y-translation: ", &shipTranslation[1], 0.0f, 50.0f);
 	ImGui::Text("Current ship speed: %.3f", shipSpeed);
 	ImGui::Text("Ship x-rotation: %.3f", shipXRotation);
 	ImGui::Text("Ship x-rotation speed: %.3f", shipXRotationSpeed);
