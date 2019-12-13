@@ -18,6 +18,7 @@ extern "C" _declspec(dllexport) unsigned int NvOptimusEnablement = 0x00000001;
 #include <glm/glm.hpp>
 #include <glm/gtx/transform.hpp>
 #include <glm/gtx/vector_angle.hpp>
+#include <glm/gtx/euler_angles.hpp>
 using namespace glm;
 
 #include <Model.h>
@@ -59,9 +60,13 @@ float shipSpeed = 0.f;
 float shipYRotationSpeed = 0.f;
 float shipXRotationSpeed = 0.f;
 float dragCoeff = 1.1f;
-float yTranslation = 15.0f;
+vec4 shipTranslation(0.f, 15.f, 0.f, 1.f);
+const float Y_TRANSL = 15.0f;
+//float xTranslation = 0.0f;
+//float zTranslation = 0.f;
 float shipXRotation = 0.f;
 float shipZRotation = 0.f;
+float shipYRotation = 0.f;
 float exhZOffset = 0.33f;
 float exhYOffset = 3.1f;
 float exhXOffset = 17.25f;
@@ -182,7 +187,7 @@ void initGL()
 	sphereModel = labhelper::loadModelFromOBJ("../scenes/sphere.obj");
 
 	roomModelMatrix = mat4(1.0f);
-	fighterModelMatrix = translate(yTranslation * worldUp);
+	fighterModelMatrix = translate(Y_TRANSL * worldUp);
 	landingPadModelMatrix = mat4(1.0f);
 
 	///////////////////////////////////////////////////////////////////////
@@ -543,7 +548,7 @@ void gui()
 		ImGui::GetIO().Framerate);
 	ImGui::SliderFloat("Acceleration", &acceleration, 0.0f, 10.0f);
 	ImGui::SliderFloat("Drag coeff.", &dragCoeff, 0.0f, 10.0f);
-	ImGui::SliderFloat("Y-translation: ", &yTranslation, 0.0f, 50.0f);
+	ImGui::SliderFloat("Y-translation: ", &shipTranslation[1], 0.0f, 50.0f);
 	ImGui::Text("Current ship speed: %.3f", shipSpeed);
 	ImGui::Text("Ship x-rotation: %.3f", shipXRotation);
 	ImGui::Text("Ship x-rotation speed: %.3f", shipXRotationSpeed);
@@ -562,15 +567,17 @@ void gui()
 void updateShip(void) {
 	vec3 zAxis(0.0f, 0.0f, 1.0f);
 	shipSpeed *= pow(dragCoeff, -abs(shipSpeed));
-	shipXRotation += shipXRotationSpeed;
-	shipZRotation = orientedAngle(worldUp, vec3(fighterModelMatrix[1]), zAxis);
-	fighterModelMatrix = rotate(fighterModelMatrix, -shipXRotation, xAxis);
-	fighterModelMatrix = rotate(fighterModelMatrix, shipYRotationSpeed, worldUp);
-	fighterModelMatrix = rotate(fighterModelMatrix, shipXRotation, xAxis);
 	if (xRotation) {
-		fighterModelMatrix = rotate(fighterModelMatrix, shipXRotationSpeed, xAxis);
-		fighterModelMatrix[3][1] = yTranslation;
+		if (shipXRotationSpeed == 0 && abs(shipXRotation) < CLAMP_ROT_TO_ZERO_SPEED) shipXRotation = 0.f;
+		else shipXRotation += shipXRotationSpeed;
 	}
+	shipYRotation += shipYRotationSpeed;
+	
+	mat4 rotMatrix = glm::eulerAngleYXZ(shipYRotation, shipXRotation, 0.f);
+	vec4 translation = fighterModelMatrix[3];
+	fighterModelMatrix = rotMatrix * mat4(1.f);
+	fighterModelMatrix[3] = translation;
+
 	fighterModelMatrix = translate(fighterModelMatrix, shipSpeed * -xAxis);
 	particleSystem.setExhaustOffset(vec3(exhXOffset, exhYOffset, exhZOffset));
 }
