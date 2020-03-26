@@ -1,5 +1,6 @@
 
 
+#include "heightfield.h"
 #ifdef _WIN32
 extern "C" _declspec(dllexport) unsigned int NvOptimusEnablement = 0x00000001;
 #endif
@@ -147,6 +148,12 @@ mat4 fighterModelMatrix;
 ParticleSystem particleSystem;
 const uint MAX_PARTICLES = 100000;
 
+///////////////////////////////////////////////////////////////////////////////
+// Heightfield
+///////////////////////////////////////////////////////////////////////////////
+const int TERRAIN_TESSELATION = 4;
+HeightField terrain;
+
 void loadShaders(bool is_reload)
 {
 	GLuint shader = labhelper::loadShaderProgram("../project/simple.vert", "../project/simple.frag",
@@ -174,6 +181,8 @@ void initShip(void) {
 
 void initGL()
 {
+	terrain.generateMesh(TERRAIN_TESSELATION);
+	
 	particleSystem = ParticleSystem::ParticleSystem(MAX_PARTICLES);
 	initShip();
 
@@ -202,7 +211,7 @@ void initGL()
 	///////////////////////////////////////////////////////////////////////
 	const int roughnesses = 8;
 	std::vector<std::string> filenames;
-	for(int i = 0; i < roughnesses; i++)
+	for(auto i = 0; i < roughnesses; i++)
 		filenames.push_back("../scenes/envmaps/" + envmap_base_name + "_dl_" + std::to_string(i) + ".hdr");
 
 	reflectionMap = labhelper::loadHdrMipmapTexture(filenames);
@@ -227,7 +236,7 @@ void drawLight(const glm::mat4& viewMatrix,
                     const glm::mat4& projectionMatrix,
                     const glm::vec3& worldSpaceLightPos)
 {
-	mat4 modelMatrix = glm::translate(worldSpaceLightPos);
+	auto modelMatrix = glm::translate(worldSpaceLightPos);
 	glUseProgram(shaderProgram);
 	labhelper::setUniformSlow(shaderProgram, "modelViewProjectionMatrix",
 	                          projectionMatrix * viewMatrix * modelMatrix);
@@ -394,7 +403,8 @@ void display(void)
 	drawScene(shaderProgram, viewMatrix, projMatrix, lightViewMatrix, lightProjMatrix);
 	drawFire(projMatrix, viewMatrix, fighterModelMatrix);
 	drawLight(viewMatrix, projMatrix, vec3(lightPosition));
-	
+
+	terrain.submitTriangles();
 }
 
 bool handleEvents(void)
@@ -610,11 +620,10 @@ void logStats() {
 int main(int argc, char* argv[])
 {
 	g_window = labhelper::init_window_SDL("OpenGL Project", 1280, 720, antiAliasSamples);
-
 	initGL();
 
-	bool stopRendering = false;
-	auto startTime = std::chrono::system_clock::now();
+	auto stopRendering = false;
+	const auto startTime = std::chrono::system_clock::now();
 
 	while(!stopRendering)
 	{

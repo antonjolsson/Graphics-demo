@@ -17,7 +17,7 @@ public:
 	HeightField(void);
 
 	// load height field
-	void loadHeightField(const std::string &heigtFieldPath);
+	void loadHeightField(const std::string &heightFieldPath);
 
 	// load diffuse map
 	void loadDiffuseTexture(const std::string &diffusePath);

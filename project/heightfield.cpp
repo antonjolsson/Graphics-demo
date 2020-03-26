@@ -2,7 +2,7 @@
 #include "heightfield.h"
 
 #include <iostream>
-#include <stdint.h>
+#include <cstdint>
 #include <vector>
 #include <glm/glm.hpp>
 #include <stb_image.h>
@@ -24,14 +24,14 @@ HeightField::HeightField(void)
 {
 }
 
-void HeightField::loadHeightField(const std::string& heigtFieldPath)
+void HeightField::loadHeightField(const std::string& heightFieldPath)
 {
 	int width, height, components;
 	stbi_set_flip_vertically_on_load(true);
-	float* data = stbi_loadf(heigtFieldPath.c_str(), &width, &height, &components, 1);
+	float* data = stbi_loadf(heightFieldPath.c_str(), &width, &height, &components, 1);
 	if(data == nullptr)
 	{
-		std::cout << "Failed to load image: " << heigtFieldPath << ".\n";
+		std::cout << "Failed to load image: " << heightFieldPath << ".\n";
 		return;
 	}
 
@@ -48,8 +48,8 @@ void HeightField::loadHeightField(const std::string& heigtFieldPath)
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, width, height, 0, GL_RED, GL_FLOAT,
 	             data); // just one component (float)
 
-	m_heightFieldPath = heigtFieldPath;
-	std::cout << "Successfully loaded heigh field texture: " << heigtFieldPath << ".\n";
+	m_heightFieldPath = heightFieldPath;
+	std::cout << "Successfully loaded height field texture: " << heightFieldPath << ".\n";
 }
 
 void HeightField::loadDiffuseTexture(const std::string& diffusePath)
@@ -81,10 +81,21 @@ void HeightField::loadDiffuseTexture(const std::string& diffusePath)
 }
 
 
-void HeightField::generateMesh(int tesselation)
+void HeightField::generateMesh(const int tesselation)
 {
 	// generate a mesh in range -1 to 1 in x and z
 	// (y is 0 but will be altered in height field vertex shader)
+	m_meshResolution = tesselation;
+
+	std::vector<vec3> positions;
+	for (int z = 0; z <= tesselation; ++z)
+	{
+		for (int x = 0; x <= tesselation; ++x)
+		{
+			positions.emplace_back(vec3{ -1 + x / 2.f, 0, 1 - z / 2.f });
+		}
+	}
+	
 }
 
 void HeightField::submitTriangles(void)
