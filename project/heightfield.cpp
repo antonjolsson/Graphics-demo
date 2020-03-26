@@ -95,6 +95,9 @@ void HeightField::generateMesh(const int tesselation)
 			positions.emplace_back(vec3{ -1 + x / 2.f, 0, 1 - z / 2.f });
 		}
 	}
+	glGenBuffers(1, &m_positionBuffer);
+	glBindBuffer(GL_ARRAY_BUFFER, m_positionBuffer);
+	glBufferData(GL_ARRAY_BUFFER, positions.size() * sizeof(vec3), &positions[0], GL_STATIC_DRAW);
 	
 }
 
