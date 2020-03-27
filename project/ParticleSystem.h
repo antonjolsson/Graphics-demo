@@ -34,7 +34,7 @@ private:
 	void updateReducedData(const glm::mat4& viewMatrix);
 	void kill(int id);
 	void spawn(Particle particle);
-	void process_particles(float dt, glm::mat4& fighterModelMatrix);
+	void processParticles(float dt, glm::mat4& fighterModelMatrix);
 	void spawnParticles(glm::mat4& fighterModelMatrix);
 	void uploadToGPU(void);
 	void render(void);

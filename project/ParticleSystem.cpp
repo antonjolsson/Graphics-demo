@@ -63,15 +63,16 @@ void ParticleSystem::spawn(Particle particle)
 	if (particles.size() < max_size) particles.push_back(particle);
 }
 
-void ParticleSystem::process_particles(float dt, glm::mat4& fighterModelMatrix)
+void ParticleSystem::processParticles(const float dt, glm::mat4& fighterModelMatrix)
 {
 	for (unsigned i = 0; i < particles.size(); ++i) {
 		if (particles.at(i).lifetime > particles.at(i).life_length) kill(i);
 	}
-	for (unsigned i = 0; i < particles.size(); ++i) {
-		particles.at(i).velocity += 0.01f * mat3(fighterModelMatrix) * getRandVelocity();;
-		particles.at(i).pos += (dt * particles.at(i).velocity);
-		particles.at(i).lifetime += dt;
+	for (auto& particle : particles)
+	{
+		particle.velocity += 0.01f * mat3(fighterModelMatrix) * getRandVelocity();;
+		particle.pos += (dt * particle.velocity);
+		particle.lifetime += dt;
 	}
 }
 
@@ -88,7 +89,7 @@ void ParticleSystem::spawnParticles(glm::mat4& fighterModelMatrix) {
 }
 
 void ParticleSystem::uploadToGPU(void) {
-	if (particles.size() == 0) return;
+	if (particles.empty()) return;
 	glBindBuffer(GL_ARRAY_BUFFER, posBuffer);
 	glBufferSubData(GL_ARRAY_BUFFER, 0, 16 * particles.size(), &reducedData[0]);
 }
@@ -111,7 +112,7 @@ void ParticleSystem::render(void) {
 void ParticleSystem::update(const glm::mat4& viewMatrix, float dt, glm::mat4& fighterModelMatrix, bool accelerating)
 {
 	if (accelerating) spawnParticles(fighterModelMatrix);
-	process_particles(dt, fighterModelMatrix);
+	processParticles(dt, fighterModelMatrix);
 	updateReducedData(viewMatrix);
 	uploadToGPU();
 	render();

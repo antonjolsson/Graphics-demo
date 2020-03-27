@@ -81,13 +81,14 @@ GLuint simpleShaderProgram; // Shader used to draw the shadow map
 GLuint simpleParticleProgram;
 GLuint particleProgram;
 GLuint backgroundProgram;
+GLuint heightfieldProgram;
 
 ///////////////////////////////////////////////////////////////////////////////
 // Environment
 ///////////////////////////////////////////////////////////////////////////////
-float environment_multiplier = 1.5f;
+float environmentMultiplier = 1.5f;
 GLuint environmentMap, irradianceMap, reflectionMap;
-const std::string envmap_base_name = "001";
+const std::string ENVMAP_BASE_NAME = "001";
 
 ///////////////////////////////////////////////////////////////////////////////
 // Light source
@@ -95,30 +96,30 @@ const std::string envmap_base_name = "001";
 vec3 lightPosition;
 float lightRotation = 0.f;
 bool lightManualOnly = true;
-vec3 point_light_color = vec3(1.f, 1.f, 1.f);
+vec3 pointLightColor = vec3(1.f, 1.f, 1.f);
 bool useSpotLight = true;
 float innerSpotlightAngle = 20.3f;
 float outerSpotlightAngle = 24.0f;
-float point_light_intensity_multiplier = 10000.0f;
+float pointLightIntensityMultiplier = 10000.0f;
 
 ///////////////////////////////////////////////////////////////////////////////
 // Shadow map
 ///////////////////////////////////////////////////////////////////////////////
 enum ClampMode
 {
-	Edge = 1,
-	Border = 2
+	EDGE = 1,
+	BORDER = 2
 };
 
 FboInfo shadowMapFB;
 int shadowMapResolution = 1024;
-int shadowMapClampMode = ClampMode::Border;
+int shadowMapClampMode = ClampMode::BORDER;
 bool shadowMapClampBorderShadowed = false;
 bool usePolygonOffset = true;
 bool useSoftFalloff = false;
 bool useHardwarePCF = true;
-float polygonOffset_factor = 5.83f;
-float polygonOffset_units = 58.3f;
+float polygonOffsetFactor = 5.83f;
+float polygonOffsetUnits = 58.3f;
 
 ///////////////////////////////////////////////////////////////////////////////
 // Camera parameters.
@@ -154,25 +155,24 @@ const uint MAX_PARTICLES = 100000;
 const int TERRAIN_TESSELATION = 4;
 HeightField terrain;
 
-void loadShaders(bool is_reload)
+void loadShaders(const bool isReload)
 {
 	GLuint shader = labhelper::loadShaderProgram("../project/simple.vert", "../project/simple.frag",
-                                             is_reload);
-	if(shader != 0)
-		simpleShaderProgram = shader;
+                                             isReload);
+	if(shader) simpleShaderProgram = shader;
 
 	shader = labhelper::loadShaderProgram("../project/background.vert", "../project/background.frag",
-	                                      is_reload);
-	if(shader != 0)
-		backgroundProgram = shader;
+	                                      isReload);
+	if(shader) backgroundProgram = shader;
 
-	shader = labhelper::loadShaderProgram("../project/shading.vert", "../project/shading.frag", is_reload);
-	if(shader != 0)
-		shaderProgram = shader;
+	shader = labhelper::loadShaderProgram("../project/shading.vert", "../project/shading.frag", isReload);
+	if(shader) shaderProgram = shader;
 
-	shader = labhelper::loadShaderProgram("../project/particle.vert", "../project/particle.frag", is_reload);
-	if (shader != 0)
-		particleProgram = shader;
+	shader = labhelper::loadShaderProgram("../project/particle.vert", "../project/particle.frag", isReload);
+	if (shader) particleProgram = shader;
+
+	shader = labhelper::loadShaderProgram("../project/heightfield.vert", "../project/heightfield.frag", isReload);
+	if (shader) heightfieldProgram = shader;
 }
 
 void initShip(void) {
@@ -194,6 +194,7 @@ void initGL()
 	shaderProgram = labhelper::loadShaderProgram("../project/shading.vert", "../project/shading.frag");
 	simpleShaderProgram = labhelper::loadShaderProgram("../project/simple.vert", "../project/simple.frag");
 	particleProgram = labhelper::loadShaderProgram("../project/particle.vert", "../project/particle.frag");
+	heightfieldProgram = labhelper::loadShaderProgram("../project/heightfield.vert", "../project/heightfield.frag");
 
 	///////////////////////////////////////////////////////////////////////
 	// Load models and set up model matrices
@@ -212,11 +213,11 @@ void initGL()
 	const int roughnesses = 8;
 	std::vector<std::string> filenames;
 	for(auto i = 0; i < roughnesses; i++)
-		filenames.push_back("../scenes/envmaps/" + envmap_base_name + "_dl_" + std::to_string(i) + ".hdr");
+		filenames.push_back("../scenes/envmaps/" + ENVMAP_BASE_NAME + "_dl_" + std::to_string(i) + ".hdr");
 
 	reflectionMap = labhelper::loadHdrMipmapTexture(filenames);
-	environmentMap = labhelper::loadHdrTexture("../scenes/envmaps/" + envmap_base_name + ".hdr");
-	irradianceMap = labhelper::loadHdrTexture("../scenes/envmaps/" + envmap_base_name + "_irradiance.hdr");
+	environmentMap = labhelper::loadHdrTexture("../scenes/envmaps/" + ENVMAP_BASE_NAME + ".hdr");
+	irradianceMap = labhelper::loadHdrTexture("../scenes/envmaps/" + ENVMAP_BASE_NAME + "_irradiance.hdr");
 
 
 	glEnable(GL_DEPTH_TEST); // enable Z-buffering
@@ -246,7 +247,7 @@ void drawLight(const glm::mat4& viewMatrix,
 void drawBackground(const mat4& viewMatrix, const mat4& projectionMatrix)
 {
 	glUseProgram(backgroundProgram);
-	labhelper::setUniformSlow(backgroundProgram, "environment_multiplier", environment_multiplier);
+	labhelper::setUniformSlow(backgroundProgram, "environment_multiplier", environmentMultiplier);
 	labhelper::setUniformSlow(backgroundProgram, "inv_PV", inverse(projectionMatrix * viewMatrix));
 	labhelper::setUniformSlow(backgroundProgram, "camera_pos", cameraPosition);
 	labhelper::drawFullScreenQuad();
@@ -269,9 +270,9 @@ void drawScene(GLuint currentShaderProgram,
 	glUseProgram(currentShaderProgram);
 	// Light source
 	vec4 viewSpaceLightPosition = viewMatrix * vec4(lightPosition, 1.0f);
-	labhelper::setUniformSlow(currentShaderProgram, "point_light_color", point_light_color);
+	labhelper::setUniformSlow(currentShaderProgram, "point_light_color", pointLightColor);
 	labhelper::setUniformSlow(currentShaderProgram, "point_light_intensity_multiplier",
-		point_light_intensity_multiplier);
+		pointLightIntensityMultiplier);
 	labhelper::setUniformSlow(currentShaderProgram, "viewSpaceLightPosition", vec3(viewSpaceLightPosition));
 	labhelper::setUniformSlow(currentShaderProgram, "viewSpaceLightDir",
 		normalize(vec3(viewMatrix * vec4(-lightPosition, 0.0f))));
@@ -282,7 +283,7 @@ void drawScene(GLuint currentShaderProgram,
 	labhelper::setUniformSlow(currentShaderProgram, "lightMatrix", lightMatrix);
 
 	// Environment
-	labhelper::setUniformSlow(currentShaderProgram, "environment_multiplier", environment_multiplier);
+	labhelper::setUniformSlow(currentShaderProgram, "environment_multiplier", environmentMultiplier);
 
 	// camera
 	labhelper::setUniformSlow(currentShaderProgram, "viewInverse", inverse(viewMatrix));
@@ -360,13 +361,13 @@ void display(void)
 	}
 	///////////////////////////////////////////////////////////////////////////
 	// Draw Shadow Map
-	if (shadowMapClampMode == ClampMode::Edge) {
+	if (shadowMapClampMode == ClampMode::EDGE) {
 		glBindTexture(GL_TEXTURE_2D, shadowMapFB.depthBuffer);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	}
 
-	if (shadowMapClampMode == ClampMode::Border) {
+	if (shadowMapClampMode == ClampMode::BORDER) {
 		glBindTexture(GL_TEXTURE_2D, shadowMapFB.depthBuffer);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
@@ -376,7 +377,7 @@ void display(void)
 
 	if (usePolygonOffset) {
 		glEnable(GL_POLYGON_OFFSET_FILL);
-		glPolygonOffset(polygonOffset_factor, polygonOffset_units);
+		glPolygonOffset(polygonOffsetFactor, polygonOffsetUnits);
 	}
 
 	glBindFramebuffer(GL_FRAMEBUFFER, shadowMapFB.framebufferId);
@@ -548,11 +549,11 @@ void gui()
 		ImGui::SliderInt("Shadow Map Resolution", &shadowMapResolution, 32, 2048);
 		ImGui::Text("Polygon Offset");
 		ImGui::Checkbox("Use polygon offset", &usePolygonOffset);
-		ImGui::SliderFloat("Factor", &polygonOffset_factor, 0.0f, 10.0f);
-		ImGui::SliderFloat("Units", &polygonOffset_units, 0.0f, 100.0f);
+		ImGui::SliderFloat("Factor", &polygonOffsetFactor, 0.0f, 10.0f);
+		ImGui::SliderFloat("Units", &polygonOffsetUnits, 0.0f, 100.0f);
 		ImGui::Text("Clamp Mode");
-		ImGui::RadioButton("Clamp to edge", &shadowMapClampMode, ClampMode::Edge);
-		ImGui::RadioButton("Clamp to border", &shadowMapClampMode, ClampMode::Border);
+		ImGui::RadioButton("Clamp to edge", &shadowMapClampMode, ClampMode::EDGE);
+		ImGui::RadioButton("Clamp to border", &shadowMapClampMode, ClampMode::BORDER);
 		ImGui::Checkbox("Border as shadow", &shadowMapClampBorderShadowed);
 		ImGui::Checkbox("Use spot light", &useSpotLight);
 		ImGui::Checkbox("Use soft falloff", &useSoftFalloff);

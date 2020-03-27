@@ -67,13 +67,13 @@ float point_light_intensity_multiplier = 10000.0f;
 ///////////////////////////////////////////////////////////////////////////////
 enum ClampMode
 {
-	Edge = 1,
-	Border = 2
+	EDGE = 1,
+	BORDER = 2
 };
 
 FboInfo shadowMapFB;
 int shadowMapResolution = 128;
-int shadowMapClampMode = ClampMode::Border;
+int shadowMapClampMode = ClampMode::BORDER;
 bool shadowMapClampBorderShadowed = false;
 bool usePolygonOffset = true;
 bool useSoftFalloff = false;
@@ -262,13 +262,13 @@ void display(void)
 	}
 	///////////////////////////////////////////////////////////////////////////
 	// Draw Shadow Map
-	if (shadowMapClampMode == ClampMode::Edge) {
+	if (shadowMapClampMode == ClampMode::EDGE) {
 		glBindTexture(GL_TEXTURE_2D, shadowMapFB.depthBuffer);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	}
 
-	if (shadowMapClampMode == ClampMode::Border) {
+	if (shadowMapClampMode == ClampMode::BORDER) {
 		glBindTexture(GL_TEXTURE_2D, shadowMapFB.depthBuffer);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
@@ -425,8 +425,8 @@ void gui()
 	ImGui::SliderFloat("Factor", &polygonOffset_factor, 0.0f, 10.0f);
 	ImGui::SliderFloat("Units", &polygonOffset_units, 0.0f, 100.0f);
 	ImGui::Text("Clamp Mode");
-	ImGui::RadioButton("Clamp to edge", &shadowMapClampMode, ClampMode::Edge);
-	ImGui::RadioButton("Clamp to border", &shadowMapClampMode, ClampMode::Border);
+	ImGui::RadioButton("Clamp to edge", &shadowMapClampMode, ClampMode::EDGE);
+	ImGui::RadioButton("Clamp to border", &shadowMapClampMode, ClampMode::BORDER);
 	ImGui::Checkbox("Border as shadow", &shadowMapClampBorderShadowed);
 	ImGui::Checkbox("Use spot light", &useSpotLight);
 	ImGui::Checkbox("Use soft falloff", &useSoftFalloff);

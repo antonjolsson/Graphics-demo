@@ -106,7 +106,7 @@ void HeightField::createVBOs(const int tesselation)
 	glBindBuffer(GL_ARRAY_BUFFER, m_uvBuffer);
 	glBufferData(GL_ARRAY_BUFFER, textureCoords.size() * sizeof(vec2), &textureCoords[0], GL_STATIC_DRAW);
 	glVertexAttribPointer(2, 2, GL_FLOAT, false/*normalized*/, 0/*stride*/, 0/*offset*/);
-	glEnableVertexAttribArray(2);
+	glEnableVertexAttribArray(1);
 }
 
 void HeightField::generateMesh(const int tesselation)
@@ -126,5 +126,7 @@ void HeightField::submitTriangles(void)
 		std::cout << "No vertex array is generated, cannot draw anything.\n";
 		return;
 	}
-
+	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	glDrawArrays(GL_TRIANGLES, 0, (m_meshResolution + 1) * (m_meshResolution + 1));
+	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 }
