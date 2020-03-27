@@ -81,24 +81,42 @@ void HeightField::loadDiffuseTexture(const std::string& diffusePath)
 }
 
 
+void HeightField::createVBOs(const int tesselation)
+{
+	m_meshResolution = tesselation;
+
+	std::vector<vec3> positions;
+	std::vector<vec2> textureCoords;
+	for (int i = 0; i <= tesselation; ++i)
+	{
+		for (int j = 0; j <= tesselation; ++j)
+		{
+			positions.emplace_back(vec3{ -1 + j / 2.f, 0, -1 + i / 2.f });
+			textureCoords.emplace_back(vec2{ i / static_cast<float>(tesselation), i / static_cast<float>(tesselation), });
+		}
+	}
+	
+	glGenBuffers(1, &m_positionBuffer);
+	glBindBuffer(GL_ARRAY_BUFFER, m_positionBuffer);
+	glBufferData(GL_ARRAY_BUFFER, positions.size() * sizeof(vec3), &positions[0], GL_STATIC_DRAW);
+	glVertexAttribPointer(0, 3, GL_FLOAT, false /*normalized*/, 0 /*stride*/, 0 /*offset*/);
+	glEnableVertexAttribArray(0);
+
+	glGenBuffers(1, &m_uvBuffer);
+	glBindBuffer(GL_ARRAY_BUFFER, m_uvBuffer);
+	glBufferData(GL_ARRAY_BUFFER, textureCoords.size() * sizeof(vec2), &textureCoords[0], GL_STATIC_DRAW);
+	glVertexAttribPointer(2, 2, GL_FLOAT, false/*normalized*/, 0/*stride*/, 0/*offset*/);
+	glEnableVertexAttribArray(2);
+}
+
 void HeightField::generateMesh(const int tesselation)
 {
 	// generate a mesh in range -1 to 1 in x and z
 	// (y is 0 but will be altered in height field vertex shader)
-	m_meshResolution = tesselation;
-
-	std::vector<vec3> positions;
-	for (int z = 0; z <= tesselation; ++z)
-	{
-		for (int x = 0; x <= tesselation; ++x)
-		{
-			positions.emplace_back(vec3{ -1 + x / 2.f, 0, 1 - z / 2.f });
-		}
-	}
-	glGenBuffers(1, &m_positionBuffer);
-	glBindBuffer(GL_ARRAY_BUFFER, m_positionBuffer);
-	glBufferData(GL_ARRAY_BUFFER, positions.size() * sizeof(vec3), &positions[0], GL_STATIC_DRAW);
 	
+	glGenVertexArrays(1, &m_vao);
+	glBindVertexArray(m_vao);
+	createVBOs(tesselation);
 }
 
 void HeightField::submitTriangles(void)

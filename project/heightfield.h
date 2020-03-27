@@ -21,6 +21,7 @@ public:
 
 	// load diffuse map
 	void loadDiffuseTexture(const std::string &diffusePath);
+	void createVBOs(int tesselation);
 
 	// generate mesh
 	void generateMesh(int tesselation);
