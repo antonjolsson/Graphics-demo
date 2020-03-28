@@ -94,8 +94,8 @@ void HeightField::createVBOs(const int tesselation)
 	{
 		for (int j = 0; j <= tesselation; ++j)
 		{
-			positions.emplace_back(vec3{ -1 + j / 2.f, 0, -1 + i / 2.f });
-			textureCoords.emplace_back(vec2{ i / static_cast<float>(tesselation), i / static_cast<float>(tesselation), });
+			positions.emplace_back(vec3{ j * 2.f / tesselation - 1, 0, i * 2.f / tesselation - 1 });
+			textureCoords.emplace_back(vec2{ j / static_cast<float>(tesselation), i / static_cast<float>(tesselation), });
 		}
 	}
 
@@ -149,7 +149,8 @@ void HeightField::submitTriangles(void)
 	glBindVertexArray(m_vao);
 	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	glDisable(GL_CULL_FACE);
-	//glDrawArrays(GL_TRIANGLES, 0, m_numIndices);
+	//glActiveTexture(GL_TEXTURE0);
+	//glBindTexture(GL_TEXTURE_2D, m_texid_hf);
 	glDrawElements(GL_TRIANGLES, m_numIndices, GL_UNSIGNED_INT, 0);
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 }

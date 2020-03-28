@@ -124,7 +124,7 @@ float polygonOffsetUnits = 58.3f;
 ///////////////////////////////////////////////////////////////////////////////
 // Camera parameters.
 ///////////////////////////////////////////////////////////////////////////////
-vec3 cameraPosition(-500.0f, 215.0f, 0.0f); // -370.0f, 215.0f, 280.0f
+vec3 cameraPosition(-540.0f, 215.0f, 0.0f); // -370.0f, 215.0f, 280.0f
 vec3 cameraDirection = normalize(vec3(0.0f) - cameraPosition);
 float cameraSpeed = 30.f;
 float fieldOfView = 50.f;
@@ -152,8 +152,9 @@ const uint MAX_PARTICLES = 100000;
 ///////////////////////////////////////////////////////////////////////////////
 // Heightfield
 ///////////////////////////////////////////////////////////////////////////////
+const std::string HEIGHTFIELD_PATH = "../scenes/nlsFinland/L3123F.png";
 const int TERRAIN_TESSELATION = 50;
-const int TERRAIN_SCALING = 20;
+const int TERRAIN_SCALING = 250;
 HeightField terrain;
 
 void loadShaders(const bool isReload)
@@ -180,11 +181,17 @@ void initShip(void) {
 	if (FPS_ADJ_SPEED) acceleration *= FPS_ADJ_SPEED_CONST;
 }
 
-void initGL()
+void initTerrain()
 {
 	terrain.generateMesh(TERRAIN_TESSELATION);
+	terrain.loadHeightField(HEIGHTFIELD_PATH);
+}
+
+void initGL()
+{
+	initTerrain();
 	
-	particleSystem = ParticleSystem::ParticleSystem(MAX_PARTICLES);
+	particleSystem = ParticleSystem(MAX_PARTICLES);
 	initShip();
 
 	///////////////////////////////////////////////////////////////////////
@@ -238,7 +245,7 @@ void drawLight(const glm::mat4& viewMatrix,
 					const glm::mat4& projectionMatrix,
 					const glm::vec3& worldSpaceLightPos)
 {
-	auto modelMatrix = glm::translate(worldSpaceLightPos);
+	const auto modelMatrix = glm::translate(worldSpaceLightPos);
 	glUseProgram(shaderProgram);
 	labhelper::setUniformSlow(shaderProgram, "modelViewProjectionMatrix",
 							  projectionMatrix * viewMatrix * modelMatrix);
@@ -311,10 +318,11 @@ void drawScene(GLuint currentShaderProgram,
 	labhelper::render(fighterModel);
 }
 
-void drawHeightfield(const mat4& projMatrix, const mat4& viewMatrix)
+void drawTerrain(const mat4& projMatrix, const mat4& viewMatrix)
 {
 	mat4 modelMatrix({TERRAIN_SCALING});
-	modelMatrix[3] = vec4{ -TERRAIN_SCALING * TERRAIN_TESSELATION / 4, 0, -TERRAIN_SCALING * TERRAIN_TESSELATION / 4, 1.0 };
+	//modelMatrix[3] = vec4{ -TERRAIN_SCALING * TERRAIN_TESSELATION / 4, 0, -TERRAIN_SCALING * TERRAIN_TESSELATION / 4, 1.0 };
+	modelMatrix[3] = vec4{ 0, 0, 0, 1.0 };
 	glUseProgram(heightfieldProgram);
 	labhelper::setUniformSlow(heightfieldProgram, "modelViewProjectionMatrix",
 		projMatrix * viewMatrix * modelMatrix);
@@ -342,7 +350,7 @@ void display(void)
 	///////////////////////////////////////////////////////////////////////////
 	// setup matrices
 	///////////////////////////////////////////////////////////////////////////
-	mat4 projMatrix = perspective(radians(fieldOfView), float(windowWidth) / float(windowHeight), 5.0f, 800.0f);
+	mat4 projMatrix = perspective(radians(fieldOfView), float(windowWidth) / float(windowHeight), 5.0f, 900.0f);
 	mat4 viewMatrix = lookAt(cameraPosition, cameraPosition + cameraDirection, worldUp);
 
 	vec4 lightStartPosition = vec4(40.0f, 50.0f, 0.0f, 1.0f);
@@ -419,7 +427,7 @@ void display(void)
 	drawFire(projMatrix, viewMatrix, fighterModelMatrix);
 	drawLight(viewMatrix, projMatrix, vec3(lightPosition));
 
-	drawHeightfield(projMatrix, viewMatrix);
+	drawTerrain(projMatrix, viewMatrix);
 }
 
 bool handleEvents(void)
@@ -669,9 +677,9 @@ int main(int argc, char* argv[])
 		stopRendering = handleEvents();
 	}
 	// Free Models
-	labhelper::freeModel(fighterModel);
-	labhelper::freeModel(landingpadModel);
-	labhelper::freeModel(sphereModel);
+	freeModel(fighterModel);
+	freeModel(landingpadModel);
+	freeModel(sphereModel);
 
 	// Shut down everything. This includes the window and all other subsystems.
 	labhelper::shutDown(g_window);
