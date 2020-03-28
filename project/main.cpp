@@ -124,10 +124,10 @@ float polygonOffsetUnits = 58.3f;
 ///////////////////////////////////////////////////////////////////////////////
 // Camera parameters.
 ///////////////////////////////////////////////////////////////////////////////
-vec3 cameraPosition(-120.0f, 70.0f, 90.0f);
+vec3 cameraPosition(-370.0f, 215.0f, 280.0f);
 vec3 cameraDirection = normalize(vec3(0.0f) - cameraPosition);
 float cameraSpeed = 30.f;
-float fieldOfView = 35.f;
+float fieldOfView = 50.f;
 
 vec3 worldUp(0.0f, 1.0f, 0.0f);
 vec3 xAxis(1.0f, 0.0f, 0.0f);
@@ -158,11 +158,11 @@ HeightField terrain;
 void loadShaders(const bool isReload)
 {
 	GLuint shader = labhelper::loadShaderProgram("../project/simple.vert", "../project/simple.frag",
-                                             isReload);
+											 isReload);
 	if(shader) simpleShaderProgram = shader;
 
 	shader = labhelper::loadShaderProgram("../project/background.vert", "../project/background.frag",
-	                                      isReload);
+										  isReload);
 	if(shader) backgroundProgram = shader;
 
 	shader = labhelper::loadShaderProgram("../project/shading.vert", "../project/shading.frag", isReload);
@@ -190,7 +190,7 @@ void initGL()
 	//		Load Shaders
 	///////////////////////////////////////////////////////////////////////
 	backgroundProgram = labhelper::loadShaderProgram("../project/background.vert",
-	                                                 "../project/background.frag");
+													 "../project/background.frag");
 	shaderProgram = labhelper::loadShaderProgram("../project/shading.vert", "../project/shading.frag");
 	simpleShaderProgram = labhelper::loadShaderProgram("../project/simple.vert", "../project/simple.frag");
 	particleProgram = labhelper::loadShaderProgram("../project/particle.vert", "../project/particle.frag");
@@ -234,13 +234,13 @@ void initGL()
 }
 
 void drawLight(const glm::mat4& viewMatrix,
-                    const glm::mat4& projectionMatrix,
-                    const glm::vec3& worldSpaceLightPos)
+					const glm::mat4& projectionMatrix,
+					const glm::vec3& worldSpaceLightPos)
 {
 	auto modelMatrix = glm::translate(worldSpaceLightPos);
 	glUseProgram(shaderProgram);
 	labhelper::setUniformSlow(shaderProgram, "modelViewProjectionMatrix",
-	                          projectionMatrix * viewMatrix * modelMatrix);
+							  projectionMatrix * viewMatrix * modelMatrix);
 	labhelper::render(sphereModel);
 }
 
@@ -310,6 +310,19 @@ void drawScene(GLuint currentShaderProgram,
 	labhelper::render(fighterModel);
 }
 
+void drawHeightfield(const mat4& projMatrix, const mat4& viewMatrix)
+{
+	mat4 modelMatrix({200.0});
+	modelMatrix[3][3] = 1.0;
+	glUseProgram(heightfieldProgram);
+	labhelper::setUniformSlow(heightfieldProgram, "modelViewProjectionMatrix",
+		projMatrix * viewMatrix * modelMatrix);
+	labhelper::setUniformSlow(heightfieldProgram, "modelViewMatrix", viewMatrix * modelMatrix);
+	labhelper::setUniformSlow(heightfieldProgram, "normalMatrix",
+		inverse(transpose(viewMatrix * modelMatrix)));
+	terrain.submitTriangles();
+}
+
 void display(void)
 {
 	///////////////////////////////////////////////////////////////////////////
@@ -328,7 +341,7 @@ void display(void)
 	///////////////////////////////////////////////////////////////////////////
 	// setup matrices
 	///////////////////////////////////////////////////////////////////////////
-	mat4 projMatrix = perspective(radians(fieldOfView), float(windowWidth) / float(windowHeight), 5.0f, 500.0f);
+	mat4 projMatrix = perspective(radians(fieldOfView), float(windowWidth) / float(windowHeight), 5.0f, 800.0f);
 	mat4 viewMatrix = lookAt(cameraPosition, cameraPosition + cameraDirection, worldUp);
 
 	vec4 lightStartPosition = vec4(40.0f, 50.0f, 0.0f, 1.0f);
@@ -405,7 +418,7 @@ void display(void)
 	drawFire(projMatrix, viewMatrix, fighterModelMatrix);
 	drawLight(viewMatrix, projMatrix, vec3(lightPosition));
 
-	terrain.submitTriangles();
+	drawHeightfield(projMatrix, viewMatrix);
 }
 
 bool handleEvents(void)
@@ -528,7 +541,8 @@ bool handleEvents(void)
 			shipYRotationSpeed = -MAX_SHIP_Y_ROTATION_SPEED;
 			shipXRotationSpeed = shipXRotation <= -MAX_SHIP_X_ROT ? 0 : -MAX_SHIP_X_ROTATION_SPEED;
 		}
-		else {
+		else
+		{
 			shipYRotationSpeed = 0;
 			if (shipXRotation > CLAMP_ROT_TO_ZERO_SPEED) shipXRotationSpeed = -MAX_SHIP_X_ROTATION_SPEED;
 			else if (shipXRotation < -CLAMP_ROT_TO_ZERO_SPEED) shipXRotationSpeed = MAX_SHIP_X_ROTATION_SPEED;
@@ -564,7 +578,7 @@ void gui()
 	}
 	
 	ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate,
-		ImGui::GetIO().Framerate);
+				ImGui::GetIO().Framerate);
 	ImGui::SliderFloat("Field of view: ", &fieldOfView, 10.0f, 70.0f);
 	ImGui::SliderFloat("Acceleration", &acceleration, 0.0f, 10.0f);
 	ImGui::SliderFloat("Drag coeff.", &dragCoeff, 0.0f, 10.0f);
@@ -574,6 +588,7 @@ void gui()
 	ImGui::Text("Ship x-axis: %.3f %.3f %.3f", fighterModelMatrix[0].x, fighterModelMatrix[0].y, fighterModelMatrix[0].z);
 	ImGui::Text("Ship y-axis: %.3f %.3f %.3f", fighterModelMatrix[1].x, fighterModelMatrix[1].y, fighterModelMatrix[1].z);
 	ImGui::Text("Ship z-axis: %.3f %.3f %.3f", fighterModelMatrix[2].x, fighterModelMatrix[2].y, fighterModelMatrix[2].z);
+	ImGui::Text("Camera position: %.3f %.3f %.3f", cameraPosition[0], cameraPosition[1], cameraPosition[2]);
 	ImGui::SliderFloat("Exhaust x-offset", &exhXOffset, -20.0f, 20.0f);
 	ImGui::SliderFloat("Exhaust y-offset", &exhYOffset, -20.0f, 20.0f);
 	ImGui::SliderFloat("Exhaust z-offset", &exhZOffset, -2.0f, 2.0f);
@@ -587,7 +602,8 @@ void updateShip(void) {
 	vec3 zAxis(0.0f, 0.0f, 1.0f);
 	shipSpeed *= pow(dragCoeff, -abs(shipSpeed));
 	if (FPS_ADJ_SPEED) shipSpeed = shipSpeed / (1000.f / deltaTime / 1000.f / OPT_FRAMERATE);
-	if (xRotation) {
+	if (xRotation)
+	{
 		if (shipXRotationSpeed == 0 && abs(shipXRotation) < CLAMP_ROT_TO_ZERO_SPEED) shipXRotation = 0.f;
 		else shipXRotation += shipXRotationSpeed;
 	}

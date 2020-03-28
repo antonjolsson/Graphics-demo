@@ -37,7 +37,7 @@ void ParticleSystem::initTexBuffer()
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 }
 
-ParticleSystem::ParticleSystem(int size) : max_size(size)
+ParticleSystem::ParticleSystem(const int size) : max_size(size)
 {
 	glGenVertexArrays(1, &particleSysVAO);
 	glBindVertexArray(particleSysVAO);
@@ -109,7 +109,7 @@ void ParticleSystem::render(void) {
 	glBindVertexArray(0);
 }
 
-void ParticleSystem::update(const glm::mat4& viewMatrix, float dt, glm::mat4& fighterModelMatrix, bool accelerating)
+void ParticleSystem::update(const glm::mat4& viewMatrix, const float dt, glm::mat4& fighterModelMatrix, const bool accelerating)
 {
 	if (accelerating) spawnParticles(fighterModelMatrix);
 	processParticles(dt, fighterModelMatrix);

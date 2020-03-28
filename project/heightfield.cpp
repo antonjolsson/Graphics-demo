@@ -4,6 +4,7 @@
 #include <iostream>
 #include <cstdint>
 #include <vector>
+#include <array>
 #include <glm/glm.hpp>
 #include <stb_image.h>
 
@@ -87,6 +88,8 @@ void HeightField::createVBOs(const int tesselation)
 
 	std::vector<vec3> positions;
 	std::vector<vec2> textureCoords;
+	std::vector<std::array<unsigned int, 3>> indices;
+	
 	for (int i = 0; i <= tesselation; ++i)
 	{
 		for (int j = 0; j <= tesselation; ++j)
@@ -95,7 +98,18 @@ void HeightField::createVBOs(const int tesselation)
 			textureCoords.emplace_back(vec2{ i / static_cast<float>(tesselation), i / static_cast<float>(tesselation), });
 		}
 	}
-	
+
+	for (int i = 0; i < tesselation; ++i)
+	{
+		for (int j = 0; j < tesselation; ++j)
+		{
+			std::array<unsigned int, 3 > arr1 { j + (i * (tesselation + 1)), j + 1 + (i * (tesselation + 1)), j + ((tesselation + 1) * (i + 1)) };
+			indices.emplace_back(arr1);
+			std::array<unsigned int, 3> arr2 { j + 1 + (i * (tesselation + 1)), j + ((tesselation + 1) * (i + 1)),  j + 1 + ((tesselation + 1) * (i + 1)) };
+			indices.emplace_back(arr2);
+		}
+	}
+
 	glGenBuffers(1, &m_positionBuffer);
 	glBindBuffer(GL_ARRAY_BUFFER, m_positionBuffer);
 	glBufferData(GL_ARRAY_BUFFER, positions.size() * sizeof(vec3), &positions[0], GL_STATIC_DRAW);
@@ -106,7 +120,11 @@ void HeightField::createVBOs(const int tesselation)
 	glBindBuffer(GL_ARRAY_BUFFER, m_uvBuffer);
 	glBufferData(GL_ARRAY_BUFFER, textureCoords.size() * sizeof(vec2), &textureCoords[0], GL_STATIC_DRAW);
 	glVertexAttribPointer(2, 2, GL_FLOAT, false/*normalized*/, 0/*stride*/, 0/*offset*/);
-	glEnableVertexAttribArray(1);
+	glEnableVertexAttribArray(2);
+
+	glGenBuffers(1, &m_indexBuffer);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_indexBuffer);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER,indices.size() * sizeof(std::array<int, 3>), &indices[0], GL_STATIC_DRAW);
 }
 
 void HeightField::generateMesh(const int tesselation)
@@ -116,6 +134,8 @@ void HeightField::generateMesh(const int tesselation)
 	
 	glGenVertexArrays(1, &m_vao);
 	glBindVertexArray(m_vao);
+
+	m_numIndices = tesselation * tesselation * 6;
 	createVBOs(tesselation);
 }
 
@@ -126,7 +146,10 @@ void HeightField::submitTriangles(void)
 		std::cout << "No vertex array is generated, cannot draw anything.\n";
 		return;
 	}
+	glBindVertexArray(m_vao);
 	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-	glDrawArrays(GL_TRIANGLES, 0, (m_meshResolution + 1) * (m_meshResolution + 1));
+	glDisable(GL_CULL_FACE);
+	//glDrawArrays(GL_TRIANGLES, 0, m_numIndices);
+	glDrawElements(GL_TRIANGLES, m_numIndices, GL_UNSIGNED_INT, 0);
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 }
