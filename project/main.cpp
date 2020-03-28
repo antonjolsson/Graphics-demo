@@ -124,7 +124,7 @@ float polygonOffsetUnits = 58.3f;
 ///////////////////////////////////////////////////////////////////////////////
 // Camera parameters.
 ///////////////////////////////////////////////////////////////////////////////
-vec3 cameraPosition(-370.0f, 215.0f, 280.0f);
+vec3 cameraPosition(-500.0f, 215.0f, 0.0f); // -370.0f, 215.0f, 280.0f
 vec3 cameraDirection = normalize(vec3(0.0f) - cameraPosition);
 float cameraSpeed = 30.f;
 float fieldOfView = 50.f;
@@ -152,7 +152,8 @@ const uint MAX_PARTICLES = 100000;
 ///////////////////////////////////////////////////////////////////////////////
 // Heightfield
 ///////////////////////////////////////////////////////////////////////////////
-const int TERRAIN_TESSELATION = 4;
+const int TERRAIN_TESSELATION = 50;
+const int TERRAIN_SCALING = 20;
 HeightField terrain;
 
 void loadShaders(const bool isReload)
@@ -312,8 +313,8 @@ void drawScene(GLuint currentShaderProgram,
 
 void drawHeightfield(const mat4& projMatrix, const mat4& viewMatrix)
 {
-	mat4 modelMatrix({200.0});
-	modelMatrix[3][3] = 1.0;
+	mat4 modelMatrix({TERRAIN_SCALING});
+	modelMatrix[3] = vec4{ -TERRAIN_SCALING * TERRAIN_TESSELATION / 4, 0, -TERRAIN_SCALING * TERRAIN_TESSELATION / 4, 1.0 };
 	glUseProgram(heightfieldProgram);
 	labhelper::setUniformSlow(heightfieldProgram, "modelViewProjectionMatrix",
 		projMatrix * viewMatrix * modelMatrix);
