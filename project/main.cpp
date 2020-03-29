@@ -153,6 +153,7 @@ const uint MAX_PARTICLES = 100000;
 // Heightfield
 ///////////////////////////////////////////////////////////////////////////////
 const std::string HEIGHTFIELD_PATH = "../scenes/nlsFinland/L3123F.png";
+const std::string TERRAIN_PHOTO_PATH = "../scenes/nlsFinland/L3123F_downscaled.jpg";
 const int TERRAIN_TESSELATION = 50;
 const int TERRAIN_SCALING = 250;
 HeightField terrain;
@@ -185,6 +186,7 @@ void initTerrain()
 {
 	terrain.generateMesh(TERRAIN_TESSELATION);
 	terrain.loadHeightField(HEIGHTFIELD_PATH);
+	terrain.loadDiffuseTexture(TERRAIN_PHOTO_PATH);
 }
 
 void initGL()

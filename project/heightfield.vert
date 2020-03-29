@@ -24,8 +24,8 @@ out vec3 viewSpaceNormal;
 
 void main()
 {
-	//vec3 adjustedPosition = vec3(position.x, texture2D(hfTexture, texCoordIn.xy).r, position.z);
-	//gl_Position = modelViewProjectionMatrix * vec4(adjustedPosition, 1.0);
-	gl_Position = modelViewProjectionMatrix * vec4(position, 1.0);
+	vec3 adjustedPosition = vec3(position.x, texture(hfTexture, texCoordIn).r, position.z);
+	gl_Position = modelViewProjectionMatrix * vec4(adjustedPosition, 1.0);
+	//gl_Position = modelViewProjectionMatrix * vec4(position, 1.0);
 	texCoord = texCoordIn;
 }
