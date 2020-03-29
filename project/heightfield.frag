@@ -4,6 +4,7 @@
 precision highp float;
 
 uniform vec3 material_color;
+layout(binding = 1) uniform sampler2D terrainPhoto;
 
 in vec2 texCoord;
 layout(location = 0) out vec4 fragmentColor;
@@ -15,5 +16,6 @@ void main()
 {
 	//fragmentColor = vec4(texCoord.x, texCoord.y, 0.0, 1.0);
 	//fragmentColor = vec4(1.0, 1.0, 1.0, 1.0);
-	fragmentColor = vec4(material_color, 1.0);
+	//fragmentColor = vec4(material_color, 1.0);
+	fragmentColor = texture(terrainPhoto, texCoord);
 }
