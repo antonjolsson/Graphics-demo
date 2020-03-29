@@ -154,7 +154,7 @@ const uint MAX_PARTICLES = 100000;
 ///////////////////////////////////////////////////////////////////////////////
 const std::string HEIGHTFIELD_PATH = "../scenes/nlsFinland/L3123F.png";
 const std::string TERRAIN_PHOTO_PATH = "../scenes/nlsFinland/L3123F_downscaled.jpg";
-const int TERRAIN_TESSELATION = 50;
+const int TERRAIN_TESSELATION = 1024;
 const int TERRAIN_SCALING = 250;
 HeightField terrain;
 
