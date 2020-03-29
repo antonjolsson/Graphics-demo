@@ -124,7 +124,7 @@ float polygonOffsetUnits = 58.3f;
 ///////////////////////////////////////////////////////////////////////////////
 // Camera parameters.
 ///////////////////////////////////////////////////////////////////////////////
-vec3 cameraPosition(-540.0f, 215.0f, 0.0f); // -370.0f, 215.0f, 280.0f
+vec3 cameraPosition(-140.0f, 40.0f, -40.0f); // -370.0f, 215.0f, 280.0f
 vec3 cameraDirection = normalize(vec3(0.0f) - cameraPosition);
 float cameraSpeed = 30.f;
 float fieldOfView = 50.f;
@@ -424,12 +424,11 @@ void display(void)
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	drawBackground(viewMatrix, projMatrix);
+	drawTerrain(projMatrix, viewMatrix);
 	
 	drawScene(shaderProgram, viewMatrix, projMatrix, lightViewMatrix, lightProjMatrix);
 	drawFire(projMatrix, viewMatrix, fighterModelMatrix);
 	drawLight(viewMatrix, projMatrix, vec3(lightPosition));
-
-	drawTerrain(projMatrix, viewMatrix);
 }
 
 bool handleEvents(void)
