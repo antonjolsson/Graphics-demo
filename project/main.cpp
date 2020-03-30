@@ -281,7 +281,7 @@ void setLightUniforms(const GLuint currentShaderProgram, const mat4& viewMatrix,
 		pointLightIntensityMultiplier);
 	labhelper::setUniformSlow(currentShaderProgram, "viewSpaceLightPosition", vec3(viewSpaceLightPosition));
 	labhelper::setUniformSlow(currentShaderProgram, "viewSpaceLightDir",
-		normalize(vec3(viewMatrix * vec4(-lightPosition, 0.0f))));
+		normalize(vec3(viewMatrix * vec4(vec3(fighterModelMatrix[3]) - lightPosition, 0.0f))));
 	labhelper::setUniformSlow(currentShaderProgram, "spotOuterAngle", std::cos(radians(outerSpotlightAngle)));
 	labhelper::setUniformSlow(currentShaderProgram, "spotInnerAngle", std::cos(radians(innerSpotlightAngle)));
 
@@ -419,14 +419,13 @@ void display(void)
 	const mat4 projMatrix = perspective(radians(fieldOfView), float(windowWidth) / float(windowHeight), 5.0f, 900.0f);
 	const mat4 viewMatrix = lookAt(cameraPosition, cameraPosition + cameraDirection, worldUp);
 
-	//const vec4 lightStartPosition = vec4(0, 50.0f, -40.0f, 1.0f);
-	const vec4 lightStartPosition = fighterModelMatrix[3] + vec4(LIGHT_POS_OFFSET, 1.f);
 	const float lightRotationSpeed = 1.f;
 	if (!lightManualOnly && !g_isMouseRightDragging)
 	{
 		lightRotation += deltaTime * lightRotationSpeed;
 	}
-	lightPosition = vec3(rotate(lightRotation, worldUp) * lightStartPosition);
+	lightRotation += shipYRotationSpeed;
+	lightPosition = vec3(rotate(lightRotation, worldUp) * vec4(LIGHT_POS_OFFSET, 1.f)) + vec3(fighterModelMatrix[3]);
 	const mat4 lightViewMatrix = lookAt(lightPosition, vec3(0.0f), worldUp);
 	const mat4 lightProjMatrix = perspective(radians(45.0f), 1.0f, 25.0f, 100.0f);
 
@@ -615,7 +614,6 @@ void gui()
 }
 
 void updateShip(void) {
-	vec3 zAxis(0.0f, 0.0f, 1.0f);
 	shipSpeed *= pow(dragCoeff, -abs(shipSpeed));
 	if (FPS_ADJ_SPEED) shipSpeed = shipSpeed / (1000.f / deltaTime / 1000.f / OPT_FRAMERATE);
 	if (xRotation)
