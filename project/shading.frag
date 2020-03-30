@@ -4,6 +4,12 @@
 precision highp float;
 
 ///////////////////////////////////////////////////////////////////////////////
+// Texture
+///////////////////////////////////////////////////////////////////////////////
+layout(binding = 1) uniform sampler2D colorTexture;
+uniform int has_diffuse_texture;
+
+///////////////////////////////////////////////////////////////////////////////
 // Material
 ///////////////////////////////////////////////////////////////////////////////
 uniform vec3 material_color;
@@ -65,6 +71,10 @@ float getFresnel(vec3 wh, vec3 wi, vec3 wo) {
 
 float highlightMultiplier = 2;
 
+vec3 getMatColor() {
+	return (has_diffuse_texture == 1) ? texture(colorTexture, texCoord).xyz : material_color;
+}
+
 vec3 calculateDirectIllumiunation(vec3 wo, vec3 n)
 {
 	vec3 direct_illum = point_light_color;
@@ -74,7 +84,7 @@ vec3 calculateDirectIllumiunation(vec3 wo, vec3 n)
 	if (dot(n, wi) <= 0) return black_color;
 	vec3 li = point_light_intensity_multiplier * point_light_color * (1.f / (d * d));
 	
-	vec3 diffuse_term = material_color * (1.f / PI) * dot(n, wi) * li;
+	vec3 diffuse_term = getMatColor() * (1.f / PI) * dot(n, wi) * li;
 
 	vec3 wh = normalize(wi + wo);
 	float f = getFresnel(wh, wi, wo);
@@ -87,7 +97,7 @@ vec3 calculateDirectIllumiunation(vec3 wo, vec3 n)
 	float brdf = f * distrib * g / (4 * dot(n, wo) * dot(n, wi));
 
 	vec3 dielectric_term = brdf * dot(n, wi) * li + (1 - f) * diffuse_term;
-	vec3 metal_term = brdf * material_color * dot(n, wi) * li;
+	vec3 metal_term = brdf * getMatColor() * dot(n, wi) * li;
 	vec3 microfacet_term = material_metalness * metal_term + (1 - material_metalness) * dielectric_term;
 
 	return highlightMultiplier * (material_reflectivity * microfacet_term + (1 - material_reflectivity) * diffuse_term); // Added multiplier here
@@ -113,9 +123,7 @@ vec3 calculateIndirectIllumination(vec3 wo, vec3 n)
 	vec2 lookup = getSphericalCoords(nws);
 	vec3 irradiance = (environment_multiplier * texture(irradianceMap, lookup)).xyz;
 
-	vec3 diffuse_term = material_color * (1.0 / PI) * irradiance;
-
-	//return diffuse_term;
+	vec3 diffuse_term = getMatColor() * (1.0 / PI) * irradiance;
 
 	vec3 wi = -(viewInverse * vec4(reflect(wo, n), 0)).xyz;
 	lookup = getSphericalCoords(wi);
@@ -124,7 +132,7 @@ vec3 calculateIndirectIllumination(vec3 wo, vec3 n)
 	vec3 wh = normalize(wi + wo);
 	float f = getFresnel(wh, wi, wo);
 	vec3 dielectric_term = f * li + (1 - f) * diffuse_term;
-	vec3 metal_term = f * material_color * li;
+	vec3 metal_term = f * getMatColor() * li;
 	vec3 microfacet_term = material_metalness * metal_term + (1 - material_metalness) * dielectric_term;
 
 	return material_reflectivity * microfacet_term + (1 - material_reflectivity) * diffuse_term;
@@ -155,7 +163,8 @@ void main()
 	///////////////////////////////////////////////////////////////////////////
 	// Add emissive term. If emissive texture exists, sample this term.
 	///////////////////////////////////////////////////////////////////////////
-	vec3 emission_term = material_emission * material_color;
+	//vec3 emission_term = material_emission * material_color;
+	vec3 emission_term = material_emission * getMatColor();
 	if(has_emission_texture == 1)
 	{
 		emission_term = texture(emissiveMap, texCoord).xyz;

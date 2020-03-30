@@ -204,7 +204,8 @@ void initGL()
 	shaderProgram = labhelper::loadShaderProgram("../project/shading.vert", "../project/shading.frag");
 	simpleShaderProgram = labhelper::loadShaderProgram("../project/simple.vert", "../project/simple.frag");
 	particleProgram = labhelper::loadShaderProgram("../project/particle.vert", "../project/particle.frag");
-	heightfieldProgram = labhelper::loadShaderProgram("../project/heightfield.vert", "../project/heightfield.frag");
+	//heightfieldProgram = labhelper::loadShaderProgram("../project/heightfield.vert", "../project/heightfield.frag");
+	heightfieldProgram = labhelper::loadShaderProgram("../project/heightfield.vert", "../project/shading.frag");
 
 	///////////////////////////////////////////////////////////////////////
 	// Load models and set up model matrices
@@ -271,15 +272,9 @@ void drawFire(const mat4& projMatrix, const mat4& viewMatrix, mat4& fighterModel
 	particleSystem.update(viewMatrix, deltaTime, fighterModelMatrix, accelerating);
 }
 
-void drawScene(GLuint currentShaderProgram,
-	const mat4& viewMatrix,
-	const mat4& projectionMatrix,
-	const mat4& lightViewMatrix,
-	const mat4& lightProjectionMatrix)
+void setLightUniforms(const GLuint currentShaderProgram, const mat4& viewMatrix, const mat4& lightViewMatrix, const mat4& lightProjectionMatrix,
+	const vec4 viewSpaceLightPosition)
 {
-	glUseProgram(currentShaderProgram);
-	// Light source
-	vec4 viewSpaceLightPosition = viewMatrix * vec4(lightPosition, 1.0f);
 	labhelper::setUniformSlow(currentShaderProgram, "point_light_color", pointLightColor);
 	labhelper::setUniformSlow(currentShaderProgram, "point_light_intensity_multiplier",
 		pointLightIntensityMultiplier);
@@ -297,7 +292,39 @@ void drawScene(GLuint currentShaderProgram,
 
 	// camera
 	labhelper::setUniformSlow(currentShaderProgram, "viewInverse", inverse(viewMatrix));
+}
 
+void drawTerrain(const mat4& projMatrix, const mat4& viewMatrix, const mat4& lightViewMatrix, const mat4& lightProjectionMatrix, const vec4& viewSpaceLightPosition)
+{
+	mat4 modelMatrix({ TERRAIN_SCALING });
+	modelMatrix[3] = vec4{ 0, 0, 0, 1.0 };
+	glUseProgram(heightfieldProgram);
+	glUniform1i(glGetUniformLocation(heightfieldProgram, "has_diffuse_texture"), 1);
+	setLightUniforms(heightfieldProgram, viewMatrix, lightViewMatrix, lightProjectionMatrix, viewSpaceLightPosition);
+	labhelper::setUniformSlow(heightfieldProgram, "modelViewProjectionMatrix",
+		projMatrix * viewMatrix * modelMatrix);
+	labhelper::setUniformSlow(heightfieldProgram, "modelViewMatrix", viewMatrix * modelMatrix);
+	labhelper::setUniformSlow(heightfieldProgram, "normalMatrix",
+		inverse(transpose(viewMatrix * modelMatrix)));
+	terrain.submitTriangles();
+}
+
+void drawScene(GLuint currentShaderProgram,
+               const mat4& viewMatrix,
+               const mat4& projectionMatrix,
+               const mat4& lightViewMatrix,
+               const mat4& lightProjectionMatrix)
+{
+	
+	// Light source
+	const vec4 viewSpaceLightPosition = viewMatrix * vec4(lightPosition, 1.0f);
+	glActiveTexture(GL_TEXTURE10);
+	glBindTexture(GL_TEXTURE_2D, shadowMapFB.depthBuffer);
+
+	drawTerrain(projectionMatrix, viewMatrix, lightViewMatrix, lightProjectionMatrix, viewSpaceLightPosition);
+
+	glUseProgram(currentShaderProgram);
+	setLightUniforms(currentShaderProgram, viewMatrix, lightViewMatrix, lightProjectionMatrix, viewSpaceLightPosition);
 	// landing pad
 	mat4 modelMatrix(1.0f);
 	labhelper::setUniformSlow(currentShaderProgram, "modelViewProjectionMatrix",
@@ -305,9 +332,6 @@ void drawScene(GLuint currentShaderProgram,
 	labhelper::setUniformSlow(currentShaderProgram, "modelViewMatrix", viewMatrix * modelMatrix);
 	labhelper::setUniformSlow(currentShaderProgram, "normalMatrix",
 		inverse(transpose(viewMatrix * modelMatrix)));
-
-	glActiveTexture(GL_TEXTURE10);
-	glBindTexture(GL_TEXTURE_2D, shadowMapFB.depthBuffer);
 
 	labhelper::render(landingpadModel);
 
@@ -318,20 +342,6 @@ void drawScene(GLuint currentShaderProgram,
 	labhelper::setUniformSlow(currentShaderProgram, "normalMatrix",
 		inverse(transpose(viewMatrix * fighterModelMatrix)));
 	labhelper::render(fighterModel);
-}
-
-void drawTerrain(const mat4& projMatrix, const mat4& viewMatrix)
-{
-	mat4 modelMatrix({TERRAIN_SCALING});
-	//modelMatrix[3] = vec4{ -TERRAIN_SCALING * TERRAIN_TESSELATION / 4, 0, -TERRAIN_SCALING * TERRAIN_TESSELATION / 4, 1.0 };
-	modelMatrix[3] = vec4{ 0, 0, 0, 1.0 };
-	glUseProgram(heightfieldProgram);
-	labhelper::setUniformSlow(heightfieldProgram, "modelViewProjectionMatrix",
-		projMatrix * viewMatrix * modelMatrix);
-	labhelper::setUniformSlow(heightfieldProgram, "modelViewMatrix", viewMatrix * modelMatrix);
-	labhelper::setUniformSlow(heightfieldProgram, "normalMatrix",
-		inverse(transpose(viewMatrix * modelMatrix)));
-	terrain.submitTriangles();
 }
 
 void display(void)
@@ -424,8 +434,6 @@ void display(void)
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	drawBackground(viewMatrix, projMatrix);
-	drawTerrain(projMatrix, viewMatrix);
-	
 	drawScene(shaderProgram, viewMatrix, projMatrix, lightViewMatrix, lightProjMatrix);
 	drawFire(projMatrix, viewMatrix, fighterModelMatrix);
 	drawLight(viewMatrix, projMatrix, vec3(lightPosition));
