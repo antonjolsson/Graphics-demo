@@ -86,14 +86,15 @@ GLuint heightfieldProgram;
 ///////////////////////////////////////////////////////////////////////////////
 // Environment
 ///////////////////////////////////////////////////////////////////////////////
-float environmentMultiplier = 1.5f;
+float environmentMultiplier = 1.5f; // 1.5f
 GLuint environmentMap, irradianceMap, reflectionMap;
 const std::string ENVMAP_BASE_NAME = "001";
 
 ///////////////////////////////////////////////////////////////////////////////
 // Light source
 ///////////////////////////////////////////////////////////////////////////////
-vec3 lightPosition;
+const vec3 LIGHT_POS_OFFSET (0, 50.0f, -40.0f);
+vec3 lightPosition = LIGHT_POS_OFFSET;
 float lightRotation = 0.f;
 bool lightManualOnly = true;
 vec3 pointLightColor = vec3(1.f, 1.f, 1.f);
@@ -284,7 +285,7 @@ void setLightUniforms(const GLuint currentShaderProgram, const mat4& viewMatrix,
 	labhelper::setUniformSlow(currentShaderProgram, "spotOuterAngle", std::cos(radians(outerSpotlightAngle)));
 	labhelper::setUniformSlow(currentShaderProgram, "spotInnerAngle", std::cos(radians(innerSpotlightAngle)));
 
-	mat4 lightMatrix = translate(vec3(0.5f)) * scale(vec3(0.5f)) * lightProjectionMatrix * lightViewMatrix * inverse(viewMatrix);
+	const mat4 lightMatrix = translate(vec3(0.5f)) * scale(vec3(0.5f)) * lightProjectionMatrix * lightViewMatrix * inverse(viewMatrix);
 	labhelper::setUniformSlow(currentShaderProgram, "lightMatrix", lightMatrix);
 
 	// Environment
@@ -294,6 +295,15 @@ void setLightUniforms(const GLuint currentShaderProgram, const mat4& viewMatrix,
 	labhelper::setUniformSlow(currentShaderProgram, "viewInverse", inverse(viewMatrix));
 }
 
+void setMatrixUniforms(const GLuint currentShaderProgram, const mat4& viewMatrix, const mat4& projectionMatrix, const mat4 modelMatrix)
+{
+	labhelper::setUniformSlow(currentShaderProgram, "modelViewProjectionMatrix",
+		projectionMatrix * viewMatrix * modelMatrix);
+	labhelper::setUniformSlow(currentShaderProgram, "modelViewMatrix", viewMatrix * modelMatrix);
+	labhelper::setUniformSlow(currentShaderProgram, "normalMatrix",
+		inverse(transpose(viewMatrix * modelMatrix)));
+}
+
 void drawTerrain(const mat4& projMatrix, const mat4& viewMatrix, const mat4& lightViewMatrix, const mat4& lightProjectionMatrix, const vec4& viewSpaceLightPosition)
 {
 	mat4 modelMatrix({ TERRAIN_SCALING });
@@ -301,11 +311,7 @@ void drawTerrain(const mat4& projMatrix, const mat4& viewMatrix, const mat4& lig
 	glUseProgram(heightfieldProgram);
 	glUniform1i(glGetUniformLocation(heightfieldProgram, "has_diffuse_texture"), 1);
 	setLightUniforms(heightfieldProgram, viewMatrix, lightViewMatrix, lightProjectionMatrix, viewSpaceLightPosition);
-	labhelper::setUniformSlow(heightfieldProgram, "modelViewProjectionMatrix",
-		projMatrix * viewMatrix * modelMatrix);
-	labhelper::setUniformSlow(heightfieldProgram, "modelViewMatrix", viewMatrix * modelMatrix);
-	labhelper::setUniformSlow(heightfieldProgram, "normalMatrix",
-		inverse(transpose(viewMatrix * modelMatrix)));
+	setMatrixUniforms(heightfieldProgram, viewMatrix, projMatrix, modelMatrix);
 	terrain.submitTriangles();
 }
 
@@ -315,8 +321,6 @@ void drawScene(GLuint currentShaderProgram,
                const mat4& lightViewMatrix,
                const mat4& lightProjectionMatrix)
 {
-	
-	// Light source
 	const vec4 viewSpaceLightPosition = viewMatrix * vec4(lightPosition, 1.0f);
 	glActiveTexture(GL_TEXTURE10);
 	glBindTexture(GL_TEXTURE_2D, shadowMapFB.depthBuffer);
@@ -325,59 +329,30 @@ void drawScene(GLuint currentShaderProgram,
 
 	glUseProgram(currentShaderProgram);
 	setLightUniforms(currentShaderProgram, viewMatrix, lightViewMatrix, lightProjectionMatrix, viewSpaceLightPosition);
-	// landing pad
-	mat4 modelMatrix(1.0f);
-	labhelper::setUniformSlow(currentShaderProgram, "modelViewProjectionMatrix",
-		projectionMatrix * viewMatrix * modelMatrix);
-	labhelper::setUniformSlow(currentShaderProgram, "modelViewMatrix", viewMatrix * modelMatrix);
-	labhelper::setUniformSlow(currentShaderProgram, "normalMatrix",
-		inverse(transpose(viewMatrix * modelMatrix)));
+	
+	const mat4 modelMatrix(1.0f);
+	setMatrixUniforms(currentShaderProgram, viewMatrix, projectionMatrix, modelMatrix);
+	render(landingpadModel);
 
-	labhelper::render(landingpadModel);
-
-	// Fighter
-	labhelper::setUniformSlow(currentShaderProgram, "modelViewProjectionMatrix",
-		projectionMatrix * viewMatrix * fighterModelMatrix);
-	labhelper::setUniformSlow(currentShaderProgram, "modelViewMatrix", viewMatrix * fighterModelMatrix);
-	labhelper::setUniformSlow(currentShaderProgram, "normalMatrix",
-		inverse(transpose(viewMatrix * fighterModelMatrix)));
-	labhelper::render(fighterModel);
+	setMatrixUniforms(currentShaderProgram, viewMatrix, projectionMatrix, fighterModelMatrix);
+	render(fighterModel);
 }
 
-void display(void)
+void drawFromCamera(const mat4 projMatrix, const mat4 viewMatrix, const mat4 lightViewMatrix, const mat4 lightProjMatrix)
 {
-	///////////////////////////////////////////////////////////////////////////
-	// Check if window size has changed and resize buffers as needed
-	///////////////////////////////////////////////////////////////////////////
-	{
-		int w, h;
-		SDL_GetWindowSize(g_window, &w, &h);
-		if(w != windowWidth || h != windowHeight)
-		{
-			windowWidth = w;
-			windowHeight = h;
-		}
-	}
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glViewport(0, 0, windowWidth, windowHeight);
+	glClearColor(0.2f, 0.2f, 0.8f, 1.0f);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	///////////////////////////////////////////////////////////////////////////
-	// setup matrices
-	///////////////////////////////////////////////////////////////////////////
-	mat4 projMatrix = perspective(radians(fieldOfView), float(windowWidth) / float(windowHeight), 5.0f, 900.0f);
-	mat4 viewMatrix = lookAt(cameraPosition, cameraPosition + cameraDirection, worldUp);
+	drawBackground(viewMatrix, projMatrix);
+	drawScene(shaderProgram, viewMatrix, projMatrix, lightViewMatrix, lightProjMatrix);
+	drawFire(projMatrix, viewMatrix, fighterModelMatrix);
+	drawLight(viewMatrix, projMatrix, vec3(lightPosition));
+}
 
-	vec4 lightStartPosition = vec4(40.0f, 50.0f, 0.0f, 1.0f);
-	float light_rotation_speed = 1.f;
-	if (!lightManualOnly && !g_isMouseRightDragging)
-	{
-		lightRotation += deltaTime * light_rotation_speed;
-	}
-	lightPosition = vec3(rotate(lightRotation, worldUp) * lightStartPosition);
-	mat4 lightViewMatrix = lookAt(lightPosition, vec3(0.0f), worldUp);
-	mat4 lightProjMatrix = perspective(radians(45.0f), 1.0f, 25.0f, 100.0f);
-
-	///////////////////////////////////////////////////////////////////////////
-	// Bind the environment map(s) to unused texture units
-	///////////////////////////////////////////////////////////////////////////
+void bindEnvironmentMaps()
+{
 	glActiveTexture(GL_TEXTURE6);
 	glBindTexture(GL_TEXTURE_2D, environmentMap);
 	glActiveTexture(GL_TEXTURE7);
@@ -385,23 +360,24 @@ void display(void)
 	glActiveTexture(GL_TEXTURE8);
 	glBindTexture(GL_TEXTURE_2D, reflectionMap);
 	glActiveTexture(GL_TEXTURE0);
+}
 
-	///////////////////////////////////////////////////////////////////////////
-	// Set up shadow map parameters
-	///////////////////////////////////////////////////////////////////////////
-	// >>> @task 1
-	if (shadowMapFB.width != shadowMapResolution || shadowMapFB.height != shadowMapResolution) {
+void drawShadowMap(const mat4 lightViewMatrix, const mat4 lightProjMatrix)
+{
+	if (shadowMapFB.width != shadowMapResolution || shadowMapFB.height != shadowMapResolution)
+	{
 		shadowMapFB.resize(shadowMapResolution, shadowMapResolution);
 	}
-	///////////////////////////////////////////////////////////////////////////
-	// Draw Shadow Map
-	if (shadowMapClampMode == ClampMode::EDGE) {
+	
+	if (shadowMapClampMode == ClampMode::EDGE)
+	{
 		glBindTexture(GL_TEXTURE_2D, shadowMapFB.depthBuffer);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	}
 
-	if (shadowMapClampMode == ClampMode::BORDER) {
+	if (shadowMapClampMode == ClampMode::BORDER)
+	{
 		glBindTexture(GL_TEXTURE_2D, shadowMapFB.depthBuffer);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
@@ -409,7 +385,8 @@ void display(void)
 		glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, &border.x);
 	}
 
-	if (usePolygonOffset) {
+	if (usePolygonOffset)
+	{
 		glEnable(GL_POLYGON_OFFSET_FILL);
 		glPolygonOffset(polygonOffsetFactor, polygonOffsetUnits);
 	}
@@ -421,22 +398,43 @@ void display(void)
 	labhelper::Material& screen = landingpadModel->m_materials[8];
 	screen.m_emission_texture.gl_id = shadowMapFB.colorTextureTargets[0];
 
-	if (usePolygonOffset) {
+	if (usePolygonOffset)
+	{
 		glDisable(GL_POLYGON_OFFSET_FILL);
 	}
+}
 
-	///////////////////////////////////////////////////////////////////////////
-	// Draw from camera
-	///////////////////////////////////////////////////////////////////////////
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-	glViewport(0, 0, windowWidth, windowHeight);
-	glClearColor(0.2f, 0.2f, 0.8f, 1.0f);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+void display(void)
+{
+	{
+		int w, h;
+		SDL_GetWindowSize(g_window, &w, &h);
+		if(w != windowWidth || h != windowHeight)
+		{
+			windowWidth = w;
+			windowHeight = h;
+		}
+	}
 
-	drawBackground(viewMatrix, projMatrix);
-	drawScene(shaderProgram, viewMatrix, projMatrix, lightViewMatrix, lightProjMatrix);
-	drawFire(projMatrix, viewMatrix, fighterModelMatrix);
-	drawLight(viewMatrix, projMatrix, vec3(lightPosition));
+	const mat4 projMatrix = perspective(radians(fieldOfView), float(windowWidth) / float(windowHeight), 5.0f, 900.0f);
+	const mat4 viewMatrix = lookAt(cameraPosition, cameraPosition + cameraDirection, worldUp);
+
+	//const vec4 lightStartPosition = vec4(0, 50.0f, -40.0f, 1.0f);
+	const vec4 lightStartPosition = fighterModelMatrix[3] + vec4(LIGHT_POS_OFFSET, 1.f);
+	const float lightRotationSpeed = 1.f;
+	if (!lightManualOnly && !g_isMouseRightDragging)
+	{
+		lightRotation += deltaTime * lightRotationSpeed;
+	}
+	lightPosition = vec3(rotate(lightRotation, worldUp) * lightStartPosition);
+	const mat4 lightViewMatrix = lookAt(lightPosition, vec3(0.0f), worldUp);
+	const mat4 lightProjMatrix = perspective(radians(45.0f), 1.0f, 25.0f, 100.0f);
+
+	bindEnvironmentMaps();
+
+	drawShadowMap(lightViewMatrix, lightProjMatrix);
+
+	drawFromCamera(projMatrix, viewMatrix, lightViewMatrix, lightProjMatrix);
 }
 
 bool handleEvents(void)
@@ -479,11 +477,11 @@ bool handleEvents(void)
 			g_prevMouseCoords.y = y;
 		}
 
-		if (!(SDL_GetMouseState(NULL, NULL) & SDL_BUTTON(SDL_BUTTON_LEFT)))
+		if (!(SDL_GetMouseState(nullptr, nullptr) & SDL_BUTTON(SDL_BUTTON_LEFT)))
 		{
 			g_isMouseDragging = false;
 		}
-		if (!(SDL_GetMouseState(NULL, NULL) & SDL_BUTTON(SDL_BUTTON_RIGHT)))
+		if (!(SDL_GetMouseState(nullptr, nullptr) & SDL_BUTTON(SDL_BUTTON_RIGHT)))
 		{
 			g_isMouseRightDragging = false;
 		}
@@ -491,19 +489,19 @@ bool handleEvents(void)
 		if (event.type == SDL_MOUSEMOTION)
 		{
 			// More info at https://wiki.libsdl.org/SDL_MouseMotionEvent
-			int delta_x = event.motion.x - g_prevMouseCoords.x;
-			int delta_y = event.motion.y - g_prevMouseCoords.y;
+			const int deltaX = event.motion.x - g_prevMouseCoords.x;
+			const int deltaY = event.motion.y - g_prevMouseCoords.y;
 			if (g_isMouseDragging)
 			{
-				float rotation_speed = 0.005f;
-				mat4 yaw = rotate(rotation_speed * -delta_x, worldUp);
-				mat4 pitch = rotate(rotation_speed * -delta_y, normalize(cross(cameraDirection, worldUp)));
+				const float rotationSpeed = 0.005f;
+				mat4 yaw = rotate(rotationSpeed * -deltaX, worldUp);
+				mat4 pitch = rotate(rotationSpeed * -deltaY, normalize(cross(cameraDirection, worldUp)));
 				cameraDirection = vec3(pitch * yaw * vec4(cameraDirection, 0.0f));
 			}
 			else if (g_isMouseRightDragging)
 			{
-				const float rotation_speed = 0.01f;
-				lightRotation += delta_x * rotation_speed;
+				const float rotationSpeed = 0.01f;
+				lightRotation += deltaX * rotationSpeed;
 			}
 			g_prevMouseCoords.x = event.motion.x;
 			g_prevMouseCoords.y = event.motion.y;
@@ -596,7 +594,7 @@ void gui()
 	}
 	
 	ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate,
-				ImGui::GetIO().Framerate);
+	            ImGui::GetIO().Framerate);
 	ImGui::SliderFloat("Field of view: ", &fieldOfView, 10.0f, 70.0f);
 	ImGui::SliderFloat("Acceleration", &acceleration, 0.0f, 10.0f);
 	ImGui::SliderFloat("Drag coeff.", &dragCoeff, 0.0f, 10.0f);
@@ -626,9 +624,9 @@ void updateShip(void) {
 		else shipXRotation += shipXRotationSpeed;
 	}
 	shipYRotation += shipYRotationSpeed;
-	
-	mat4 rotMatrix = glm::eulerAngleYXZ(shipYRotation, shipXRotation, 0.f);
-	vec4 translation = fighterModelMatrix[3];
+
+	const mat4 rotMatrix = glm::eulerAngleYXZ(shipYRotation, shipXRotation, 0.f);
+	const vec4 translation = fighterModelMatrix[3];
 	fighterModelMatrix = rotMatrix * mat4(1.f);
 	fighterModelMatrix[3] = translation;
 
