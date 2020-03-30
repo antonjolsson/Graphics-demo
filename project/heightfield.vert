@@ -24,14 +24,27 @@ out vec3 viewSpacePosition;
 out vec3 viewSpaceNormal;
 out vec4 shadowMapCoord;
 
+const float HEIGHT_SCALING = 1.f / 5;
+
+vec3 getHeightAdjustedPos(vec2 offset) {
+	return vec3(position.x + offset.x, texture(hfTexture, vec2(texCoordIn.x + offset.x, texCoordIn.y + offset.y)).r * HEIGHT_SCALING, 
+		position.z + offset.y);
+}
+
+vec3 getEstnormal() {
+	vec3 posA = getHeightAdjustedPos(vec2(1, -1));
+	vec3 posB = getHeightAdjustedPos(vec2(-1, 1));
+	vec3 posC = getHeightAdjustedPos(vec2(1, 1));
+	return normalize(cross(posB - posA, posC - posA));
+}
+
 void main()
 {
-	vec3 adjustedPosition = vec3(position.x, texture(hfTexture, texCoordIn).r / 5, position.z);
+	vec3 adjustedPosition = getHeightAdjustedPos(vec2(0, 0));
 	gl_Position = modelViewProjectionMatrix * vec4(adjustedPosition, 1.0);
-	//gl_Position = modelViewProjectionMatrix * vec4(position, 1.0);
 	texCoord = texCoordIn;
 	shadowMapCoord = lightMatrix * vec4(viewSpacePosition, 1.f);
-	vec3 normalIn = vec3 (1.f, 1.f, 0.f);
+	vec3 normalIn = getEstnormal();
 	viewSpaceNormal = (normalMatrix * vec4(normalIn, 0.0)).xyz;
 	viewSpacePosition = (modelViewMatrix * vec4(position, 1.0)).xyz;
 }
