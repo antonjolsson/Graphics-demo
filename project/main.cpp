@@ -650,7 +650,7 @@ void logStats() {
 
 int main(int argc, char* argv[])
 {
-	g_window = labhelper::init_window_SDL("OpenGL Project", 1280, 720, antiAliasSamples);
+	g_window = labhelper::init_window_SDL("Foreign Attack", 1920, 1080, antiAliasSamples);
 	initGL();
 
 	auto stopRendering = false;

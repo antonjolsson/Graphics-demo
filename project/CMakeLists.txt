@@ -18,8 +18,11 @@ add_executable ( ${PROJECT_NAME}
     heightfield.cpp
     ParticleSystem.cpp
     ParticleSystem.h
+    avancezlib.cpp
+    avancezlib.h
+    vector2D.h
     ${SHADERS}
-    )
+     "component.cpp" "game.cpp" "gameObject.cpp")
 
 target_link_libraries ( ${PROJECT_NAME} labhelper )
 config_build_output()

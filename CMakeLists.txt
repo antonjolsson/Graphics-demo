@@ -11,6 +11,9 @@ if(WIN32)
     list(APPEND CMAKE_PREFIX_PATH "${CMAKE_SOURCE_DIR}/external/sdl2")
     list(APPEND CMAKE_PREFIX_PATH "${CMAKE_SOURCE_DIR}/external/glew")
     list(APPEND CMAKE_PREFIX_PATH "${CMAKE_SOURCE_DIR}/external/glm")
+    list(APPEND CMAKE_PREFIX_PATH "${CMAKE_SOURCE_DIR}/external/sdl2_ttf")
+    list(APPEND CMAKE_PREFIX_PATH "${CMAKE_SOURCE_DIR}/external/sdl2_mixer")
+    list(APPEND CMAKE_PREFIX_PATH "${CMAKE_SOURCE_DIR}/external/sdl2_image")
 endif(WIN32)
 
 macro(config_build_output)
@@ -27,8 +30,6 @@ macro(config_build_output)
         configure_file("${CMAKE_SOURCE_DIR}/VSUserTemplate.user" "${vs_user_file}" @ONLY)
     endif(MSVC)
 endmacro(config_build_output)
-
-
 
 add_definitions(-DGLM_ENABLE_EXPERIMENTAL)
 add_definitions(-D_CRT_SECURE_NO_WARNINGS)
