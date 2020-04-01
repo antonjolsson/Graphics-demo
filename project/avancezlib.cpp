@@ -53,7 +53,7 @@ void AvancezLib::destroy() {
 }
 
 AvancezLib::KeyStatus& AvancezLib::getKeyStatus() {
-    return keys;
+    return keys_;
 }
 
 // Time in seconds
@@ -64,11 +64,11 @@ float AvancezLib::getElapsedTime() {
 /*Sprite *AvancezLib::createSprite(const char *filePath) {
     SDL_Texture* texture = IMG_LoadTexture(renderer, filePath);
     return new Sprite(renderer, texture, scaling);;
-}*/
+}
 
 Sprite *AvancezLib::createColliderSprite() {
     return new Sprite(renderer, nullptr, scaling);
-}
+}*/
 
 void AvancezLib::quit() {
     destroy();
@@ -80,19 +80,19 @@ void AvancezLib::processInput() {
     while (SDL_PollEvent(&e)) {
         // check keyboard state (which keys are still pressed)
         const uint8_t* state = SDL_GetKeyboardState(nullptr);
-        keys.left = state[SDL_SCANCODE_LEFT] ||
+        keys_.left = state[SDL_SCANCODE_LEFT] ||
                 SDL_GameControllerGetButton(gameController, SDL_CONTROLLER_BUTTON_DPAD_LEFT) != 0;
-        keys.right = state[SDL_SCANCODE_RIGHT] ||
+        keys_.right = state[SDL_SCANCODE_RIGHT] ||
                      SDL_GameControllerGetButton(gameController, SDL_CONTROLLER_BUTTON_DPAD_RIGHT) != 0;
-        keys.up = state[SDL_SCANCODE_UP] ||
+        keys_.up = state[SDL_SCANCODE_UP] ||
                      SDL_GameControllerGetButton(gameController, SDL_CONTROLLER_BUTTON_DPAD_UP) != 0;
-        keys.down = state[SDL_SCANCODE_DOWN] ||
+        keys_.down = state[SDL_SCANCODE_DOWN] ||
                      SDL_GameControllerGetButton(gameController, SDL_CONTROLLER_BUTTON_DPAD_DOWN) != 0;
-        keys.jump = state[SDL_SCANCODE_C] ||
+        keys_.jump = state[SDL_SCANCODE_C] ||
                     SDL_GameControllerGetButton(gameController, SDL_CONTROLLER_BUTTON_A) != 0;
-        keys.fire = state[SDL_SCANCODE_A] ||
+        keys_.fire = state[SDL_SCANCODE_A] ||
                  SDL_GameControllerGetButton(gameController, SDL_CONTROLLER_BUTTON_X) != 0;
-        keys.quit =  (e.type == SDL_QUIT || state[SDL_SCANCODE_Q] || state[SDL_SCANCODE_ESCAPE] ||
+        keys_.quit =  (e.type == SDL_QUIT || state[SDL_SCANCODE_Q] || state[SDL_SCANCODE_ESCAPE] ||
                 SDL_GameControllerGetButton(gameController, SDL_CONTROLLER_BUTTON_START) != 0);
     }
 }
@@ -113,7 +113,7 @@ int AvancezLib::getRandomInt(int min, int max) {
     return uniformIntDist(rng);
 }
 
-Sprite::Sprite(SDL_Renderer *renderer, SDL_Texture *texture, unsigned int _scaling) {
+/*Sprite::Sprite(SDL_Renderer *renderer, SDL_Texture *texture, unsigned int _scaling) {
     this->renderer = renderer;
     this->texture = texture;
 }
@@ -146,7 +146,7 @@ void AvancezLib::drawText(int x, int y, const char *msg, TextAlign pos, SDL_Colo
 
 void AvancezLib::setFont(const char *filePath, int fontSize, const SDL_Color color) {
     //text.font = TTF_OpenFont(filePath, fontSize);
-}
+}*/
 
 /*Sprite *AvancezLib::createSprite(const SpriteSheet& sheet) {
     SDL_Surface* surface = IMG_Load(sheet.filePath.c_str());
@@ -161,7 +161,7 @@ void AvancezLib::setFont(const char *filePath, int fontSize, const SDL_Color col
     return new Sprite(renderer, texture, scaling);
 }*/
 
-void Sprite::destroy() const {
+/*void Sprite::destroy() const {
     SDL_DestroyTexture(texture);
     SDL_DestroyRenderer(renderer);
 }
@@ -175,6 +175,6 @@ void Sprite::drawOutline(Vector2D screenPosition, Vector2D dimensions, SDL_Color
 SDL_Rect Sprite::getRect(const Vector2D &position, const Vector2D &dimensions) {
     return {(int) round(position.x), (int) round(position.y),
             (int) round(dimensions.x), (int) round(dimensions.y)};
-}
+}*/
 
 //#pragma clang diagnostic pop

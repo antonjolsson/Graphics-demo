@@ -12,7 +12,7 @@ class Component {
 
 protected:
 
-    const Vector2D GRAVITY {0, 600};
+    //const Vector2D GRAVITY {0, 600};
     AvancezLib* engine;	// used to access the engine
 	GameObject* go;		// the game object this component is part of
 	std::set<GameObject*>* gameObjects;	// the global container of game objects
@@ -32,7 +32,7 @@ public:
 };
 
 
-class RenderComponent : public Component
+/*class RenderComponent2D : public Component
 {
 protected:
 
@@ -63,7 +63,7 @@ protected:
 
     Animation* currentAnimation;
 
-    void switchAnimation(RenderComponent::Animation& animation);
+    void switchAnimation(RenderComponent2D::Animation& animation);
 
     Animation explosionAnimation {
             0,
@@ -85,7 +85,7 @@ public:
     bool determineToRender(float dt);
 };
 
-class EnemyRenderComponent : public RenderComponent {
+class EnemyRenderComponent : public RenderComponent2D {
 
 public:
     void init() override;
@@ -94,9 +94,9 @@ public:
 
     virtual void create(AvancezLib *_engine, GameObject *_go);
 
-};
+};*/
 
-class BoxCollideComponent : public Component
+class BoxCollideComponent2D : public Component
 {
     enum Edge {TOP, RIGHT, BOTTOM, LEFT, NO_EDGE};
 
@@ -105,12 +105,12 @@ class BoxCollideComponent : public Component
     std::array<Vector2D, 4> normals;
     bool debug = false;
     // Used to show the hit boxes
-    Sprite* colliderSprite;
+    //Sprite* colliderSprite;
     SDL_Color outlineColor = {255, 100, 100, 255}; // {0, 255, 0, 255};
 
     Vector2D intersection {0, 0};
 
-    Edge getIntersectingEdge(BoxCollideComponent* otherCollider);
+    Edge getIntersectingEdge(BoxCollideComponent2D* otherCollider);
 
 public:
 	virtual void create(AvancezLib *engine, GameObject *go, std::set<GameObject *> *gameObjects,

@@ -22,7 +22,7 @@ void Component::receive(int message) {
     }
 }
 
-void RenderComponent::update(float dt)
+/*void RenderComponent2D::update(float dt)
 {
 	if (!go->enabled || paused)
 		return;
@@ -32,40 +32,40 @@ void RenderComponent::update(float dt)
     go->spriteDims = spriteDims;
 }
 
-void RenderComponent::destroy() {
+void RenderComponent2D::destroy() {
 	if (sprite != nullptr)
 		sprite->destroy();
 	sprite = nullptr;
-}
+}*/
 
-void BoxCollideComponent::create(AvancezLib *engine, GameObject *go, std::set<GameObject *> *gameObjects,
+void BoxCollideComponent2D::create(AvancezLib *engine, GameObject *go, std::set<GameObject *> *gameObjects,
                                  ObjectPool<GameObject> *_collObjects, bool _debug) {
     setCorners(go);
     setNormals();
     Component::create(engine, go, gameObjects);
 	this->collObjects = _collObjects;
 	debug = _debug;
-	if (debug) colliderSprite = engine->createColliderSprite();
+	//if (debug) colliderSprite = engine->createColliderSprite();
 }
 
-void BoxCollideComponent::setNormals() {
+void BoxCollideComponent2D::setNormals() {
     for (int i = 0; i < normals.size(); i++) {
         normals[i] = (corners[(i + 1) % corners.size()] - corners[i]).getNormal();
     }
 }
 
-void BoxCollideComponent::setCorners(GameObject* go) {
+void BoxCollideComponent2D::setCorners(GameObject* go) {
     Vector2D ul {go->worldPosition}, br {go->worldPosition + go->spriteDims};
     corners = {ul, {br.x, ul.y}, br, {ul.x, br.y}};
 }
 
-void BoxCollideComponent::update(float dt) {
+void BoxCollideComponent2D::update(float dt) {
     if (paused) return;
     setCorners(go);
     setNormals();
 	for (auto otherObject : collObjects->getPool()) {
         if (otherObject->enabled) {
-            auto* otherCollider = otherObject->getComponent<BoxCollideComponent *>();
+            auto* otherCollider = otherObject->getComponent<BoxCollideComponent2D *>();
             if (otherCollider->paused)
                 return;
             intersection = {0, 0};
@@ -76,11 +76,11 @@ void BoxCollideComponent::update(float dt) {
                 otherObject->receive(OUT_OF_WATER);
 		}
 	}
-	if (debug) colliderSprite->drawOutline(go->screenPosition,
-	        getDimensions(), outlineColor);
+	/*if (debug) colliderSprite->drawOutline(go->screenPosition,
+	        getDimensions(), outlineColor);*/
 }
 
-BoxCollideComponent::Edge BoxCollideComponent::getIntersectingEdge(BoxCollideComponent* otherCollider) {
+BoxCollideComponent2D::Edge BoxCollideComponent2D::getIntersectingEdge(BoxCollideComponent2D* otherCollider) {
     double xDistance = getMidPoint().x - otherCollider->getMidPoint().x;
     double yDistance = getMidPoint().y - otherCollider->getMidPoint().y;
     double boxXLengths = getDimensions().x + otherCollider->getDimensions().x;
@@ -101,15 +101,15 @@ BoxCollideComponent::Edge BoxCollideComponent::getIntersectingEdge(BoxCollideCom
     return NO_EDGE;
 }
 
-Vector2D BoxCollideComponent::getMidPoint() {
+Vector2D BoxCollideComponent2D::getMidPoint() {
     return Vector2D {corners[0].x + getDimensions().x / 2, corners[0].y + getDimensions().y / 2};
 }
 
-Vector2D BoxCollideComponent::getDimensions() {
+Vector2D BoxCollideComponent2D::getDimensions() {
     return Vector2D {corners[1].x - corners[0].x, corners[2].y - corners[1].y};
 }
 
-void BoxCollideComponent::handleCollision(GameObject *otherObject, Edge edge) {
+void BoxCollideComponent2D::handleCollision(GameObject *otherObject, Edge edge) {
     switch (go->type) {
         case GROUND: case ICE:
             clampIntersectingBox(otherObject, edge);
@@ -159,7 +159,7 @@ void BoxCollideComponent::handleCollision(GameObject *otherObject, Edge edge) {
 }
 
 // Remove boxes' intersection
-void BoxCollideComponent::clampIntersectingBox(GameObject *otherObject, Edge edge) {
+void BoxCollideComponent2D::clampIntersectingBox(GameObject *otherObject, Edge edge) {
     switch (edge) {
         case LEFT:
             otherObject->worldPosition.x = go->worldPosition.x - otherObject->spriteDims.x;
@@ -182,18 +182,18 @@ void BoxCollideComponent::clampIntersectingBox(GameObject *otherObject, Edge edg
     }
 }
 
-Vector2D BoxCollideComponent::getIntersection(double xDistance, double yDistance, double boxXLengths,
+Vector2D BoxCollideComponent2D::getIntersection(double xDistance, double yDistance, double boxXLengths,
                                               double boxYLengths) {
     return Vector2D {boxXLengths / 2 - abs(xDistance), boxYLengths / 2 - abs(yDistance)};
 }
 
-void RenderComponent::Animation::init() {
+/*void RenderComponent2D::Animation::init() {
     for (auto& entry : animationSprites) {
         totalDuration += entry.duration;
     }
 }
 
-RenderComponent::SpriteProperties RenderComponent::Animation::getCurrentSpriteProperties(float _timeSinceModeSwitch) {
+RenderComponent2D::SpriteProperties RenderComponent2D::Animation::getCurrentSpriteProperties(float _timeSinceModeSwitch) {
     float timeSum = 0;
     _timeSinceModeSwitch = std::fmod(_timeSinceModeSwitch, totalDuration);
     for (auto& entry : animationSprites) {
@@ -204,12 +204,12 @@ RenderComponent::SpriteProperties RenderComponent::Animation::getCurrentSpritePr
     return animationSprites[animationSprites.size() - 1];
 }
 
-void RenderComponent::switchAnimation(RenderComponent::Animation& animation) {
+void RenderComponent2D::switchAnimation(RenderComponent2D::Animation& animation) {
     timeSinceModeSwitch = 0;
     currentAnimation = &animation;
 }
 
-void RenderComponent::receive(int message) {
+void RenderComponent2D::receive(int message) {
     switch (message) {
         case MSG_EXPLODED: case PLAYER_KILLED:
             switchAnimation(explosionAnimation);
@@ -249,13 +249,13 @@ void EnemyRenderComponent::update(float dt) {
     go->spriteDims = spriteDims;
 }
 
-void RenderComponent::terminate() {
+void RenderComponent2D::terminate() {
     paused = true;
     go->enabled = false;
     go->destroyedForever = true;
 }
 
-bool RenderComponent::determineToRender(float dt) {
+bool RenderComponent2D::determineToRender(float dt) {
     if (!go->enabled || paused) return false; // Stop rendering player if paused (i.e. game over)
     timeSinceModeSwitch += dt;
     // Stop rendering after explosion is over
@@ -264,4 +264,4 @@ bool RenderComponent::determineToRender(float dt) {
         return false;
     }
     return true;
-}
+}*/

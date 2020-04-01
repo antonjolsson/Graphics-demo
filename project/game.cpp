@@ -20,7 +20,7 @@ void Game::initEnemies(AvancezLib *_engine, bool debug) {
     behaviour->create(_engine, crazyRazy, player, &gameObjects);
     auto* crazyRender = new CrazyRenderComponent();
     crazyRender->create(_engine, crazyRazy);
-    auto* collider = new BoxCollideComponent();
+    auto* collider = new BoxCollideComponent2D();
     collider->create(_engine, crazyRazy, &gameObjects, enemyCollObjects, debug);
     crazyRazy->addComponents({behaviour, crazyRender, collider});
 
@@ -39,25 +39,25 @@ void Game::init(unsigned int _gameWidth, unsigned int _gameHeight, AvancezLib *n
     bulletCollObjects = new ObjectPool<GameObject>();
 
     initEnemies(newEngine, debug);
-    initGUI();
+    //initGUI();
 
     enabled = true;
 }
 
-void Game::initGUI() {
+/*void Game::initGUI() {
     gui = new GUI(gameWidth, gameHeight);
     auto* render = new GUIRenderComponent();
     //render->create(gui, player, engine);
     gui->addComponent(render);
     receivers.push_back(gui);
     gui->enabled = true;
-}
+}*/
 
 void Game::initPlayer(AvancezLib *newEngine, bool debug) {
 }
 
 void Game::init() {
-    gui->init();
+    //gui->init();
     enabled = true;
 }
 
@@ -69,7 +69,7 @@ void Game::update(float dt) {
     }
     for (auto gameObject : gameObjects)
         gameObject->update(dt, viewPortPosition);
-    gui->update(score);
+    //gui->update(score);
 }
 
 void Game::draw() {
@@ -84,7 +84,7 @@ void Game::destroy() {
     delete playerCollObjects;
     delete enemyCollObjects;
     delete bulletCollObjects;
-    delete gui;
+    //delete gui;
 
     music = nullptr;
 }

@@ -2,7 +2,7 @@
 // Created by Anton Olsson on 2020-02-16.
 //
 
-#pragma once
+/*#pragma once
 
 #include "gameObject.h"
 #include "avancezlib.h"
@@ -43,7 +43,7 @@ public:
     }
 };
 
-class GUIRenderComponent : public RenderComponent {
+class GUIRenderComponent : public RenderComponent2D {
 
     const SDL_Color BLACK {0, 0, 0, 255};
     const SDL_Color YELLOW {255, 255, 0, 255};
@@ -127,4 +127,4 @@ public:
         else if (gui->isLevelWon()) drawText(LEVEL_WON_MESS, engine->CENTER, messageYPos, YELLOW);
     }
 
-};
+};*/

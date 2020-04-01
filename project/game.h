@@ -31,7 +31,7 @@ class Game : public GameObject {
     ObjectPool<GameObject>* bulletCollObjects;
     std::set<GameObject*> bgCollObjects;
 
-    GUI *gui = nullptr;
+    //GUI *gui = nullptr;
 
     Mix_Music* music = nullptr;
 
@@ -48,7 +48,7 @@ public:
   
     virtual void init(unsigned int _gameWidth, unsigned int _gameHeight, AvancezLib* newEngine, SDL_Color _clearColor,
             bool debug);
-    void initGUI();
+    //void initGUI();
     void initPlayer(AvancezLib *newEngine, bool debug);
     void init() override;
 	void update(float dt);

@@ -7,7 +7,7 @@
 
 #undef main
 
-struct SpriteSheet {
+/*struct SpriteSheet {
 
     std::string filePath;
     SDL_Color colorKey;
@@ -34,7 +34,7 @@ public:
 	void drawOutline(Vector2D screenPosition, Vector2D dimensions, SDL_Color color);
 
 	static SDL_Rect getRect(const Vector2D &position, const Vector2D &dimensions);
-};
+};*/
 
 
 class AvancezLib
@@ -51,11 +51,11 @@ class AvancezLib
 
 public:
 
-    Sprite *createColliderSprite();
+    //Sprite *createColliderSprite();
 
     //Sprite *createSprite(const SpriteSheet& sheet);
 
-	enum TextAlign {NO_CHANGE, CENTER, LEFT};
+	//enum TextAlign {NO_CHANGE, CENTER, LEFT};
 
 	// Destroys the avancez library instance
 	void destroy();
@@ -94,26 +94,26 @@ public:
 
     int getRandomInt(int min, int max);
 
-    void drawText(int x, int y, const char *msg, TextAlign pos, SDL_Color color);
+    //void drawText(int x, int y, const char *msg, TextAlign pos, SDL_Color color);
 
-    void setFont(const char *filePath, int fontSize, SDL_Color color);
+    //void setFont(const char *filePath, int fontSize, SDL_Color color);
 
-    Sprite *createSprite(const char *filePath);
+    //Sprite *createSprite(const char *filePath);
 
 private:
 
     SDL_Window * window{};
 	SDL_Renderer * renderer{};
 
-    struct Text {
+    /*struct Text {
         //TTF_Font* font;
         SDL_Surface* surface = nullptr;
         SDL_Texture* texture;
-    };
+    };*/
 
-    Text text{};
+    //Text text{};
 
-	KeyStatus keys{};
+	KeyStatus keys_{};
 
     void initGameControllers();
 
