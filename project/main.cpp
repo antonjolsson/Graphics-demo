@@ -1,5 +1,7 @@
 
 
+#include "avancezlib.h"
+#include "game.h"
 #include "heightfield.h"
 #ifdef _WIN32
 extern "C" _declspec(dllexport) unsigned int NvOptimusEnablement = 0x00000001;
@@ -34,6 +36,11 @@ using std::max;
 ///////////////////////////////////////////////////////////////////////////////
 // Various globals
 ///////////////////////////////////////////////////////////////////////////////
+
+const bool SHOW_HITBOX = false;
+const std::string CAPTION = "Foreign Attack";
+const int WIN_WIDTH = 1920;
+const int WIN_HEIGHT = 1080;
 
 SDL_Window* g_window = nullptr;
 static float currentTime = 0.0f;
@@ -192,10 +199,6 @@ void initTerrain()
 
 void initGL()
 {
-	initTerrain();
-	
-	particleSystem = ParticleSystem(MAX_PARTICLES);
-	initShip();
 
 	///////////////////////////////////////////////////////////////////////
 	//		Load Shaders
@@ -205,8 +208,12 @@ void initGL()
 	shaderProgram = labhelper::loadShaderProgram("../project/shading.vert", "../project/shading.frag");
 	simpleShaderProgram = labhelper::loadShaderProgram("../project/simple.vert", "../project/simple.frag");
 	particleProgram = labhelper::loadShaderProgram("../project/particle.vert", "../project/particle.frag");
-	//heightfieldProgram = labhelper::loadShaderProgram("../project/heightfield.vert", "../project/heightfield.frag");
 	heightfieldProgram = labhelper::loadShaderProgram("../project/heightfield.vert", "../project/shading.frag");
+
+	initTerrain();
+
+	particleSystem = ParticleSystem(MAX_PARTICLES);
+	initShip();
 
 	///////////////////////////////////////////////////////////////////////
 	// Load models and set up model matrices
@@ -304,14 +311,14 @@ void setMatrixUniforms(const GLuint currentShaderProgram, const mat4& viewMatrix
 		inverse(transpose(viewMatrix * modelMatrix)));
 }
 
-void drawTerrain(const mat4& projMatrix, const mat4& viewMatrix, const mat4& lightViewMatrix, const mat4& lightProjectionMatrix, const vec4& viewSpaceLightPosition)
+void drawTerrain(const mat4& _projMatrix, const mat4& _viewMatrix, const mat4& _lightViewMatrix, const mat4& _lightProjectionMatrix, const vec4& _viewSpaceLightPosition)
 {
 	mat4 modelMatrix({ TERRAIN_SCALING });
 	modelMatrix[3] = vec4{ 0, 0, 0, 1.0 };
 	glUseProgram(heightfieldProgram);
 	glUniform1i(glGetUniformLocation(heightfieldProgram, "has_diffuse_texture"), 1);
-	setLightUniforms(heightfieldProgram, viewMatrix, lightViewMatrix, lightProjectionMatrix, viewSpaceLightPosition);
-	setMatrixUniforms(heightfieldProgram, viewMatrix, projMatrix, modelMatrix);
+	setLightUniforms(heightfieldProgram, _viewMatrix, _lightViewMatrix, _lightProjectionMatrix, _viewSpaceLightPosition);
+	setMatrixUniforms(heightfieldProgram, _viewMatrix, _projMatrix, modelMatrix);
 	terrain.submitTriangles();
 }
 
@@ -362,7 +369,7 @@ void bindEnvironmentMaps()
 	glActiveTexture(GL_TEXTURE0);
 }
 
-void drawShadowMap(const mat4 lightViewMatrix, const mat4 lightProjMatrix)
+void drawShadowMap(const mat4 _lightViewMatrix, const mat4 _lightProjMatrix)
 {
 	if (shadowMapFB.width != shadowMapResolution || shadowMapFB.height != shadowMapResolution)
 	{
@@ -394,7 +401,7 @@ void drawShadowMap(const mat4 lightViewMatrix, const mat4 lightProjMatrix)
 	glBindFramebuffer(GL_FRAMEBUFFER, shadowMapFB.framebufferId);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glViewport(0, 0, shadowMapFB.width, shadowMapFB.height);
-	drawScene(simpleShaderProgram, lightViewMatrix, lightProjMatrix, lightViewMatrix, lightProjMatrix);
+	drawScene(simpleShaderProgram, _lightViewMatrix, _lightProjMatrix, _lightViewMatrix, _lightProjMatrix);
 	labhelper::Material& screen = landingpadModel->m_materials[8];
 	screen.m_emission_texture.gl_id = shadowMapFB.colorTextureTargets[0];
 
@@ -650,7 +657,12 @@ void logStats() {
 
 int main(int argc, char* argv[])
 {
-	g_window = labhelper::init_window_SDL("Foreign Attack", 1920, 1080, antiAliasSamples);
+	
+	g_window = labhelper::init_window_SDL("Foreign Attack", WIN_WIDTH, WIN_HEIGHT, antiAliasSamples);
+
+	AvancezLib engine;
+	Game game(&engine, SHOW_HITBOX);
+	
 	initGL();
 
 	auto stopRendering = false;
@@ -663,6 +675,9 @@ int main(int argc, char* argv[])
 		previousTime = currentTime;
 		currentTime = timeSinceStart.count();
 		deltaTime = currentTime - previousTime;
+
+		game.update(deltaTime);
+		
 		updateShip();
 		// render to window
 		display();

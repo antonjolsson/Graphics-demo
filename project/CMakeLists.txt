@@ -21,6 +21,13 @@ add_executable ( ${PROJECT_NAME}
     avancezlib.cpp
     avancezlib.h
     vector2D.h
+    behaviour.h
+    behaviour.cpp
+    ship.h
+    ship.cpp
+    renderer.h
+    renderer.cpp
+    game.h
     ${SHADERS}
      "component.cpp" "game.cpp" "gameObject.cpp")
 

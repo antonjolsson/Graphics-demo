@@ -3,6 +3,8 @@
 //
 
 #include "game.h"
+#include "fbo.h"
+#include <labhelper.h>
 
 void Game::initEnemies(AvancezLib *_engine, bool debug) {
     
@@ -53,22 +55,19 @@ void Game::init(unsigned int _gameWidth, unsigned int _gameHeight, AvancezLib *n
     gui->enabled = true;
 }*/
 
-void Game::initPlayer(AvancezLib *newEngine, bool debug) {
-}
-
 void Game::init() {
     //gui->init();
     enabled = true;
 }
 
-void Game::update(float dt) {
+void Game::update(const float _dt) {
     const AvancezLib::KeyStatus keys = engine->getKeyStatus();
     if (keys.quit) {
         destroy();
         engine->quit();
     }
     for (auto gameObject : gameObjects)
-        gameObject->update(dt);
+        gameObject->update(_dt);
     //gui->update(score);
 }
 
@@ -89,8 +88,8 @@ void Game::destroy() {
     music = nullptr;
 }
 
-void Game::receive(Message m) {
-    switch (m) {
+void Game::receive(Message _m) {
+    switch (_m) {
         case PLAYER_KILLED :
             send(GAME_OVER);
             break;
@@ -107,5 +106,31 @@ void Game::playMusic() {
     Mix_VolumeMusic(MUSIC_VOLUME);
     music = Mix_LoadMUS(MUSIC_FILE);
     Mix_PlayMusic( music, -1 );
+}
+
+void Game::initShip()
+{
+    ship = new Ship(shaderProgram);
+}
+
+void Game::initShaders()
+{
+    backgroundProgram = labhelper::loadShaderProgram("../project/background.vert",
+        "../project/background.frag");
+    shaderProgram = labhelper::loadShaderProgram("../project/shading.vert", "../project/shading.frag");
+    simpleShaderProgram = labhelper::loadShaderProgram("../project/simple.vert", "../project/simple.frag");
+    particleProgram = labhelper::loadShaderProgram("../project/particle.vert", "../project/particle.frag");
+    heightfieldProgram = labhelper::loadShaderProgram("../project/heightfield.vert", "../project/shading.frag");
+}
+
+Game::Game(AvancezLib* _engine, const bool _showHitbox)
+{
+    engine = _engine;
+    showHitBox = _showHitbox;
+    enabled = true;
+
+    initShaders();
+
+    initShip();
 }
 

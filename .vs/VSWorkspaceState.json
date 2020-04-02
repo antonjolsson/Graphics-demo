@@ -1,7 +1,8 @@
 {
   "ExpandedNodes": [
     "",
-    "\\build"
+    "\\build",
+    "\\build\\project"
   ],
   "SelectedNode": "\\build\\computer-graphics-labs.sln",
   "PreviewInSolutionExplorer": false

@@ -47,8 +47,6 @@ class AvancezLib
     //Game Controller 1 handler
     SDL_GameController* gameController = nullptr;
 
-    unsigned int scaling;
-
 public:
 
     //Sprite *createColliderSprite();
@@ -113,7 +111,7 @@ private:
 
     //Text text{};
 
-	KeyStatus keys_{};
+	KeyStatus keys{};
 
     void initGameControllers();
 

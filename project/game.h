@@ -2,7 +2,12 @@
 
 #include "gameObject.h"
 #include "gui.h"
+#include <GL/glew.h>
+#include <SDL_audio.h>
+#include "ship.h"
 #include "../external/SDL2_mixer/include/SDL_mixer.h"
+
+//#include "fbo.h"
 
 class Game : public GameObject {
 
@@ -17,13 +22,15 @@ class Game : public GameObject {
 
     SDL_Color clearColor = {};
 
+    Ship* ship;
+	
     std::set<GameObject*> gameObjects;
 	
 	AvancezLib* engine = nullptr;
 
-    ObjectPool<GameObject>* playerCollObjects;
-    ObjectPool<GameObject>* enemyCollObjects;
-    ObjectPool<GameObject>* bulletCollObjects;
+    ObjectPool<GameObject>* playerCollObjects{};
+    ObjectPool<GameObject>* enemyCollObjects{};
+    ObjectPool<GameObject>* bulletCollObjects{};
     std::set<GameObject*> bgCollObjects;
 
     //GUI *gui = nullptr;
@@ -35,6 +42,15 @@ class Game : public GameObject {
 	unsigned int score = 0;
 
 	bool quit = false;
+    bool showHitBox;
+
+    GLuint shaderProgram;       // Shader for rendering the final image
+    GLuint simpleShaderProgram; // Shader used to draw the shadow map
+    GLuint simpleParticleProgram;
+    GLuint particleProgram;
+    GLuint backgroundProgram;
+    GLuint heightfieldProgram;
+	
 
 public:
 
@@ -43,14 +59,18 @@ public:
     virtual void init(unsigned int _gameWidth, unsigned int _gameHeight, AvancezLib* newEngine, SDL_Color _clearColor,
             bool debug);
     //void initGUI();
-    void initPlayer(AvancezLib *newEngine, bool debug);
+    void initPlayer();
     void init() override;
-	void update(float dt);
+	void update(float _dt) override;
 	virtual void draw();
-	void receive(Message m) override;
+	void receive(Message _m) override;
 	void destroy() override;
     bool isQuitting() const;
 
     void playMusic();
 
+    void initShip();
+
+    void initShaders();
+    Game(AvancezLib* _engine, const bool _showHitbox);
 };

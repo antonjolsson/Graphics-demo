@@ -5,11 +5,6 @@
 #include "gameObject.h"
 #include "component.h"
 
-CompType Component::getCompType() const
-{
-	return compType;
-}
-
 void Component::create(AvancezLib* _engine, GameObject* _go, std::set<GameObject*>* _gameObjects)
 {
 	go = _go;

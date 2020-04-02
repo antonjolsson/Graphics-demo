@@ -6,6 +6,7 @@
 #include <vector>
 #include <map>
 #include "component.h"
+#include <SDL.h>
 #include "../external/SDL2_mixer/include/SDL_mixer.h"
 
 enum Message {
@@ -25,10 +26,6 @@ protected:
 
     bool enabled = false;
 
-public:
-    void setEnabled(bool _enabled);
-    bool isEnabled() const;
-protected:
     const char* ENEMY_HIT_SOUND = "resource/sounds/EnemyDamage.wav";
     const int DEFAULT_EFFECT_VOL = SDL_MIX_MAXVOLUME / 2;
     const int HIT_SOUND_VOL = SDL_MIX_MAXVOLUME / 3;
@@ -36,12 +33,15 @@ protected:
 	std::vector<GameObject*> receivers;
 	std::vector<Component*> components;
 
-    Mix_Chunk* sound;
+    Mix_Chunk* sound = nullptr;
 
     bool gameOver = false;
     bool levelWon = false;
 
 public:
+	
+    void setEnabled(bool _enabled);
+    bool isEnabled() const;
 
     bool isGameOver() const;
 
@@ -96,7 +96,7 @@ public:
     void addComponents(const std::vector<Component *> &_components);
 
     virtual void init();
-    virtual void update(const float _dt);
+    virtual void update(float _dt);
     void init(int hp, int _attackDamage);
 
     void update(float _dt, int _initialHP, int _attackDamage);

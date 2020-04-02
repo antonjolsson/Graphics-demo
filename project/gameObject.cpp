@@ -2,7 +2,9 @@
 #include "avancezlib.h"
 #include "gameObject.h"
 
-#include "../build/project/behaviour.h"
+
+#include "../external/SDL2_mixer/include/SDL_mixer.h"
+#include "behaviour.h"
 
 void GameObject::create() {
 	

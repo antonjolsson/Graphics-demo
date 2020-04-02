@@ -8,8 +8,6 @@
 
 class GameObject;
 
-enum CompType {BEHAVIOUR, RIGID_BODY, RENDER, BOX_COLL, AUDIO, NO_COMP_TYPE};
-
 class Component {
 
 protected:
@@ -21,10 +19,7 @@ protected:
 
     bool paused = false;
 
-	CompType compType = NO_COMP_TYPE;
-
 public:
-    CompType getCompType() const;
 
     virtual ~Component() = default;
 

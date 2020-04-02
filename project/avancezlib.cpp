@@ -10,7 +10,7 @@
 #include <SDL.h>
 
 #include "../external/SDL2_mixer/include/SDL_mixer.h"
-//#include "../external/SDL2_image/include/SDL_image.h"
+
 
 bool AvancezLib::init(int width, int height, const unsigned int _scaling) {
 
@@ -32,8 +32,6 @@ bool AvancezLib::init(int width, int height, const unsigned int _scaling) {
     SDL_SetWindowTitle(window, WINDOW_TITLE);
     SDL_SetWindowIcon(window, SDL_LoadBMP(ICON_FILE));
     initGameControllers();
-    scaling = _scaling;
-    SDL_RenderSetScale(renderer, (float) scaling, (float) scaling);
     return true;
 }
 
@@ -53,7 +51,7 @@ void AvancezLib::destroy() {
 }
 
 AvancezLib::KeyStatus& AvancezLib::getKeyStatus() {
-    return keys_;
+    return keys;
 }
 
 // Time in seconds
@@ -80,19 +78,19 @@ void AvancezLib::processInput() {
     while (SDL_PollEvent(&e)) {
         // check keyboard state (which keys are still pressed)
         const uint8_t* state = SDL_GetKeyboardState(nullptr);
-        keys_.left = state[SDL_SCANCODE_LEFT] ||
+        keys.left = state[SDL_SCANCODE_LEFT] ||
                 SDL_GameControllerGetButton(gameController, SDL_CONTROLLER_BUTTON_DPAD_LEFT) != 0;
-        keys_.right = state[SDL_SCANCODE_RIGHT] ||
+        keys.right = state[SDL_SCANCODE_RIGHT] ||
                      SDL_GameControllerGetButton(gameController, SDL_CONTROLLER_BUTTON_DPAD_RIGHT) != 0;
-        keys_.up = state[SDL_SCANCODE_UP] ||
+        keys.up = state[SDL_SCANCODE_UP] ||
                      SDL_GameControllerGetButton(gameController, SDL_CONTROLLER_BUTTON_DPAD_UP) != 0;
-        keys_.down = state[SDL_SCANCODE_DOWN] ||
+        keys.down = state[SDL_SCANCODE_DOWN] ||
                      SDL_GameControllerGetButton(gameController, SDL_CONTROLLER_BUTTON_DPAD_DOWN) != 0;
-        keys_.jump = state[SDL_SCANCODE_C] ||
+        keys.jump = state[SDL_SCANCODE_C] ||
                     SDL_GameControllerGetButton(gameController, SDL_CONTROLLER_BUTTON_A) != 0;
-        keys_.fire = state[SDL_SCANCODE_A] ||
+        keys.fire = state[SDL_SCANCODE_A] ||
                  SDL_GameControllerGetButton(gameController, SDL_CONTROLLER_BUTTON_X) != 0;
-        keys_.quit =  (e.type == SDL_QUIT || state[SDL_SCANCODE_Q] || state[SDL_SCANCODE_ESCAPE] ||
+        keys.quit =  (e.type == SDL_QUIT || state[SDL_SCANCODE_Q] || state[SDL_SCANCODE_ESCAPE] ||
                 SDL_GameControllerGetButton(gameController, SDL_CONTROLLER_BUTTON_START) != 0);
     }
 }
