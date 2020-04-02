@@ -68,7 +68,7 @@ void Game::update(float dt) {
         engine->quit();
     }
     for (auto gameObject : gameObjects)
-        gameObject->update(dt, viewPortPosition);
+        gameObject->update(dt);
     //gui->update(score);
 }
 

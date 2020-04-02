@@ -7,11 +7,6 @@
 class Game : public GameObject {
 
     const unsigned int MAX_NUM_GAME_OBJECTS = 10000;
-    const unsigned int MAX_NUM_BULLETS = 32;
-    const unsigned int CRAZY_RAZIES = 9;
-    const unsigned int PEPES = 7;
-
-    const Vector2D LEVEL_WIN_POS {2398, 88};
 
     const char* MUSIC_FILE = "resource/sounds/IceManMusic.wav";
     const int MUSIC_VOLUME = SDL_MIX_MAXVOLUME / 4;
@@ -20,7 +15,7 @@ class Game : public GameObject {
     unsigned int gameHeight = 0;
     unsigned int levelWidth = 0;
 
-    SDL_Color clearColor;
+    SDL_Color clearColor = {};
 
     std::set<GameObject*> gameObjects;
 	
@@ -35,8 +30,7 @@ class Game : public GameObject {
 
     Mix_Music* music = nullptr;
 
-	std::map<Message, int> eventScoreMap {{CRAZY_KILLED, 500},
-										  {PEPE_KILLED, 500}};
+	std::map<Message, int> eventScoreMap {};
 
 	unsigned int score = 0;
 
