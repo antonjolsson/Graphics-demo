@@ -83,7 +83,7 @@ void Game::destroy() {
     delete playerCollObjects;
     delete enemyCollObjects;
     delete bulletCollObjects;
-    //delete gui;
+    ////delete gui;
 
     music = nullptr;
 }
