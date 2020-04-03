@@ -13,7 +13,7 @@ class Game : public GameObject {
 
     const unsigned int MAX_NUM_GAME_OBJECTS = 10000;
 
-    const char* MUSIC_FILE = "resource/sounds/IceManMusic.wav";
+    const char* MUSIC_FILE = "../project/resource/AirwolfExtendedVersion.mp3";
     const int MUSIC_VOLUME = SDL_MIX_MAXVOLUME / 4;
 
     unsigned int gameWidth = 0;
@@ -22,7 +22,7 @@ class Game : public GameObject {
 
     SDL_Color clearColor = {};
 
-    Ship* ship;
+    Ship* ship{};
 	
     std::set<GameObject*> gameObjects;
 	
@@ -44,12 +44,12 @@ class Game : public GameObject {
 	bool quit = false;
     bool showHitBox;
 
-    GLuint shaderProgram;       // Shader for rendering the final image
-    GLuint simpleShaderProgram; // Shader used to draw the shadow map
-    GLuint simpleParticleProgram;
-    GLuint particleProgram;
-    GLuint backgroundProgram;
-    GLuint heightfieldProgram;
+    GLuint shaderProgram{};       // Shader for rendering the final image
+    GLuint simpleShaderProgram{}; // Shader used to draw the shadow map
+    GLuint simpleParticleProgram{};
+    GLuint particleProgram{};
+    GLuint backgroundProgram{};
+    GLuint heightfieldProgram{};
 	
 
 public:

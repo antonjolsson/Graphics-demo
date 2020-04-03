@@ -166,23 +166,23 @@ const int TERRAIN_TESSELATION = 1024;
 const int TERRAIN_SCALING = 250;
 HeightField terrain;
 
-void loadShaders(const bool isReload)
+void loadShaders(const bool _isReload)
 {
 	GLuint shader = labhelper::loadShaderProgram("../project/simple.vert", "../project/simple.frag",
-											 isReload);
+											 _isReload);
 	if(shader) simpleShaderProgram = shader;
 
 	shader = labhelper::loadShaderProgram("../project/background.vert", "../project/background.frag",
-										  isReload);
+										  _isReload);
 	if(shader) backgroundProgram = shader;
 
-	shader = labhelper::loadShaderProgram("../project/shading.vert", "../project/shading.frag", isReload);
+	shader = labhelper::loadShaderProgram("../project/shading.vert", "../project/shading.frag", _isReload);
 	if(shader) shaderProgram = shader;
 
-	shader = labhelper::loadShaderProgram("../project/particle.vert", "../project/particle.frag", isReload);
+	shader = labhelper::loadShaderProgram("../project/particle.vert", "../project/particle.frag", _isReload);
 	if (shader) particleProgram = shader;
 
-	shader = labhelper::loadShaderProgram("../project/heightfield.vert", "../project/heightfield.frag", isReload);
+	shader = labhelper::loadShaderProgram("../project/heightfield.vert", "../project/heightfield.frag", _isReload);
 	if (shader) heightfieldProgram = shader;
 }
 
@@ -263,43 +263,43 @@ void drawLight(const glm::mat4& viewMatrix,
 	labhelper::render(sphereModel);
 }
 
-void drawBackground(const mat4& viewMatrix, const mat4& projectionMatrix)
+void drawBackground(const mat4& _viewMatrix, const mat4& _projectionMatrix)
 {
 	glUseProgram(backgroundProgram);
 	labhelper::setUniformSlow(backgroundProgram, "environment_multiplier", environmentMultiplier);
-	labhelper::setUniformSlow(backgroundProgram, "inv_PV", inverse(projectionMatrix * viewMatrix));
+	labhelper::setUniformSlow(backgroundProgram, "inv_PV", inverse(_projectionMatrix * _viewMatrix));
 	labhelper::setUniformSlow(backgroundProgram, "camera_pos", cameraPosition);
 	labhelper::drawFullScreenQuad();
 }
 
-void drawFire(const mat4& projMatrix, const mat4& viewMatrix, mat4& fighterModelMatrix) {
+void drawFire(const mat4& _projMatrix, const mat4& _viewMatrix, mat4& _fighterModelMatrix) {
 	glUseProgram(particleProgram);
-	labhelper::setUniformSlow(particleProgram, "projectionMatrix", projMatrix);
+	labhelper::setUniformSlow(particleProgram, "projectionMatrix", _projMatrix);
 	labhelper::setUniformSlow(particleProgram, "screen_x", float(windowWidth));
 	labhelper::setUniformSlow(particleProgram, "screen_y", float(windowHeight));
-	particleSystem.update(viewMatrix, deltaTime, fighterModelMatrix, accelerating);
+	particleSystem.update(_viewMatrix, deltaTime, _fighterModelMatrix, accelerating);
 }
 
-void setLightUniforms(const GLuint currentShaderProgram, const mat4& viewMatrix, const mat4& lightViewMatrix, const mat4& lightProjectionMatrix,
-	const vec4 viewSpaceLightPosition)
+void setLightUniforms(const GLuint _currentShaderProgram, const mat4& _viewMatrix, const mat4& _lightViewMatrix, const mat4& _lightProjectionMatrix,
+	const vec4 _viewSpaceLightPosition)
 {
-	labhelper::setUniformSlow(currentShaderProgram, "point_light_color", pointLightColor);
-	labhelper::setUniformSlow(currentShaderProgram, "point_light_intensity_multiplier",
+	labhelper::setUniformSlow(_currentShaderProgram, "point_light_color", pointLightColor);
+	labhelper::setUniformSlow(_currentShaderProgram, "point_light_intensity_multiplier",
 		pointLightIntensityMultiplier);
-	labhelper::setUniformSlow(currentShaderProgram, "viewSpaceLightPosition", vec3(viewSpaceLightPosition));
-	labhelper::setUniformSlow(currentShaderProgram, "viewSpaceLightDir",
-		normalize(vec3(viewMatrix * vec4(vec3(fighterModelMatrix[3]) - lightPosition, 0.0f))));
-	labhelper::setUniformSlow(currentShaderProgram, "spotOuterAngle", std::cos(radians(outerSpotlightAngle)));
-	labhelper::setUniformSlow(currentShaderProgram, "spotInnerAngle", std::cos(radians(innerSpotlightAngle)));
+	labhelper::setUniformSlow(_currentShaderProgram, "viewSpaceLightPosition", vec3(_viewSpaceLightPosition));
+	labhelper::setUniformSlow(_currentShaderProgram, "viewSpaceLightDir",
+		normalize(vec3(_viewMatrix * vec4(vec3(fighterModelMatrix[3]) - lightPosition, 0.0f))));
+	labhelper::setUniformSlow(_currentShaderProgram, "spotOuterAngle", std::cos(radians(outerSpotlightAngle)));
+	labhelper::setUniformSlow(_currentShaderProgram, "spotInnerAngle", std::cos(radians(innerSpotlightAngle)));
 
-	const mat4 lightMatrix = translate(vec3(0.5f)) * scale(vec3(0.5f)) * lightProjectionMatrix * lightViewMatrix * inverse(viewMatrix);
-	labhelper::setUniformSlow(currentShaderProgram, "lightMatrix", lightMatrix);
+	const mat4 lightMatrix = translate(vec3(0.5f)) * scale(vec3(0.5f)) * _lightProjectionMatrix * _lightViewMatrix * inverse(_viewMatrix);
+	labhelper::setUniformSlow(_currentShaderProgram, "lightMatrix", lightMatrix);
 
 	// Environment
-	labhelper::setUniformSlow(currentShaderProgram, "environment_multiplier", environmentMultiplier);
+	labhelper::setUniformSlow(_currentShaderProgram, "environment_multiplier", environmentMultiplier);
 
 	// camera
-	labhelper::setUniformSlow(currentShaderProgram, "viewInverse", inverse(viewMatrix));
+	labhelper::setUniformSlow(_currentShaderProgram, "viewInverse", inverse(_viewMatrix));
 }
 
 void setMatrixUniforms(const GLuint currentShaderProgram, const mat4& viewMatrix, const mat4& projectionMatrix, const mat4 modelMatrix)
@@ -322,26 +322,26 @@ void drawTerrain(const mat4& _projMatrix, const mat4& _viewMatrix, const mat4& _
 	terrain.submitTriangles();
 }
 
-void drawScene(GLuint currentShaderProgram,
-               const mat4& viewMatrix,
-               const mat4& projectionMatrix,
-               const mat4& lightViewMatrix,
-               const mat4& lightProjectionMatrix)
+void drawScene(const GLuint _currentShaderProgram,
+               const mat4& _viewMatrix,
+               const mat4& _projectionMatrix,
+               const mat4& _lightViewMatrix,
+               const mat4& _lightProjectionMatrix)
 {
-	const vec4 viewSpaceLightPosition = viewMatrix * vec4(lightPosition, 1.0f);
+	const vec4 viewSpaceLightPosition = _viewMatrix * vec4(lightPosition, 1.0f);
 	glActiveTexture(GL_TEXTURE10);
 	glBindTexture(GL_TEXTURE_2D, shadowMapFB.depthBuffer);
 
-	drawTerrain(projectionMatrix, viewMatrix, lightViewMatrix, lightProjectionMatrix, viewSpaceLightPosition);
+	drawTerrain(_projectionMatrix, _viewMatrix, _lightViewMatrix, _lightProjectionMatrix, viewSpaceLightPosition);
 
-	glUseProgram(currentShaderProgram);
-	setLightUniforms(currentShaderProgram, viewMatrix, lightViewMatrix, lightProjectionMatrix, viewSpaceLightPosition);
+	glUseProgram(_currentShaderProgram);
+	setLightUniforms(_currentShaderProgram, _viewMatrix, _lightViewMatrix, _lightProjectionMatrix, viewSpaceLightPosition);
 	
 	const mat4 modelMatrix(1.0f);
-	setMatrixUniforms(currentShaderProgram, viewMatrix, projectionMatrix, modelMatrix);
+	setMatrixUniforms(_currentShaderProgram, _viewMatrix, _projectionMatrix, modelMatrix);
 	render(landingpadModel);
 
-	setMatrixUniforms(currentShaderProgram, viewMatrix, projectionMatrix, fighterModelMatrix);
+	setMatrixUniforms(_currentShaderProgram, _viewMatrix, _projectionMatrix, fighterModelMatrix);
 	render(fighterModel);
 }
 

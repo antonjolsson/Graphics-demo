@@ -12,13 +12,13 @@
 #include "../external/SDL2_mixer/include/SDL_mixer.h"
 
 
-bool AvancezLib::init(int width, int height, const unsigned int _scaling) {
+bool AvancezLib::init(const int _width, const int _height, const unsigned int _scaling) {
 
     if (SDL_Init(SDL_INIT_EVERYTHING) != 0) {
         SDL_Log("Unable to initialize SDL: %s", SDL_GetError());
         return false;
     }
-    if (SDL_CreateWindowAndRenderer(width, height, SDL_WINDOW_ALLOW_HIGHDPI, &window, &renderer) != 0) {
+    if (SDL_CreateWindowAndRenderer(_width, _height, SDL_WINDOW_ALLOW_HIGHDPI, &window, &renderer) != 0) {
         SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Couldn't create window and renderer: %s", SDL_GetError());
         return false;
     }

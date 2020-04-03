@@ -105,7 +105,10 @@ bool Game::isQuitting() const {
 void Game::playMusic() {
     Mix_VolumeMusic(MUSIC_VOLUME);
     music = Mix_LoadMUS(MUSIC_FILE);
-    Mix_PlayMusic( music, -1 );
+    if (!music) {
+        printf("Mix_LoadMUS(\"%s\"): %s\n", MUSIC_FILE, Mix_GetError());
+    }
+    else Mix_PlayMusic( music, -1 );
 }
 
 void Game::initShip()
@@ -130,7 +133,9 @@ Game::Game(AvancezLib* _engine, const bool _showHitbox)
     enabled = true;
 
     initShaders();
-
     initShip();
+
+    Mix_OpenAudio(22050, MIX_DEFAULT_FORMAT, 2, 4096);
+    playMusic();
 }
 

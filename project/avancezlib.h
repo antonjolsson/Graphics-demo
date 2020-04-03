@@ -62,7 +62,7 @@ public:
 	void quit();
 
 	// Creates the main window. Returns true on success.
-    bool init(int width, int height, unsigned int _scaling);
+    bool init(int _width, int _height, unsigned int _scaling);
 
 	// Clears the screen and draws all sprites and texts which have been drawn
 	// since the last update call.
