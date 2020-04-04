@@ -7,6 +7,7 @@ add_subdirectory ( ${CMAKE_SOURCE_DIR}/external_src/imgui-1.51 ${CMAKE_CURRENT_B
 set_target_properties(imgui PROPERTIES FOLDER external)
 
 find_package ( SDL2 REQUIRED )
+find_package ( SDL2_MIXER REQUIRED )
 find_package ( glm REQUIRED )
 find_package ( GLEW REQUIRED )
 find_package ( OpenGL REQUIRED )
@@ -35,6 +36,7 @@ target_include_directories( ${PROJECT_NAME}
     ${CMAKE_SOURCE_DIR}/external_src/stb-master
     ${CMAKE_SOURCE_DIR}/external_src/tinyobjloader-1.0.6
     ${SDL2_INCLUDE_DIRS}
+    ${SDL2_MIXER_INCLUDE_DIRS}
     ${GLM_INCLUDE_DIRS}
     ${GLEW_INCLUDE_DIRS}
     ${OPENGL_INCLUDE_DIR}
@@ -44,6 +46,7 @@ target_link_libraries ( ${PROJECT_NAME}
     PUBLIC
     imgui
     ${SDL2_LIBRARIES}
+    ${SDL2_MIXER_LIBRARIES}
     ${GLEW_LIBRARIES}
     ${OPENGL_LIBRARY}
     )
