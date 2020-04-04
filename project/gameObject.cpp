@@ -51,7 +51,7 @@ void GameObject::send(Message _m) {
 	}
 }
 
-void GameObject::receive(Message _m) {
+void GameObject::receive(const Message _m) {
     if (!isEnabled()) return;
     switch (_m) {
         case MOVED_LEFT: case MOVED_RIGHT:
@@ -99,18 +99,11 @@ bool GameObject::isInvincibleAfterHit() {
     return behaviour.isInvincibleAfterHit();
 }
 
-void GameObject::playSound(const char *_path, const int _volume) {
-    sound = Mix_LoadWAV(_path);
-    Mix_VolumeChunk(sound, _volume);
-    Mix_PlayChannel(-1, sound, 0);
-}
-
 void GameObject::init(const int hp, const int _attackDamage) {
     init();
 }
 
-void GameObject::create(const Tag _type, const Mode _mode, const glm::vec3 _position) {
-    type = _type;
+void GameObject::create(const Mode _mode, const glm::vec3 _position) {
     mode = _mode;
     position = _position;
 }

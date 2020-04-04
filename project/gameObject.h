@@ -14,8 +14,6 @@ enum Message {
         OUT_OF_WATER, PLAYER_HIT, OBJ_IN_AIR, MOVED_LEFT, MOVED_RIGHT, NO_INPUT, BULLET_HIT, MSG_EXPLODED,
         HIT_FROM_LEFT, HIT_FROM_RIGHT, HIT_FROM_TOP, HIT_FROM_BOTTOM};
 
-enum Tag {PLAYER, ENEMY, GROUND, WATER, BULLET, NONE, ICE};
-
 enum Mode {IDLE, IN_AIR, IN_AIR_FIRING, RUNNING, RUNNING_FIRING, FIRING, EXPLODING_MODE, TAKEN_DAMAGE, FLYING};
 
 class Component;
@@ -33,8 +31,6 @@ protected:
 	std::vector<GameObject*> receivers;
 	std::vector<Component*> components;
 
-    Mix_Chunk* sound = nullptr;
-
     bool gameOver = false;
     bool levelWon = false;
 
@@ -47,20 +43,10 @@ public:
 
     bool isLevelWon() const;
 
-    const std::map<Tag, Message> objectHitMessageMap {
-            {PLAYER, PLAYER_HIT},
-            {ENEMY, ENEMY_HIT},
-            {GROUND, GROUND_HIT},
-            {ICE, ICE_HIT},
-            {WATER, WATER_HIT},
-            {BULLET, BULLET_HIT},
-    };
-
     glm::vec3 position {0};
     glm::vec3 rotation { 0};
     glm::vec3 scale{ 0};
 
-    Tag type = NONE;
     Mode mode = IDLE;
 
     bool destroyedForever = false;
@@ -91,15 +77,11 @@ public:
 
     bool isInvincibleAfterHit();
 
-    void playSound(const char *_path, int _volume);
-
     void addComponents(const std::vector<Component *> &_components);
 
     virtual void init();
     virtual void update(float _dt);
     void init(int hp, int _attackDamage);
 
-    void update(float _dt, int _initialHP, int _attackDamage);
-
-    void create(Tag _type, Mode _mode, const glm::vec3 _position);
+    void create(Mode _mode, const glm::vec3 _position);
 };

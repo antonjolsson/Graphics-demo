@@ -661,6 +661,9 @@ int main(int argc, char* argv[])
 	g_window = labhelper::init_window_SDL("Foreign Attack", WIN_WIDTH, WIN_HEIGHT, antiAliasSamples);
 
 	AvancezLib engine;
+
+	Mix_OpenAudio(22050, MIX_DEFAULT_FORMAT, 2, 4096);
+	
 	Game game(&engine, SHOW_HITBOX);
 	
 	initGL();

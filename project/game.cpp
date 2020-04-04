@@ -6,6 +6,8 @@
 #include "fbo.h"
 #include <labhelper.h>
 
+#include "AudioPlayer.h"
+
 void Game::initEnemies(AvancezLib *_engine, bool debug) {
     
 }
@@ -85,7 +87,7 @@ void Game::destroy() {
     delete bulletCollObjects;
     ////delete gui;
 
-    music = nullptr;
+    delete audioPlayer;
 }
 
 void Game::receive(Message _m) {
@@ -100,15 +102,6 @@ void Game::receive(Message _m) {
 
 bool Game::isQuitting() const {
     return quit;
-}
-
-void Game::playMusic() {
-    Mix_VolumeMusic(MUSIC_VOLUME);
-    music = Mix_LoadMUS(MUSIC_FILE);
-    if (!music) {
-        printf("Mix_LoadMUS(\"%s\"): %s\n", MUSIC_FILE, Mix_GetError());
-    }
-    else Mix_PlayMusic( music, -1 );
 }
 
 void Game::initShip()
@@ -132,10 +125,13 @@ Game::Game(AvancezLib* _engine, const bool _showHitbox)
     showHitBox = _showHitbox;
     enabled = true;
 
+    audioPlayer = new GameAudioPlayer();
     initShaders();
     initShip();
+}
 
-    Mix_OpenAudio(22050, MIX_DEFAULT_FORMAT, 2, 4096);
-    playMusic();
+GameAudioPlayer::GameAudioPlayer()
+{
+    //playMusic(backgroundMusic);
 }
 

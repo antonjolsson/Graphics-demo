@@ -5,16 +5,23 @@
 #include <GL/glew.h>
 #include <SDL_audio.h>
 #include "ship.h"
-#include "../external/SDL2_mixer/include/SDL_mixer.h"
+#include "AudioPlayer.h"
 
 //#include "fbo.h"
+
+class GameAudioPlayer : public AudioPlayer
+{
+
+    Audio backgroundMusic{ "../project/resource/AirwolfExtendedVersion.mp3", SDL_MIX_MAXVOLUME / 4, true };
+
+public:
+
+    GameAudioPlayer();
+};
 
 class Game : public GameObject {
 
     const unsigned int MAX_NUM_GAME_OBJECTS = 10000;
-
-    const char* MUSIC_FILE = "../project/resource/AirwolfExtendedVersion.mp3";
-    const int MUSIC_VOLUME = SDL_MIX_MAXVOLUME / 4;
 
     unsigned int gameWidth = 0;
     unsigned int gameHeight = 0;
@@ -35,8 +42,6 @@ class Game : public GameObject {
 
     //GUI *gui = nullptr;
 
-    Mix_Music* music = nullptr;
-
 	std::map<Message, int> eventScoreMap {};
 
 	unsigned int score = 0;
@@ -50,7 +55,8 @@ class Game : public GameObject {
     GLuint particleProgram{};
     GLuint backgroundProgram{};
     GLuint heightfieldProgram{};
-	
+
+    GameAudioPlayer* audioPlayer;
 
 public:
 
@@ -66,8 +72,6 @@ public:
 	void receive(Message _m) override;
 	void destroy() override;
     bool isQuitting() const;
-
-    void playMusic();
 
     void initShip();
 
