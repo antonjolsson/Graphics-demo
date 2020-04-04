@@ -8,6 +8,8 @@ class AudioPlayer : public Component
 
 protected:
 
+	const int DEFAULT_EFFECT_VOL = SDL_MIX_MAXVOLUME / 2;
+
 	struct Audio
 	{
 		const char* AUDIO_FILE{};

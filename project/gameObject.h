@@ -22,11 +22,14 @@ class GameObject
 {
 protected:
 
-    bool enabled = false;
+	struct Transform
+	{
+		glm::vec3 position { 0 };
+        glm::vec3 rotation { 0 };
+        glm::vec3 scale { 1 };
+	} transform;
 
-    const char* ENEMY_HIT_SOUND = "resource/sounds/EnemyDamage.wav";
-    const int DEFAULT_EFFECT_VOL = SDL_MIX_MAXVOLUME / 2;
-    const int HIT_SOUND_VOL = SDL_MIX_MAXVOLUME / 3;
+    bool enabled = false;
 
 	std::vector<GameObject*> receivers;
 	std::vector<Component*> components;
@@ -35,6 +38,17 @@ protected:
     bool levelWon = false;
 
 public:
+
+	void setPosition(glm::vec3 _position);
+
+	void setRotation(const glm::vec3 _rotation);
+
+	void setScale(const glm::vec3 _scale);
+
+	const Transform getTransform(void) const;
+	
+	GameObject() = default;
+	GameObject(glm::vec3 _position, glm::vec3 _rotation, glm::vec3 _scale);
 	
     void setEnabled(bool _enabled);
     bool isEnabled() const;
@@ -42,10 +56,6 @@ public:
     bool isGameOver() const;
 
     bool isLevelWon() const;
-
-    glm::vec3 position {0};
-    glm::vec3 rotation { 0};
-    glm::vec3 scale{ 0};
 
     Mode mode = IDLE;
 
@@ -63,15 +73,8 @@ public:
 
     virtual void create(unsigned int _gameWidth);
 
-    template<typename T> T* getComponent() {
-        for (Component * c : components) {
-            T* t = dynamic_cast<T*>(c);  //ugly but it works...
-            if (t != nullptr) {
-                return t;
-            }
-        }
-        return nullptr;
-    }
+    template<typename T>
+	T* getComponent();
 
     int getAttackDamage();
 
@@ -85,3 +88,17 @@ public:
 
     void create(Mode _mode, const glm::vec3 _position);
 };
+
+template <typename T>
+T* GameObject::getComponent()
+{
+	for (Component* c : components)
+	{
+		T* t = dynamic_cast<T*>(c); //ugly but it works...
+		if (t != nullptr)
+		{
+			return t;
+		}
+	}
+	return nullptr;
+}

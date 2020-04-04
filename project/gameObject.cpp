@@ -103,9 +103,29 @@ void GameObject::init(const int hp, const int _attackDamage) {
     init();
 }
 
-void GameObject::create(const Mode _mode, const glm::vec3 _position) {
-    mode = _mode;
-    position = _position;
+void GameObject::setPosition(const glm::vec3 _position)
+{
+    transform.position = _position;
+}
+
+void GameObject::setRotation(const glm::vec3 _rotation)
+{
+    transform.rotation = _rotation;
+}
+
+void GameObject::setScale(const glm::vec3 _scale)
+{
+    transform.scale = _scale;
+}
+
+const GameObject::Transform GameObject::getTransform() const
+{
+    return transform;
+}
+
+GameObject::GameObject(const glm::vec3 _position, const glm::vec3 _rotation, const glm::vec3 _scale)
+{
+    transform = { _position, _rotation, _scale };
 }
 
 void GameObject::setEnabled(const bool _enabled)
