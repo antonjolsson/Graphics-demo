@@ -11,13 +11,6 @@ void ParticleSystem::initPosBuffer()
 
 void ParticleSystem::initTexBuffer()
 {
-	/*float fireTexCoords[] = {
-	0.0f, 0.0f, // (u,v) for v0 
-	0.0f, 1.0f, // (u,v) for v1
-	1.0f, 1.0f, // (u,v) for v2
-	1.0f, 0.0f // (u,v) for v3
-	};*/
-
 	glGenBuffers(1, &texBuffer);
 	glBindBuffer(GL_ARRAY_BUFFER, texBuffer);
 	//glBufferData(GL_ARRAY_BUFFER, sizeof(fireTexCoords), fireTexCoords, GL_STATIC_DRAW);

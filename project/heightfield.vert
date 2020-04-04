@@ -32,9 +32,9 @@ vec3 getHeightAdjustedPos(vec2 offset) {
 }
 
 vec3 getEstnormal() {
-	vec3 posA = getHeightAdjustedPos(vec2(1, -1));
-	vec3 posB = getHeightAdjustedPos(vec2(-1, 1));
-	vec3 posC = getHeightAdjustedPos(vec2(1, 1));
+	vec3 posA = getHeightAdjustedPos(vec2(0.001, -0.001));
+	vec3 posB = getHeightAdjustedPos(vec2(-0.001, 0.001));
+	vec3 posC = getHeightAdjustedPos(vec2(0.001, 0.001));
 	return normalize(cross(posB - posA, posC - posA));
 }
 

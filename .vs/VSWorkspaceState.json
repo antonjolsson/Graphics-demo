@@ -1,8 +1,16 @@
 {
   "ExpandedNodes": [
     "",
-    "\\build"
+    "\\build",
+    "\\build\\CMakeFiles",
+    "\\build\\project",
+    "\\external",
+    "\\external\\SDL2_mixer",
+    "\\external\\SDL2_mixer\\lib",
+    "\\external\\SDL2_mixer\\lib\\x64",
+    "\\external_src",
+    "\\Local settings (.vs)"
   ],
-  "SelectedNode": "\\build\\computer-graphics-labs.sln",
+  "SelectedNode": "\\build\\project\\project.sln",
   "PreviewInSolutionExplorer": false
 }

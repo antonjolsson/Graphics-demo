@@ -126,6 +126,7 @@ Game::Game(AvancezLib* _engine, const bool _showHitbox)
     enabled = true;
 
     audioPlayer = new GameAudioPlayer();
+    components.push_back(audioPlayer);
     initShaders();
     initShip();
 }

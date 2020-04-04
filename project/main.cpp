@@ -93,7 +93,7 @@ GLuint heightfieldProgram;
 ///////////////////////////////////////////////////////////////////////////////
 // Environment
 ///////////////////////////////////////////////////////////////////////////////
-float environmentMultiplier = 1.5f; // 1.5f
+float environmentMultiplier = 2.5f; // 1.5f - original code
 GLuint environmentMap, irradianceMap, reflectionMap;
 const std::string ENVMAP_BASE_NAME = "001";
 
