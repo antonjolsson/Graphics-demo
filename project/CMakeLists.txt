@@ -31,6 +31,8 @@ add_executable ( ${PROJECT_NAME}
     AudioPlayer.h
     AudioPlayer.cpp
     gameObject.h
+    camera.h
+    camera.cpp
     component.h
     ${SHADERS}
      "component.cpp" "game.cpp" "gameObject.cpp")

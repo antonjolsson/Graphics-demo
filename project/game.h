@@ -17,15 +17,12 @@ class GameAudioPlayer : public AudioPlayer
 public:
 
     GameAudioPlayer();
+	
 };
 
 class Game : public GameObject {
 
     const unsigned int MAX_NUM_GAME_OBJECTS = 10000;
-
-    unsigned int gameWidth = 0;
-    unsigned int gameHeight = 0;
-    unsigned int levelWidth = 0;
 
     SDL_Color clearColor = {};
 
@@ -62,10 +59,7 @@ public:
 
     void initEnemies(AvancezLib *_engine, bool debug);
   
-    virtual void init(unsigned int _gameWidth, unsigned int _gameHeight, AvancezLib* newEngine, SDL_Color _clearColor,
-            bool debug);
     //void initGUI();
-    void initPlayer();
     void init() override;
 	void update(float _dt) override;
 	virtual void draw();
@@ -73,8 +67,11 @@ public:
 	void destroy() override;
     bool isQuitting() const;
 
-    void initShip();
+    void initPlayer();
 
     void initShaders();
+    void initTerrain(AvancezLib* _engine, const bool _showHitbox);
+    void initBackground(AvancezLib* _engine, const bool _showHitbox);
+    void initCamera(AvancezLib* _engine);
     Game(AvancezLib* _engine, const bool _showHitbox);
 };

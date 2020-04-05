@@ -5,7 +5,7 @@
 #include "game.h"
 #include "fbo.h"
 #include <labhelper.h>
-
+#include "camera.h"
 #include "AudioPlayer.h"
 
 void Game::initEnemies(AvancezLib *_engine, bool debug) {
@@ -31,23 +31,6 @@ void Game::initEnemies(AvancezLib *_engine, bool debug) {
     bgCollObjects.insert(crazyRazy);
 }*/
 
-void Game::init(unsigned int _gameWidth, unsigned int _gameHeight, AvancezLib *newEngine, const SDL_Color _clearColor,
-        bool debug) {
-    gameWidth = _gameWidth;
-    gameHeight = _gameHeight;
-    engine = newEngine;
-    clearColor = _clearColor;
-
-    playerCollObjects = new ObjectPool<GameObject>();
-    enemyCollObjects = new ObjectPool<GameObject>();
-    bulletCollObjects = new ObjectPool<GameObject>();
-
-    initEnemies(newEngine, debug);
-    //initGUI();
-
-    enabled = true;
-}
-
 /*void Game::initGUI() {
     gui = new GUI(gameWidth, gameHeight);
     auto* render = new GUIRenderComponent();
@@ -68,6 +51,7 @@ void Game::update(const float _dt) {
         destroy();
         engine->quit();
     }
+    ship->update(_dt);
     for (auto gameObject : gameObjects)
         gameObject->update(_dt);
     //gui->update(score);
@@ -104,9 +88,10 @@ bool Game::isQuitting() const {
     return quit;
 }
 
-void Game::initShip()
+void Game::initPlayer()
 {
     ship = new Ship(shaderProgram);
+    receivers.push_back(ship);
 }
 
 void Game::initShaders()
@@ -119,6 +104,23 @@ void Game::initShaders()
     heightfieldProgram = labhelper::loadShaderProgram("../project/heightfield.vert", "../project/shading.frag");
 }
 
+void Game::initTerrain(AvancezLib* _engine, const bool _showHitbox)
+{
+	
+	
+}
+
+void Game::initBackground(AvancezLib* _engine, const bool _showHitbox)
+{
+	
+}
+
+void Game::initCamera(AvancezLib* _engine)
+{
+    //auto* camera = new Camera(_engine);
+    receivers.push_back(new Camera(_engine));
+}
+
 Game::Game(AvancezLib* _engine, const bool _showHitbox)
 {
     engine = _engine;
@@ -127,8 +129,13 @@ Game::Game(AvancezLib* _engine, const bool _showHitbox)
 
     audioPlayer = new GameAudioPlayer();
     components.push_back(audioPlayer);
+
+    initCamera(_engine);
     initShaders();
-    initShip();
+    initPlayer();
+    initTerrain(_engine, _showHitbox);
+    initEnemies(_engine, _showHitbox);
+    initBackground(_engine, _showHitbox);
 }
 
 GameAudioPlayer::GameAudioPlayer()
