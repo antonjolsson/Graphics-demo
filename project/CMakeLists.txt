@@ -27,6 +27,8 @@ add_executable ( ${PROJECT_NAME}
     ship.cpp
     renderer.h
     renderer.cpp
+    rigidBody.h
+    rigidBody.cpp
     game.h
     AudioPlayer.h
     AudioPlayer.cpp

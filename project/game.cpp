@@ -90,7 +90,7 @@ bool Game::isQuitting() const {
 
 void Game::initPlayer()
 {
-    ship = new Ship(shaderProgram);
+    ship = new ship::Ship(shaderProgram);
     receivers.push_back(ship);
 }
 

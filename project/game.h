@@ -26,7 +26,7 @@ class Game : public GameObject {
 
     SDL_Color clearColor = {};
 
-    Ship* ship{};
+    ship::Ship* ship{};
 	
     std::set<GameObject*> gameObjects;
 	

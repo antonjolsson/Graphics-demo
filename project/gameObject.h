@@ -47,7 +47,7 @@ public:
 
 	void setScale(const glm::vec3 _scale);
 
-	const Transform getTransform(void) const;
+	Transform& getTransform(void);
 	
 	GameObject() = default;
 	GameObject(glm::vec3 _position, glm::vec3 _rotation, glm::vec3 _scale);

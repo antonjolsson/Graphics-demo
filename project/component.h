@@ -26,7 +26,7 @@ public:
 	virtual void create(AvancezLib* _engine, GameObject* _go, std::set<GameObject*>* _gameObjects);
 
 	virtual void init() {}
-	virtual void update(float _dt) = 0;
+	virtual void update(float _dt) {};
 	virtual void receive(int _message);
 	virtual void destroy() {}
 };

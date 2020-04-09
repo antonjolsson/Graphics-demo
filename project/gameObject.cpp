@@ -118,7 +118,7 @@ void GameObject::setScale(const glm::vec3 _scale)
     transform.scale = _scale;
 }
 
-const GameObject::Transform GameObject::getTransform() const
+GameObject::Transform& GameObject::getTransform()
 {
     return transform;
 }
