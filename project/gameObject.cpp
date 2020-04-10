@@ -1,5 +1,4 @@
 
-#include "avancezlib.h"
 #include "gameObject.h"
 
 
@@ -99,7 +98,7 @@ bool GameObject::isInvincibleAfterHit() {
     return behaviour.isInvincibleAfterHit();
 }
 
-void GameObject::init(const int hp, const int _attackDamage) {
+void GameObject::init(const int _hp, const int _attackDamage) {
     init();
 }
 

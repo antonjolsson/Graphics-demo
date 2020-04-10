@@ -86,9 +86,7 @@ public:
 
     virtual void init();
     virtual void update(float _dt);
-    void init(int hp, int _attackDamage);
-
-    void create(Mode _mode, const glm::vec3 _position);
+    void init(int _hp, int _attackDamage);
 };
 
 template <typename T>

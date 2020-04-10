@@ -37,7 +37,7 @@ public:
 };*/
 
 
-class AvancezLib
+class Engine
 {
     const char* WINDOW_TITLE = "Mega Man";
     const char* ICON_FILE = "resource/icon.bmp";

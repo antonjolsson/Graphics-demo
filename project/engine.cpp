@@ -5,14 +5,14 @@
 // Created by Anton Olsson on 2020-01-29.
 //
 
-#include "avancezlib.h"
+#include "engine.h"
 
 #include <SDL.h>
 
 #include "../external/SDL2_mixer/include/SDL_mixer.h"
 
 
-bool AvancezLib::init(const int _width, const int _height, const unsigned int _scaling) {
+bool Engine::init(const int _width, const int _height, const unsigned int _scaling) {
 
     if (SDL_Init(SDL_INIT_EVERYTHING) != 0) {
         SDL_Log("Unable to initialize SDL: %s", SDL_GetError());
@@ -35,11 +35,11 @@ bool AvancezLib::init(const int _width, const int _height, const unsigned int _s
     return true;
 }
 
-void AvancezLib::initGameControllers() { //Check for joysticks
+void Engine::initGameControllers() { //Check for joysticks
     if (SDL_NumJoysticks() >= 1) gameController = SDL_GameControllerOpen(0);
 }
 
-void AvancezLib::destroy() {
+void Engine::destroy() {
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
     //TTF_CloseFont(text.font);
@@ -50,30 +50,30 @@ void AvancezLib::destroy() {
     SDL_Quit();
 }
 
-AvancezLib::KeyStatus& AvancezLib::getKeyStatus() {
+Engine::KeyStatus& Engine::getKeyStatus() {
     return keys;
 }
 
 // Time in seconds
-float AvancezLib::getElapsedTime() {
+float Engine::getElapsedTime() {
     return (float) SDL_GetTicks() / 1000;
 }
 
-/*Sprite *AvancezLib::createSprite(const char *filePath) {
+/*Sprite *Engine::createSprite(const char *filePath) {
     SDL_Texture* texture = IMG_LoadTexture(renderer, filePath);
     return new Sprite(renderer, texture, scaling);;
 }
 
-Sprite *AvancezLib::createColliderSprite() {
+Sprite *Engine::createColliderSprite() {
     return new Sprite(renderer, nullptr, scaling);
 }*/
 
-void AvancezLib::quit() {
+void Engine::quit() {
     destroy();
     exit(0);
 }
 
-void AvancezLib::processInput() {
+void Engine::processInput() {
     SDL_Event e;
     while (SDL_PollEvent(&e)) {
         // check keyboard state (which keys are still pressed)
@@ -95,17 +95,17 @@ void AvancezLib::processInput() {
     }
 }
 
-void AvancezLib::swapBuffers() {
+void Engine::swapBuffers() {
     SDL_RenderPresent(renderer);
 }
 
-void AvancezLib::clearWindow(const SDL_Color color) {
+void Engine::clearWindow(const SDL_Color color) {
     SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, color.a);
     SDL_RenderClear(renderer);
 }
 
 // Useful for engine extension
-int AvancezLib::getRandomInt(int min, int max) {
+int Engine::getRandomInt(int min, int max) {
     std::mt19937 rng(randomSeed());
     std::uniform_int_distribution<int> uniformIntDist(min, max - 1);
     return uniformIntDist(rng);
@@ -127,7 +127,7 @@ void Sprite::draw(Vector2D screenPos, Vector2D sheetPos, Vector2D srcDims, Vecto
             xFlipped ? SDL_FLIP_HORIZONTAL : SDL_FLIP_NONE);
 }
 
-void AvancezLib::drawText(int x, int y, const char *msg, TextAlign pos, SDL_Color color) {
+void Engine::drawText(int x, int y, const char *msg, TextAlign pos, SDL_Color color) {
     //text.surface = TTF_RenderText_Solid(text.font, msg, color);
     text.texture = SDL_CreateTextureFromSurface(renderer, text.surface);
     int texW, texH = 0;
@@ -142,11 +142,11 @@ void AvancezLib::drawText(int x, int y, const char *msg, TextAlign pos, SDL_Colo
     SDL_RenderCopy(renderer, text.texture, nullptr, &dstRect);
 }
 
-void AvancezLib::setFont(const char *filePath, int fontSize, const SDL_Color color) {
+void Engine::setFont(const char *filePath, int fontSize, const SDL_Color color) {
     //text.font = TTF_OpenFont(filePath, fontSize);
 }*/
 
-/*Sprite *AvancezLib::createSprite(const SpriteSheet& sheet) {
+/*Sprite *Engine::createSprite(const SpriteSheet& sheet) {
     SDL_Surface* surface = IMG_Load(sheet.filePath.c_str());
     if (!surface) {
         printf("IMG_Load: %s\n", IMG_GetError());

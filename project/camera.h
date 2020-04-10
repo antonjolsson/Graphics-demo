@@ -4,10 +4,12 @@
 
 class Camera :public GameObject
 {
-
+	
+	Engine* engine;
+	
 public:
 	
-	Camera(AvancezLib* _engine);
-	AvancezLib* engine;
+	Camera(Engine* _engine);
+	
 };
 

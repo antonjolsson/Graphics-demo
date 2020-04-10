@@ -10,7 +10,12 @@ bool Behaviour::isInvincibleAfterHit() const
 	return invincibleAfterHit_;
 }
 
-void Behaviour::update(float dt)
+void Behaviour::update(float _dt)
 {
 	
+}
+
+Behaviour::Behaviour(GameObject* _go, Engine* _engine) {
+	go = _go;
+	engine = _engine;
 }

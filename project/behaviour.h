@@ -14,9 +14,10 @@ private:
 
 public:
 
-	virtual void decreaseHP(int damage) {};
+	virtual void decreaseHP(int _damage) {};
 
-	void update(float dt) override;
-	
+	void update(float _dt) override;
+
+	Behaviour(GameObject* _go, Engine* _engine);
 };
 

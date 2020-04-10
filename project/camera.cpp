@@ -1,6 +1,6 @@
 #include "camera.h"
 
-Camera::Camera(AvancezLib* _engine)
+Camera::Camera(Engine* _engine)
 {
 	engine = _engine;
 }

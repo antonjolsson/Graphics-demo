@@ -4,8 +4,9 @@
 #include "gui.h"
 #include <GL/glew.h>
 #include <SDL_audio.h>
-#include "ship.h"
+#include "Ship.h"
 #include "AudioPlayer.h"
+#include "engine.h"
 
 //#include "fbo.h"
 
@@ -26,11 +27,11 @@ class Game : public GameObject {
 
     SDL_Color clearColor = {};
 
-    ship::Ship* ship{};
+    Ship *ship;
 	
     std::set<GameObject*> gameObjects;
 	
-	AvancezLib* engine = nullptr;
+    Engine* engine = nullptr;
 
     ObjectPool<GameObject>* playerCollObjects{};
     ObjectPool<GameObject>* enemyCollObjects{};
@@ -57,7 +58,7 @@ class Game : public GameObject {
 
 public:
 
-    void initEnemies(AvancezLib *_engine, bool debug);
+    void initEnemies(Engine*_engine, bool debug);
   
     //void initGUI();
     void init() override;
@@ -70,8 +71,8 @@ public:
     void initPlayer();
 
     void initShaders();
-    void initTerrain(AvancezLib* _engine, const bool _showHitbox);
-    void initBackground(AvancezLib* _engine, const bool _showHitbox);
-    void initCamera(AvancezLib* _engine);
-    Game(AvancezLib* _engine, const bool _showHitbox);
+    void initTerrain(Engine* _engine, const bool _showHitbox);
+    void initBackground(Engine* _engine, const bool _showHitbox);
+    void initCamera(Engine* _engine);
+    Game(Engine* _engine, const bool _showHitbox);
 };

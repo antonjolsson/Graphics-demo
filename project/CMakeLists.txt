@@ -18,8 +18,8 @@ add_executable ( ${PROJECT_NAME}
     heightfield.cpp
     ParticleSystem.cpp
     ParticleSystem.h
-    avancezlib.cpp
-    avancezlib.h
+    engine.cpp
+    engine.h
     vector2D.h
     behaviour.h
     behaviour.cpp

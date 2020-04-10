@@ -1,6 +1,4 @@
 
-
-#include "avancezlib.h"
 #include "game.h"
 #include "heightfield.h"
 #ifdef _WIN32
@@ -660,7 +658,7 @@ int main(int argc, char* argv[])
 	
 	g_window = labhelper::init_window_SDL("Foreign Attack", WIN_WIDTH, WIN_HEIGHT, antiAliasSamples);
 
-	AvancezLib engine;
+	Engine engine;
 
 	Mix_OpenAudio(22050, MIX_DEFAULT_FORMAT, 2, 4096);
 	

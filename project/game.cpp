@@ -7,12 +7,13 @@
 #include <labhelper.h>
 #include "camera.h"
 #include "AudioPlayer.h"
+#include "engine.h"
 
-void Game::initEnemies(AvancezLib *_engine, bool debug) {
+void Game::initEnemies(Engine*_engine, bool debug) {
     
 }
 
-/*void Game::initCrazyRazy(AvancezLib *_engine, bool debug, int index) {
+/*void Game::initCrazyRazy(Engine *_engine, bool debug, int index) {
     auto* crazyRazy = new CrazyRazy();
     crazyRazy->create(gameWidth, crazyRazy->TYPE, crazyRazy->INITIAL_MODE, crazyRazy->getStartPos(index));
     gameObjects.insert(crazyRazy);
@@ -46,7 +47,7 @@ void Game::init() {
 }
 
 void Game::update(const float _dt) {
-    const AvancezLib::KeyStatus keys = engine->getKeyStatus();
+    const Engine::KeyStatus keys = engine->getKeyStatus();
     if (keys.quit) {
         destroy();
         engine->quit();
@@ -90,8 +91,7 @@ bool Game::isQuitting() const {
 
 void Game::initPlayer()
 {
-    ship = new ship::Ship(shaderProgram);
-    receivers.push_back(ship);
+    
 }
 
 void Game::initShaders()
@@ -104,24 +104,24 @@ void Game::initShaders()
     heightfieldProgram = labhelper::loadShaderProgram("../project/heightfield.vert", "../project/shading.frag");
 }
 
-void Game::initTerrain(AvancezLib* _engine, const bool _showHitbox)
+void Game::initTerrain(Engine* _engine, const bool _showHitbox)
 {
 	
 	
 }
 
-void Game::initBackground(AvancezLib* _engine, const bool _showHitbox)
+void Game::initBackground(Engine* _engine, const bool _showHitbox)
 {
 	
 }
 
-void Game::initCamera(AvancezLib* _engine)
+void Game::initCamera(Engine* _engine)
 {
     //auto* camera = new Camera(_engine);
     receivers.push_back(new Camera(_engine));
 }
 
-Game::Game(AvancezLib* _engine, const bool _showHitbox)
+Game::Game(Engine* _engine, const bool _showHitbox)
 {
     engine = _engine;
     showHitBox = _showHitbox;
@@ -132,10 +132,13 @@ Game::Game(AvancezLib* _engine, const bool _showHitbox)
 
     initCamera(_engine);
     initShaders();
-    initPlayer();
+    ship = new Ship(_engine, shaderProgram, _showHitbox);
+    
     initTerrain(_engine, _showHitbox);
     initEnemies(_engine, _showHitbox);
     initBackground(_engine, _showHitbox);
+	
+    receivers.push_back(ship);
 }
 
 GameAudioPlayer::GameAudioPlayer()
