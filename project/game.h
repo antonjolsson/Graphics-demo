@@ -64,7 +64,7 @@ public:
     void init() override;
 	void update(float _dt) override;
 	virtual void draw();
-	void receive(Message _m) override;
+	void readMessages() override;
 	void destroy() override;
     bool isQuitting() const;
 

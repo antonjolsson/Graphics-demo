@@ -525,14 +525,14 @@ bool handleEvents(void)
 		{
 			cameraPosition -= deltaTime * cameraSpeed * cameraDirection;
 		}
-		if (state[SDL_SCANCODE_A])
+		/*if (state[SDL_SCANCODE_A])
 		{
 			cameraPosition -= deltaTime * cameraSpeed * cameraRight;
 		}
 		if (state[SDL_SCANCODE_D])
 		{
 			cameraPosition += deltaTime * cameraSpeed * cameraRight;
-		}
+		}*/
 		if (state[SDL_SCANCODE_Q])
 		{
 			cameraPosition -= deltaTime * cameraSpeed * worldUp;
@@ -541,7 +541,7 @@ bool handleEvents(void)
 		{
 			cameraPosition += deltaTime * cameraSpeed * worldUp;
 		}
-		if (state[SDL_SCANCODE_UP])
+		/*if (state[SDL_SCANCODE_UP])
 		{
 			shipSpeed += acceleration;
 			accelerating = true;
@@ -567,7 +567,7 @@ bool handleEvents(void)
 			if (shipXRotation > CLAMP_ROT_TO_ZERO_SPEED) shipXRotationSpeed = -MAX_SHIP_X_ROTATION_SPEED;
 			else if (shipXRotation < -CLAMP_ROT_TO_ZERO_SPEED) shipXRotationSpeed = MAX_SHIP_X_ROTATION_SPEED;
 			else shipXRotationSpeed = 0;
-		}
+		}*/
 	}
 	return quitEvent;
 }
@@ -619,14 +619,14 @@ void gui()
 }
 
 void updateShip(void) {
-	shipSpeed *= pow(dragCoeff, -abs(shipSpeed));
+	/*shipSpeed *= pow(dragCoeff, -abs(shipSpeed));
 	if (FPS_ADJ_SPEED) shipSpeed = shipSpeed / (1000.f / deltaTime / 1000.f / OPT_FRAMERATE);
 	if (xRotation)
 	{
 		if (shipXRotationSpeed == 0 && abs(shipXRotation) < CLAMP_ROT_TO_ZERO_SPEED) shipXRotation = 0.f;
 		else shipXRotation += shipXRotationSpeed;
 	}
-	shipYRotation += shipYRotationSpeed;
+	shipYRotation += shipYRotationSpeed;*/
 
 	const mat4 rotMatrix = glm::eulerAngleYXZ(shipYRotation, shipXRotation, 0.f);
 	const vec4 translation = fighterModelMatrix[3];
@@ -666,10 +666,10 @@ int main(int argc, char* argv[])
 	
 	initGL();
 
-	auto stopRendering = false;
+	auto quit = false;
 	const auto startTime = std::chrono::system_clock::now();
 
-	while(!stopRendering)
+	while(!game.isQuitting())
 	{
 		//update currentTime
 		std::chrono::duration<float> timeSinceStart = std::chrono::system_clock::now() - startTime;
@@ -695,7 +695,7 @@ int main(int argc, char* argv[])
 		SDL_GL_SwapWindow(g_window);
 
 		// check events (keyboard among other)
-		stopRendering = handleEvents();
+		//quit = handleEvents();
 	}
 	// Free Models
 	freeModel(fighterModel);

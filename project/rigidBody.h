@@ -32,7 +32,14 @@ class RigidBody : public Component
 	//bool useGravity = false; TODO: Implement
 
 	bool accelerating = false;
-	
+
+public:
+	void setZeroAcc();
+	void alterAcceleration(glm::vec3 _vec);
+	void setRotationVelocity(glm::vec3 _velocity);
+	void setXRotationVel(float _x);
+
+private:
 	void applyDrag();
 
 	void setRotation(bool _frozenPos, float& _rotVelocity, float _resetRotSpeedRot, float& _position) const;
@@ -40,6 +47,5 @@ class RigidBody : public Component
 public:
 
 	void update(float _dt) override;
-	RigidBody(GameObject* _go, const float _dragCoeff, const float _xAcceleration, const float _maxXRot, 
-		const float _maxXRotSpeed, const float _maxYRotSpeed, const float _resetRotSpeed);
+	RigidBody(GameObject* _go, float _dragCoeff);
 };

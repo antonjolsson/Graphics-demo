@@ -67,24 +67,25 @@ public:
 	// Clears the screen and draws all sprites and texts which have been drawn
 	// since the last update call.
 	// If update returns false, the application should terminate.
-	void processInput();
 
 	void swapBuffers();
 
-	void clearWindow(SDL_Color color);
+	void clearWindow(SDL_Color _color);
 
     // Return the total time spent in the game, in seconds.
 	float getElapsedTime();
 
 	struct KeyStatus
 	{
-		bool fire; // a / gamepad a
-        bool jump; // c / gamepad b
+		bool missile; // space / gamepad a
+        bool up; // a / gamepad b
 		bool left; // left arrow
 		bool right; // right arrow
-        bool up; // left arrow
-        bool down; // right arrow
+        bool forward; // up arrow
+        bool reverse; // down arrow
 		bool quit; // escape button
+		bool machinegun; // s
+		bool down; // d
 	};
 
 	// Returns the keyboard status. If a flag is set, the corresponding key is being held down.

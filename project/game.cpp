@@ -47,11 +47,14 @@ void Game::init() {
 }
 
 void Game::update(const float _dt) {
-    const Engine::KeyStatus keys = engine->getKeyStatus();
+    /*const Engine::KeyStatus keys = engine->getKeyStatus();
     if (keys.quit) {
         destroy();
-        engine->quit();
-    }
+        //engine->quit();
+        quit = true;
+    	return;
+    }*/
+    readMessages();
     ship->update(_dt);
     for (auto gameObject : gameObjects)
         gameObject->update(_dt);
@@ -75,13 +78,19 @@ void Game::destroy() {
     delete audioPlayer;
 }
 
-void Game::receive(Message _m) {
-    switch (_m) {
+void Game::readMessages() {
+	for (Message m : mailbox) {
+		switch (m) {
+        case QUIT:
+            quit = true;
+            destroy();
+			break;
         case PLAYER_KILLED :
             send(GAME_OVER);
             break;
         default:
             break;
+		}
     }
 }
 
@@ -132,7 +141,9 @@ Game::Game(Engine* _engine, const bool _showHitbox)
 
     initCamera(_engine);
     initShaders();
-    ship = new Ship(_engine, shaderProgram, _showHitbox);
+
+    ship = new Ship(engine, shaderProgram, _showHitbox);
+    ship->addReceiver(this);
     
     initTerrain(_engine, _showHitbox);
     initEnemies(_engine, _showHitbox);

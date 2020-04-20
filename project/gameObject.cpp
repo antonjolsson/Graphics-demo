@@ -51,32 +51,39 @@ void GameObject::send(Message _m) {
 }
 
 void GameObject::receive(const Message _m) {
+    mailbox.insert(_m);
+}
+
+void GameObject::readMessages() {
     if (!isEnabled()) return;
-    switch (_m) {
+    for (Message m : mailbox) {
+	    switch (m) {
         case MOVED_LEFT: case MOVED_RIGHT:
-            sendComponents(_m);
+            sendComponents(m);
         case NO_INPUT:
-            sendComponents(_m);
+            sendComponents(m);
             break;
         case FIRE:
-            sendComponents(_m);
+            sendComponents(m);
             break;
         case BULLET_HIT: case PLAYER_HIT:
-            sendComponents(_m);
+            sendComponents(m);
             break;
         case OBJ_IN_AIR:
             mode = IN_AIR;
-            sendComponents(_m);
+            sendComponents(m);
             break;
         case GAME_OVER:
             gameOver = true;
-            sendComponents(_m);
+            sendComponents(m);
             break;
         case LEVEL_WON:
             levelWon = true;
             break;
         default: break;
+		}
     }
+    mailbox.clear();
 }
 
 void GameObject::sendComponents(Message _message) {

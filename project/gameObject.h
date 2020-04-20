@@ -38,6 +38,8 @@ protected:
 
     bool gameOver = false;
     bool levelWon = false;
+	
+	std::set<Message> mailbox;
 
 public:
 
@@ -69,9 +71,10 @@ public:
 	virtual void addComponent(Component* _component);
 	virtual void destroy();
 	virtual void addReceiver(GameObject *_go);
-	virtual void receive(Message _m);
+	virtual void readMessages();
 	virtual void send(Message _m);
-    void sendComponents(Message _message);
+	void receive(Message _m);
+	void sendComponents(Message _message);
 
     virtual void create(unsigned int _gameWidth);
 

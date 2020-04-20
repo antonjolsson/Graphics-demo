@@ -51,6 +51,28 @@ void Engine::destroy() {
 }
 
 Engine::KeyStatus& Engine::getKeyStatus() {
+    SDL_Event e;
+    while (SDL_PollEvent(&e)) {
+        // check keyboard state (which keys are still pressed)
+        const uint8_t* state = SDL_GetKeyboardState(nullptr);
+        keys.left = state[SDL_SCANCODE_LEFT] ||
+            SDL_GameControllerGetButton(gameController, SDL_CONTROLLER_BUTTON_DPAD_LEFT) != 0;
+        keys.right = state[SDL_SCANCODE_RIGHT] ||
+            SDL_GameControllerGetButton(gameController, SDL_CONTROLLER_BUTTON_DPAD_RIGHT) != 0;
+        keys.forward = state[SDL_SCANCODE_UP] ||
+            SDL_GameControllerGetButton(gameController, SDL_CONTROLLER_BUTTON_DPAD_UP) != 0;
+        keys.reverse = state[SDL_SCANCODE_DOWN] ||
+            SDL_GameControllerGetButton(gameController, SDL_CONTROLLER_BUTTON_DPAD_DOWN) != 0;
+        keys.up = state[SDL_SCANCODE_A] ||
+            SDL_GameControllerGetButton(gameController, SDL_CONTROLLER_BUTTON_A) != 0;
+        keys.down = state[SDL_SCANCODE_D];
+        keys.missile = state[SDL_SCANCODE_SPACE] ||
+            SDL_GameControllerGetButton(gameController, SDL_CONTROLLER_BUTTON_X) != 0;
+        keys.machinegun = state[SDL_SCANCODE_S] ||
+            SDL_GameControllerGetButton(gameController, SDL_CONTROLLER_BUTTON_X) != 0;
+        keys.quit = (e.type == SDL_QUIT || state[SDL_SCANCODE_Q] || state[SDL_SCANCODE_ESCAPE] ||
+            SDL_GameControllerGetButton(gameController, SDL_CONTROLLER_BUTTON_START) != 0);
+    }
     return keys;
 }
 
@@ -73,34 +95,12 @@ void Engine::quit() {
     exit(0);
 }
 
-void Engine::processInput() {
-    SDL_Event e;
-    while (SDL_PollEvent(&e)) {
-        // check keyboard state (which keys are still pressed)
-        const uint8_t* state = SDL_GetKeyboardState(nullptr);
-        keys.left = state[SDL_SCANCODE_LEFT] ||
-                SDL_GameControllerGetButton(gameController, SDL_CONTROLLER_BUTTON_DPAD_LEFT) != 0;
-        keys.right = state[SDL_SCANCODE_RIGHT] ||
-                     SDL_GameControllerGetButton(gameController, SDL_CONTROLLER_BUTTON_DPAD_RIGHT) != 0;
-        keys.up = state[SDL_SCANCODE_UP] ||
-                     SDL_GameControllerGetButton(gameController, SDL_CONTROLLER_BUTTON_DPAD_UP) != 0;
-        keys.down = state[SDL_SCANCODE_DOWN] ||
-                     SDL_GameControllerGetButton(gameController, SDL_CONTROLLER_BUTTON_DPAD_DOWN) != 0;
-        keys.jump = state[SDL_SCANCODE_C] ||
-                    SDL_GameControllerGetButton(gameController, SDL_CONTROLLER_BUTTON_A) != 0;
-        keys.fire = state[SDL_SCANCODE_A] ||
-                 SDL_GameControllerGetButton(gameController, SDL_CONTROLLER_BUTTON_X) != 0;
-        keys.quit =  (e.type == SDL_QUIT || state[SDL_SCANCODE_Q] || state[SDL_SCANCODE_ESCAPE] ||
-                SDL_GameControllerGetButton(gameController, SDL_CONTROLLER_BUTTON_START) != 0);
-    }
-}
-
 void Engine::swapBuffers() {
     SDL_RenderPresent(renderer);
 }
 
-void Engine::clearWindow(const SDL_Color color) {
-    SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, color.a);
+void Engine::clearWindow(const SDL_Color _color) {
+    SDL_SetRenderDrawColor(renderer, _color.r, _color.g, _color.b, _color.a);
     SDL_RenderClear(renderer);
 }
 

@@ -10,8 +10,9 @@ class Renderer : public Component
 	GLuint shaderProgram;
 	
 public:
-
+	
 	void update(float _dt) override;
 	Renderer(const GLuint _shaderProgram, labhelper::Model* _model);
+	
 };
 

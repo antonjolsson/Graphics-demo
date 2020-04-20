@@ -1,7 +1,27 @@
 #include "rigidBody.h"
-
+#include <glm/detail/_vectorize.hpp>
+#include <glm/detail/_vectorize.hpp>
 #include <glm/gtx/euler_angles.inl>
 #include <glm/gtx/transform.inl>
+
+
+void RigidBody::setZeroAcc() {
+	acceleration = glm::vec3(0);
+}
+
+void RigidBody::alterAcceleration(const glm::vec3 _vec) {
+	acceleration.x += _vec.x;
+	acceleration.y += _vec.y;
+	acceleration.z += _vec.z;
+}
+
+void RigidBody::setRotationVelocity(glm::vec3 _velocity) {
+	rotationVelocity = _velocity;
+}
+
+void RigidBody::setXRotationVel(const float _x) {
+	rotationVelocity.x = _x;
+}
 
 void RigidBody::applyDrag()
 {
@@ -30,12 +50,7 @@ void RigidBody::update(const float _dt) {
 		position.z);
 }
 
-RigidBody::RigidBody(GameObject* _go, const float _dragCoeff, const float _xAcceleration, const float _maxXRot, 
-	const float _maxXRotSpeed, const float _maxYRotSpeed, const float _resetRotSpeed) {
+RigidBody::RigidBody(GameObject* _go, const float _dragCoeff) {
 	go = _go;
 	dragCoeff = _dragCoeff;
-	acceleration.x = _xAcceleration;
-	maxRotation.x = _maxXRot;
-	maxRotVelocity = { _maxXRotSpeed, _maxYRotSpeed, maxRotVelocity.z };
-	resetRotSpeedRot = glm::vec3{ _resetRotSpeed };
 }
