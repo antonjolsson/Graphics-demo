@@ -2,14 +2,14 @@
 
 #include "gameObject.h"
 
-class Camera :public GameObject
+class CameraComponent :public GameObject
 {
 	
 	Engine* engine;
 	
 public:
 	
-	Camera(Engine* _engine);
+	CameraComponent(Engine* _engine);
 	
 };
 

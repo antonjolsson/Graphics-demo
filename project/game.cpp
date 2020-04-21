@@ -5,8 +5,8 @@
 #include "game.h"
 #include "fbo.h"
 #include <labhelper.h>
-#include "camera.h"
-#include "AudioPlayer.h"
+#include "CameraComponent.h"
+#include "AudioComponent.h"
 #include "engine.h"
 
 void Game::initEnemies(Engine*_engine, bool debug) {
@@ -127,7 +127,7 @@ void Game::initBackground(Engine* _engine, const bool _showHitbox)
 void Game::initCamera(Engine* _engine)
 {
     //auto* camera = new Camera(_engine);
-    receivers.push_back(new Camera(_engine));
+    receivers.push_back(new CameraComponent(_engine));
 }
 
 Game::Game(Engine* _engine, const bool _showHitbox)

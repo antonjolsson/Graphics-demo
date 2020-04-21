@@ -3,7 +3,7 @@
 
 
 #include "../external/SDL2_mixer/include/SDL_mixer.h"
-#include "behaviour.h"
+#include "BehaviourComponent.h"
 
 void GameObject::create() {
 	
@@ -42,7 +42,7 @@ void GameObject::addReceiver(GameObject* _go) {
 	receivers.push_back(_go);
 }
 
-void GameObject::send(Message _m) {
+void GameObject::send(const Message _m) {
 	for (auto& receiver : receivers) {
 		if (!receiver->isEnabled())
 			continue;
@@ -96,12 +96,12 @@ void GameObject::create(unsigned int _gameWidth) {
 }
 
 int GameObject::getAttackDamage() {
-	const Behaviour behaviour = *getComponent<Behaviour>();
+	const BehaviourComponent behaviour = *getComponent<BehaviourComponent>();
     return behaviour.getAttackDamage();
 }
 
 bool GameObject::isInvincibleAfterHit() {
-    const Behaviour behaviour = *getComponent<Behaviour>();
+    const BehaviourComponent behaviour = *getComponent<BehaviourComponent>();
     return behaviour.isInvincibleAfterHit();
 }
 

@@ -339,8 +339,8 @@ void drawScene(const GLuint _currentShaderProgram,
 	setMatrixUniforms(_currentShaderProgram, _viewMatrix, _projectionMatrix, modelMatrix);
 	render(landingpadModel);
 
-	setMatrixUniforms(_currentShaderProgram, _viewMatrix, _projectionMatrix, fighterModelMatrix);
-	render(fighterModel);
+	//setMatrixUniforms(_currentShaderProgram, _viewMatrix, _projectionMatrix, fighterModelMatrix);
+	//render(fighterModel);
 }
 
 void drawFromCamera(const mat4 projMatrix, const mat4 viewMatrix, const mat4 lightViewMatrix, const mat4 lightProjMatrix)
@@ -541,33 +541,6 @@ bool handleEvents(void)
 		{
 			cameraPosition += deltaTime * cameraSpeed * worldUp;
 		}
-		/*if (state[SDL_SCANCODE_UP])
-		{
-			shipSpeed += acceleration;
-			accelerating = true;
-		}
-		else accelerating = false;
-		if (state[SDL_SCANCODE_DOWN])
-		{
-			shipSpeed -= acceleration;
-		}
-		if (state[SDL_SCANCODE_LEFT])
-		{
-			shipYRotationSpeed = MAX_SHIP_Y_ROTATION_SPEED;
-			shipXRotationSpeed = shipXRotation >= MAX_SHIP_X_ROT ? 0 : MAX_SHIP_X_ROTATION_SPEED;
-		}
-		else if (state[SDL_SCANCODE_RIGHT])
-		{
-			shipYRotationSpeed = -MAX_SHIP_Y_ROTATION_SPEED;
-			shipXRotationSpeed = shipXRotation <= -MAX_SHIP_X_ROT ? 0 : -MAX_SHIP_X_ROTATION_SPEED;
-		}
-		else
-		{
-			shipYRotationSpeed = 0;
-			if (shipXRotation > CLAMP_ROT_TO_ZERO_SPEED) shipXRotationSpeed = -MAX_SHIP_X_ROTATION_SPEED;
-			else if (shipXRotation < -CLAMP_ROT_TO_ZERO_SPEED) shipXRotationSpeed = MAX_SHIP_X_ROTATION_SPEED;
-			else shipXRotationSpeed = 0;
-		}*/
 	}
 	return quitEvent;
 }
@@ -619,21 +592,13 @@ void gui()
 }
 
 void updateShip(void) {
-	/*shipSpeed *= pow(dragCoeff, -abs(shipSpeed));
-	if (FPS_ADJ_SPEED) shipSpeed = shipSpeed / (1000.f / deltaTime / 1000.f / OPT_FRAMERATE);
-	if (xRotation)
-	{
-		if (shipXRotationSpeed == 0 && abs(shipXRotation) < CLAMP_ROT_TO_ZERO_SPEED) shipXRotation = 0.f;
-		else shipXRotation += shipXRotationSpeed;
-	}
-	shipYRotation += shipYRotationSpeed;*/
 
-	const mat4 rotMatrix = glm::eulerAngleYXZ(shipYRotation, shipXRotation, 0.f);
+	/*const mat4 rotMatrix = glm::eulerAngleYXZ(shipYRotation, shipXRotation, 0.f);
 	const vec4 translation = fighterModelMatrix[3];
 	fighterModelMatrix = rotMatrix * mat4(1.f);
 	fighterModelMatrix[3] = translation;
 
-	fighterModelMatrix = translate(fighterModelMatrix, shipSpeed * -xAxis);
+	fighterModelMatrix = translate(fighterModelMatrix, shipSpeed * -xAxis);*/
 	particleSystem.setExhaustOffset(vec3(exhXOffset, exhYOffset, exhZOffset));
 }
 

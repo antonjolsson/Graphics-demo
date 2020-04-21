@@ -3,16 +3,18 @@
 #include <GL/glew.h>
 
 #include "Model.h"
+#include "Ship.h"
 
-class Renderer : public Component
+class RenderComponent : public Component
 {
 	labhelper::Model* model = nullptr;
 	GLuint shaderProgram;
+	glm::mat4 modelMatrix;
 	
 public:
 	
 	void update(float _dt) override;
-	Renderer(const GLuint _shaderProgram, labhelper::Model* _model);
-	
+	RenderComponent(GameObject* _go, GLuint _shaderProgram, labhelper::Model* _model);
+
 };
 

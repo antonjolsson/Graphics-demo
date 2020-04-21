@@ -1,11 +1,11 @@
 #pragma once
 
 #include "../../project/gameObject.h"
-#include "renderer.h"
+#include "RenderComponent.h"
 #include <GL/glew.h>
 #include "ParticleSystem.h"
 #include "engine.h"
-#include "behaviour.h"
+#include "BehaviourComponent.h"
 #include "rigidBody.h"
 
 class Ship : public GameObject {
@@ -23,7 +23,7 @@ public:
 	void update(float _dt) override;
 };
 
-class ShipBehaviour : public Behaviour {
+class ShipBehaviour : public BehaviourComponent {
 
 	const float DRAG_COEFF = 1.1f;
 	const float X_ACCELERATION = 0.8f;

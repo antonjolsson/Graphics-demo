@@ -1,9 +1,9 @@
 #include "rigidBody.h"
 #include "Ship.h"
 
-#include "behaviour.h"
+#include "BehaviourComponent.h"
 
-ShipBehaviour::ShipBehaviour(Ship* _ship, Engine* _engine, RigidBody* _rigidBody): Behaviour(_ship, _engine),
+ShipBehaviour::ShipBehaviour(Ship* _ship, Engine* _engine, RigidBody* _rigidBody): BehaviourComponent(_ship, _engine),
 	keyStatus() {
 	rigidBody = _rigidBody;
 }
@@ -57,7 +57,7 @@ void Ship::readMessages() {
 
 Ship::Ship(Engine* _engine, GLuint _shaderProgram, const bool _showHitbox) {
 	transform.position = INITIAL_POSITION;
-	auto* renderer = new Renderer(_shaderProgram, fighterModel);
+	auto* renderer = new RenderComponent(this, _shaderProgram, fighterModel);
 	auto* rigidBody = new RigidBody(this, DRAG_COEFF);
 	auto* behaviour = new ShipBehaviour(this, _engine, rigidBody);
 	addComponents(std::vector<Component*> {behaviour, renderer, rigidBody});

@@ -5,12 +5,12 @@
 #include <GL/glew.h>
 #include <SDL_audio.h>
 #include "Ship.h"
-#include "AudioPlayer.h"
+#include "AudioComponent.h"
 #include "engine.h"
 
 //#include "fbo.h"
 
-class GameAudioPlayer : public AudioPlayer
+class GameAudioPlayer : public AudioComponent
 {
 
     Audio backgroundMusic{ "../project/resource/AirwolfExtendedVersion.mp3", SDL_MIX_MAXVOLUME / 4, true };

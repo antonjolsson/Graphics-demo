@@ -3,7 +3,7 @@
 
 #include "component.h"
 
-class AudioPlayer : public Component
+class AudioComponent : public Component
 {
 
 protected:

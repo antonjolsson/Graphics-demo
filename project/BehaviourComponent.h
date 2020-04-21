@@ -1,7 +1,7 @@
 #pragma once
 #include "../../project/component.h"
 
-class Behaviour : public Component
+class BehaviourComponent : public Component
 {
 	
 	int attackDamage_ = 0;
@@ -18,6 +18,6 @@ public:
 
 	void update(float _dt) override;
 
-	Behaviour(GameObject* _go, Engine* _engine);
+	BehaviourComponent(GameObject* _go, Engine* _engine);
 };
 
