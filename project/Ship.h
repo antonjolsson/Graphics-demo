@@ -17,6 +17,7 @@ class Ship : public GameObject {
 public:
 	
 	const vec4 INITIAL_POSITION{ 0.f, 15.f, 0.f, 1.f };
+	const vec3 EXHAUST_OFFSET{ 0.33, 3.1, 17.25 };
 
 	Ship(Engine* _engine, GLuint _shaderProgram, const bool _showHitbox);
 
