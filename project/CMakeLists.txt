@@ -21,20 +21,22 @@ add_executable ( ${PROJECT_NAME}
     engine.cpp
     engine.h
     vector2D.h
-    behaviour.h
-    behaviour.cpp
+    BehaviourComponent.h
+    BehaviourComponent.cpp
     ship.h
     ship.cpp
-    renderer.h
-    renderer.cpp
+    Renderer.h
+    Renderer.cpp
     rigidBody.h
     rigidBody.cpp
     game.h
-    AudioPlayer.h
-    AudioPlayer.cpp
+    AudioComponent.h
+    AudioComponent.cpp
     gameObject.h
-    camera.h
-    camera.cpp
+    CameraComponent.h
+    CameraComponent.cpp
+    RenderComponent.h
+    RenderComponent.cpp
     component.h
     ${SHADERS}
      "component.cpp" "game.cpp" "gameObject.cpp")

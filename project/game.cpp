@@ -8,6 +8,7 @@
 #include "CameraComponent.h"
 #include "AudioComponent.h"
 #include "engine.h"
+#include "Renderer.h"
 
 void Game::initEnemies(Engine*_engine, bool debug) {
     
@@ -47,23 +48,15 @@ void Game::init() {
 }
 
 void Game::update(const float _dt) {
-    /*const Engine::KeyStatus keys = engine->getKeyStatus();
-    if (keys.quit) {
-        destroy();
-        //engine->quit();
-        quit = true;
-    	return;
-    }*/
     readMessages();
+    for (auto component : components) {
+        component->update(_dt);
+    }
     ship->update(_dt);
     for (auto gameObject : gameObjects)
         gameObject->update(_dt);
+    renderer->draw();
     //gui->update(score);
-}
-
-void Game::draw() {
-    engine->swapBuffers();
-    engine->clearWindow(clearColor);
 }
 
 void Game::destroy() {
@@ -98,11 +91,6 @@ bool Game::isQuitting() const {
     return quit;
 }
 
-void Game::initPlayer()
-{
-    
-}
-
 void Game::initShaders()
 {
     backgroundProgram = labhelper::loadShaderProgram("../project/background.vert",
@@ -126,8 +114,25 @@ void Game::initBackground(Engine* _engine, const bool _showHitbox)
 
 void Game::initCamera(Engine* _engine)
 {
-    //auto* camera = new Camera(_engine);
-    receivers.push_back(new CameraComponent(_engine));
+    camera = new CameraComponent(_engine);
+    receivers.push_back(camera);
+}
+
+void Game::initShip(const bool _showHitbox) {
+	ship = new Ship(engine, shaderProgram, _showHitbox);
+    ship->addReceiver(this);
+    gameObjects.insert(ship);
+}
+
+void Game::initRenderer(Engine* _engine, const bool _showHitbox) {
+    std::vector<RenderComponent*> renderComponents;
+    for (auto go : gameObjects) {
+        auto renderComponent = go->getComponent<RenderComponent>();
+        if (renderComponent != nullptr)
+            renderComponents.push_back(renderComponent);
+    }
+    renderer = new Renderer(_engine, camera, renderComponents, _showHitbox);
+    renderer->setRenderShadows(true);
 }
 
 Game::Game(Engine* _engine, const bool _showHitbox)
@@ -142,12 +147,13 @@ Game::Game(Engine* _engine, const bool _showHitbox)
     initCamera(_engine);
     initShaders();
 
-    ship = new Ship(engine, shaderProgram, _showHitbox);
-    ship->addReceiver(this);
+    initShip(_showHitbox);
     
     initTerrain(_engine, _showHitbox);
     initEnemies(_engine, _showHitbox);
     initBackground(_engine, _showHitbox);
+
+    initRenderer(_engine, _showHitbox);
 	
     receivers.push_back(ship);
 }

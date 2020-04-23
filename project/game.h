@@ -6,14 +6,17 @@
 #include <SDL_audio.h>
 #include "Ship.h"
 #include "AudioComponent.h"
+#include "CameraComponent.h"
 #include "engine.h"
+#include "Renderer.h"
 
 //#include "fbo.h"
 
 class GameAudioPlayer : public AudioComponent
 {
 
-    Audio backgroundMusic{ "../project/resource/AirwolfExtendedVersion.mp3", SDL_MIX_MAXVOLUME / 4, true };
+    Audio backgroundMusic{ "../project/resource/AirwolfExtendedVersion.mp3", SDL_MIX_MAXVOLUME / 4,
+    	true };
 
 public:
 
@@ -27,7 +30,7 @@ class Game : public GameObject {
 
     SDL_Color clearColor = {};
 
-    Ship *ship;
+    Ship *ship{};
 	
     std::set<GameObject*> gameObjects;
 	
@@ -55,6 +58,8 @@ class Game : public GameObject {
     GLuint heightfieldProgram{};
 
     GameAudioPlayer* audioPlayer;
+    CameraComponent* camera{};
+    Renderer* renderer{};
 
 public:
 
@@ -63,16 +68,15 @@ public:
     //void initGUI();
     void init() override;
 	void update(float _dt) override;
-	virtual void draw();
 	void readMessages() override;
 	void destroy() override;
     bool isQuitting() const;
 
-    void initPlayer();
-
     void initShaders();
-    void initTerrain(Engine* _engine, const bool _showHitbox);
-    void initBackground(Engine* _engine, const bool _showHitbox);
+    void initTerrain(Engine* _engine, bool _showHitbox);
+    void initBackground(Engine* _engine, bool _showHitbox);
     void initCamera(Engine* _engine);
-    Game(Engine* _engine, const bool _showHitbox);
+    void initShip(bool _showHitbox);
+    void initRenderer(Engine* _engine, bool _showHitbox);
+    Game(Engine* _engine, bool _showHitbox);
 };
