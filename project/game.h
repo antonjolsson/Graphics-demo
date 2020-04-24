@@ -28,7 +28,7 @@ public:
 class Game : public GameObject {
 
     const unsigned int MAX_NUM_GAME_OBJECTS = 10000;
-    //const int AA_SAMPLES = 16;
+
     const float OPT_FRAMERATE = 60.f;
 	
     const vec3 LIGHT_POS_OFFSET{ 0, 50.0f, -40.0 };
@@ -72,7 +72,6 @@ public:
   
     //void initGUI();
     void init() override;
-	void update(float _dt) override;
 	void readMessages() override;
 	void destroy() override;
     bool isQuitting() const;
@@ -80,9 +79,9 @@ public:
     void initShaders();
     void initTerrain(Engine* _engine, bool _showHitbox);
     void initBackground(Engine* _engine, bool _showHitbox);
-    void initCamera(Engine* _engine);
+    void initCamera(Engine* _engine, const int _winWidth, const int _winHeight);
     void initShip(bool _showHitbox);
-    void initRenderer(Engine* _engine, bool _showHitbox, int _winWidth, int _winHeight);
+    void initRenderer(Engine* _engine, bool _showHitbox, int _winWidth, int _winHeight, std::vector<GameObject*>& _lights);
     void update(float _dt, int _windowWidth, int _windowHeight);
     GameObject* initLight();
     Game(Engine* _engine, bool _showHitbox, int _winWidth, int _winHeight);

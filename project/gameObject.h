@@ -50,7 +50,7 @@ public:
 	void setScale(const glm::vec3 _scale);
 
 	Transform& getTransform(void);
-	void update(float _dt, int _windowWidth, int _windowHeight);
+	virtual void update(float _dt, int _windowWidth, int _windowHeight);
 
 	GameObject() = default;
 	GameObject(glm::vec3 _position, glm::vec3 _rotation, glm::vec3 _scale);

@@ -5,8 +5,16 @@ void CameraComponent::setCameraDirection(const vec3& _cameraDirection) {
 	cameraDirection = _cameraDirection;
 }
 
-CameraComponent::CameraComponent(Ship* _tracing) : tracing(_tracing), windowWidth(0), windowHeight(0) {
+void CameraComponent::init(GameObject* _camera) {
+	addGameObject(_camera);
+	setCameraDirection(normalize(vec3(0.0f) - _camera->getTransform().position));
+}
+
+CameraComponent::CameraComponent(Ship* _tracing, const int _winWidth, const int _winHeight) {
 	tracingObject = true;
+	tracing = _tracing;
+	windowWidth = _winWidth;
+	windowHeight = _winHeight;
 }
 
 void CameraComponent::update(float _dt, const int _windowHeight, const int _windowWidth) {
@@ -14,7 +22,7 @@ void CameraComponent::update(float _dt, const int _windowHeight, const int _wind
 	windowHeight = _windowHeight;
 	if (tracingObject) {
 		go->getTransform().position = tracing->getTransform().position += tracingDistance;
-		cameraDirection = normalize(vec3(0.0f) - go->getTransform().position);
+		cameraDirection = normalize(tracing->getTransform().position - go->getTransform().position);
 	}
 }
 

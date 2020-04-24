@@ -8,6 +8,7 @@
 #include "CameraComponent.h"
 #include "AudioComponent.h"
 #include "engine.h"
+#include "LightComponent.h"
 #include "Renderer.h"
 
 void Game::initEnemies(Engine*_engine, bool debug) {
@@ -47,7 +48,7 @@ void Game::init() {
     enabled = true;
 }
 
-void Game::update(const float _dt, int _windowWidth, int _windowHeight) {
+void Game::update(const float _dt, const int _windowWidth, const int _windowHeight) {
     readMessages();
     for (auto component : components) {
         component->update(_dt);
@@ -61,8 +62,14 @@ void Game::update(const float _dt, int _windowWidth, int _windowHeight) {
 }
 
 GameObject* Game::initLight() {
-    auto lightComponent = new LightComponent(ship, LIGHT_POS_OFFSET);
-	
+    auto lightComponent = new LightComponent();
+    auto light = new GameObject(ship->getTransform().position + LIGHT_POS_OFFSET, vec3(0),
+        vec3(1));
+    light->addComponent(lightComponent);
+    lightComponent->addGameObject(light);
+    gameObjects.insert(light);
+    receivers.push_back(light);
+    return light;
 }
 
 void Game::destroy() {
@@ -118,12 +125,12 @@ void Game::initBackground(Engine* _engine, const bool _showHitbox)
 	
 }
 
-void Game::initCamera(Engine* _engine)
+void Game::initCamera(Engine* _engine, const int _winWidth, const int _winHeight)
 {
-    auto cameraComponent = new CameraComponent(ship);
+    auto cameraComponent = new CameraComponent(ship, _winWidth, _winHeight);
     camera = new Camera();
     camera->addComponent(cameraComponent);
-    cameraComponent->setCameraDirection(normalize(vec3(0.0f) - camera->getTransform().position));
+    cameraComponent->init(camera);
     receivers.push_back(camera);
 }
 
@@ -131,16 +138,18 @@ void Game::initShip(const bool _showHitbox) {
 	ship = new Ship(engine, shaderProgram, _showHitbox);
     ship->addReceiver(this);
     gameObjects.insert(ship);
+    receivers.push_back(ship);
 }
 
-void Game::initRenderer(Engine* _engine, const bool _showHitbox, const int _winWidth, const int _winHeight) {
+void Game::initRenderer(Engine* _engine, const bool _showHitbox, const int _winWidth, const int _winHeight, 
+    std::vector<GameObject*>& _lights) {
     std::vector<RenderComponent*> renderComponents;
     for (auto go : gameObjects) {
         auto renderComponent = go->getComponent<RenderComponent>();
         if (renderComponent != nullptr)
             renderComponents.push_back(renderComponent);
     }
-    renderer = new Renderer(_engine, camera, renderComponents, _showHitbox, _winWidth, _winHeight);
+    renderer = new Renderer(_engine, camera, renderComponents, _showHitbox, _winWidth, _winHeight, _lights);
     renderer->setRenderShadows(true);
 }
 
@@ -152,19 +161,16 @@ Game::Game(Engine* _engine, bool _showHitbox, const int _winWidth, const int _wi
     audioPlayer = new GameAudioPlayer();
     components.push_back(audioPlayer);
 
-    initCamera(_engine);
-    GameObject* light = initLight();
-    initShaders();
-
     initShip(_showHitbox);
     
     initTerrain(_engine, _showHitbox);
     initEnemies(_engine, _showHitbox);
     initBackground(_engine, _showHitbox);
-
-    initRenderer(_engine, _showHitbox, _winWidth, _winHeight);
 	
-    receivers.push_back(ship);
+    initCamera(_engine, _winWidth, _winHeight);
+    GameObject* light = initLight();
+    initShaders();
+    initRenderer(_engine, _showHitbox, _winWidth, _winHeight, std::vector<GameObject*>{light});
 }
 
 GameAudioPlayer::GameAudioPlayer()

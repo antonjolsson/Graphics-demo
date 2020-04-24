@@ -14,3 +14,7 @@ void Component::receive(int _message) {
     }
 }
 
+void Component::addGameObject(GameObject* _go) {
+    go = _go;
+}
+

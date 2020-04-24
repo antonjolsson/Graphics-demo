@@ -5,7 +5,6 @@
 
 #include "engine.h"
 #include "objectPool.h"
-#include "gameObject.h"
 
 class GameObject;
 
@@ -28,5 +27,6 @@ public:
 	virtual void update(float _dt) {};
 	virtual void receive(int _message);
 	virtual void destroy() {}
+	void addGameObject(GameObject* _go);
 };
 

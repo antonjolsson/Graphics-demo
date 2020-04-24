@@ -15,11 +15,12 @@ class Renderer {
 	int winWidth;
 	int winHeight;
 	CameraComponent* cameraComponent;
+	std::vector<GameObject*>& lights;
 
 public:
 	
-	Renderer(Engine* _engine, GameObject* _camera, const std::vector<RenderComponent*>& _renderComponents, 
-		bool _showHitbox, int _winWidth, int _winHeight);
+	Renderer(Engine* _engine, GameObject* _camera, std::vector<RenderComponent*>& _renderComponents, bool _showHitbox,
+	         int _winWidth, int _winHeight, std::vector<GameObject*>& _lights);
 	void setRenderShadows(bool _renderShadows);
 	void draw();
 

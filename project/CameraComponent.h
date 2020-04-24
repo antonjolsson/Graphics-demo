@@ -12,10 +12,11 @@ class CameraComponent :public Component
 	float fieldOfView = 50.f;
 	float nearPlane = 5.f;
 	float farPlane = 900.f;
-	vec3 cameraDirection;
+	vec3 cameraDirection{};
 
 public:
 	void setCameraDirection(const vec3& _cameraDirection);
+	void init(GameObject* _camera);
 private:
 	GameObject* tracing = nullptr;
 	bool tracingObject;
@@ -25,7 +26,7 @@ private:
 
 public:
 	
-	CameraComponent(Ship* _tracing);
+	CameraComponent(Ship* _tracing, int _winWidth, int _winHeight);
 
 	void update(float _dt, int _windowHeight, int _windowWidth);
 	mat4 getProjMatrix() const;

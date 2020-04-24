@@ -1,8 +1,9 @@
 #include "Renderer.h"
 
-Renderer::Renderer(Engine* _engine, GameObject* _camera, const std::vector<RenderComponent*>& _renderComponents,
-                   const bool _showHitbox, const int _winWidth, const int _winHeight) : engine(_engine), camera(_camera),
-                    renderComponents(_renderComponents), showHitbox(_showHitbox), winWidth(_winWidth), winHeight(_winHeight) {
+Renderer::Renderer(Engine* _engine, GameObject* _camera, std::vector<RenderComponent*>& _renderComponents, 
+	const bool _showHitbox, const int _winWidth, const int _winHeight, std::vector<GameObject*>& _lights) :
+	engine(_engine), camera(_camera), renderComponents(_renderComponents), showHitbox(_showHitbox), winWidth(_winWidth),
+	winHeight(_winHeight), lights(_lights) {
 	cameraComponent = camera->getComponent<CameraComponent>();
 	glEnable(GL_DEPTH_TEST); // enable Z-buffering
 	glEnable(GL_CULL_FACE);  // enables backface culling
