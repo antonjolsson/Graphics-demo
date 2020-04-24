@@ -409,18 +409,18 @@ void drawShadowMap(const mat4 _lightViewMatrix, const mat4 _lightProjMatrix)
 	}
 }
 
+void setWindowSize() {
+	int w, h;
+	SDL_GetWindowSize(g_window, &w, &h);
+	if(w != windowWidth || h != windowHeight)
+	{
+		windowWidth = w;
+		windowHeight = h;
+	}
+}
+
 void display(void)
 {
-	{
-		int w, h;
-		SDL_GetWindowSize(g_window, &w, &h);
-		if(w != windowWidth || h != windowHeight)
-		{
-			windowWidth = w;
-			windowHeight = h;
-		}
-	}
-
 	const mat4 projMatrix = perspective(radians(fieldOfView), float(windowWidth) / float(windowHeight), 5.0f, 900.0f);
 	const mat4 viewMatrix = lookAt(cameraPosition, cameraPosition + cameraDirection, worldUp);
 
@@ -627,7 +627,7 @@ int main(int argc, char* argv[])
 
 	Mix_OpenAudio(22050, MIX_DEFAULT_FORMAT, 2, 4096);
 	
-	Game game(&engine, SHOW_HITBOX);
+	Game game(&engine, SHOW_HITBOX, WIN_WIDTH, WIN_HEIGHT);
 	
 	initGL();
 
@@ -636,22 +636,23 @@ int main(int argc, char* argv[])
 
 	while(!game.isQuitting())
 	{
+		setWindowSize();
 		//update currentTime
 		std::chrono::duration<float> timeSinceStart = std::chrono::system_clock::now() - startTime;
 		previousTime = currentTime;
 		currentTime = timeSinceStart.count();
 		deltaTime = currentTime - previousTime;
 
-		game.update(deltaTime);
+		game.update(deltaTime, windowWidth, windowHeight);
 		
 		updateShip();
 		// render to window
-		display();
+		//display();
 
 		// Render overlay GUI.
 		if(showUI)
 		{
-			gui();
+			//gui();
 		}
 
 		if (logger) logStats();

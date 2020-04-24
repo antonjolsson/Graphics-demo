@@ -47,7 +47,7 @@ void Game::init() {
     enabled = true;
 }
 
-void Game::update(const float _dt) {
+void Game::update(const float _dt, int _windowWidth, int _windowHeight) {
     readMessages();
     for (auto component : components) {
         component->update(_dt);
@@ -55,8 +55,14 @@ void Game::update(const float _dt) {
     ship->update(_dt);
     for (auto gameObject : gameObjects)
         gameObject->update(_dt);
+    camera->update(_dt, _windowWidth, _windowHeight);
     renderer->draw();
     //gui->update(score);
+}
+
+GameObject* Game::initLight() {
+    auto lightComponent = new LightComponent(ship, LIGHT_POS_OFFSET);
+	
 }
 
 void Game::destroy() {
@@ -114,7 +120,10 @@ void Game::initBackground(Engine* _engine, const bool _showHitbox)
 
 void Game::initCamera(Engine* _engine)
 {
-    camera = new CameraComponent(_engine);
+    auto cameraComponent = new CameraComponent(ship);
+    camera = new Camera();
+    camera->addComponent(cameraComponent);
+    cameraComponent->setCameraDirection(normalize(vec3(0.0f) - camera->getTransform().position));
     receivers.push_back(camera);
 }
 
@@ -124,20 +133,19 @@ void Game::initShip(const bool _showHitbox) {
     gameObjects.insert(ship);
 }
 
-void Game::initRenderer(Engine* _engine, const bool _showHitbox) {
+void Game::initRenderer(Engine* _engine, const bool _showHitbox, const int _winWidth, const int _winHeight) {
     std::vector<RenderComponent*> renderComponents;
     for (auto go : gameObjects) {
         auto renderComponent = go->getComponent<RenderComponent>();
         if (renderComponent != nullptr)
             renderComponents.push_back(renderComponent);
     }
-    renderer = new Renderer(_engine, camera, renderComponents, _showHitbox);
+    renderer = new Renderer(_engine, camera, renderComponents, _showHitbox, _winWidth, _winHeight);
     renderer->setRenderShadows(true);
 }
 
-Game::Game(Engine* _engine, const bool _showHitbox)
-{
-    engine = _engine;
+Game::Game(Engine* _engine, bool _showHitbox, const int _winWidth, const int _winHeight) {
+	engine = _engine;
     showHitBox = _showHitbox;
     enabled = true;
 
@@ -145,6 +153,7 @@ Game::Game(Engine* _engine, const bool _showHitbox)
     components.push_back(audioPlayer);
 
     initCamera(_engine);
+    GameObject* light = initLight();
     initShaders();
 
     initShip(_showHitbox);
@@ -153,7 +162,7 @@ Game::Game(Engine* _engine, const bool _showHitbox)
     initEnemies(_engine, _showHitbox);
     initBackground(_engine, _showHitbox);
 
-    initRenderer(_engine, _showHitbox);
+    initRenderer(_engine, _showHitbox, _winWidth, _winHeight);
 	
     receivers.push_back(ship);
 }

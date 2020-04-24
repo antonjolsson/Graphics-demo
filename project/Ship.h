@@ -37,6 +37,7 @@ class ShipBehaviour : public BehaviourComponent {
 	RigidBody* rigidBody;
 
 public:
+	
 	ShipBehaviour(Ship* _ship, Engine* _engine, RigidBody* _rigidBody);
 	void update(float _dt) override;
 };

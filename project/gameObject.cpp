@@ -4,6 +4,7 @@
 
 #include "../external/SDL2_mixer/include/SDL_mixer.h"
 #include "BehaviourComponent.h"
+#include "CameraComponent.h"
 
 void GameObject::create() {
 	
@@ -127,6 +128,16 @@ void GameObject::setScale(const glm::vec3 _scale)
 GameObject::Transform& GameObject::getTransform()
 {
     return transform;
+}
+
+void GameObject::update(const float _dt, int _windowWidth, int _windowHeight) {
+    if (!isEnabled()) return;
+    CameraComponent* cameraComponent = getComponent<CameraComponent>();
+    cameraComponent->update(_dt, _windowHeight, _windowWidth);
+    for (auto& component : components) {
+        if (component != cameraComponent)
+			component->update(_dt);
+    }
 }
 
 GameObject::GameObject(const glm::vec3 _position, const glm::vec3 _rotation, const glm::vec3 _scale)

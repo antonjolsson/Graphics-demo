@@ -6,6 +6,7 @@
 #include <SDL_audio.h>
 #include "Ship.h"
 #include "AudioComponent.h"
+#include "Camera.h"
 #include "CameraComponent.h"
 #include "engine.h"
 #include "Renderer.h"
@@ -27,6 +28,10 @@ public:
 class Game : public GameObject {
 
     const unsigned int MAX_NUM_GAME_OBJECTS = 10000;
+    //const int AA_SAMPLES = 16;
+    const float OPT_FRAMERATE = 60.f;
+	
+    const vec3 LIGHT_POS_OFFSET{ 0, 50.0f, -40.0 };
 
     SDL_Color clearColor = {};
 
@@ -58,8 +63,8 @@ class Game : public GameObject {
     GLuint heightfieldProgram{};
 
     GameAudioPlayer* audioPlayer;
-    CameraComponent* camera{};
     Renderer* renderer{};
+    GameObject* camera{};
 
 public:
 
@@ -77,6 +82,8 @@ public:
     void initBackground(Engine* _engine, bool _showHitbox);
     void initCamera(Engine* _engine);
     void initShip(bool _showHitbox);
-    void initRenderer(Engine* _engine, bool _showHitbox);
-    Game(Engine* _engine, bool _showHitbox);
+    void initRenderer(Engine* _engine, bool _showHitbox, int _winWidth, int _winHeight);
+    void update(float _dt, int _windowWidth, int _windowHeight);
+    GameObject* initLight();
+    Game(Engine* _engine, bool _showHitbox, int _winWidth, int _winHeight);
 };

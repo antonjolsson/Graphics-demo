@@ -6,16 +6,20 @@
 
 class Renderer {
 	
-	
+	const int AA_SAMPLES = 16;
 	bool renderShadows = false;
 	Engine* engine;
-	CameraComponent* camera;
+	GameObject* camera;
 	const std::vector<RenderComponent*>& renderComponents;
 	bool showHitbox = false;
+	int winWidth;
+	int winHeight;
+	CameraComponent* cameraComponent;
 
 public:
 	
-	Renderer(Engine* _engine, CameraComponent* _camera, const std::vector<RenderComponent*>& _renderComponents, bool _showHitbox);
+	Renderer(Engine* _engine, GameObject* _camera, const std::vector<RenderComponent*>& _renderComponents, 
+		bool _showHitbox, int _winWidth, int _winHeight);
 	void setRenderShadows(bool _renderShadows);
 	void draw();
 

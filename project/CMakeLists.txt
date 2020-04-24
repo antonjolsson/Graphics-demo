@@ -37,6 +37,10 @@ add_executable ( ${PROJECT_NAME}
     CameraComponent.cpp
     RenderComponent.h
     RenderComponent.cpp
+    Camera.cpp
+    Camera.h
+    LightComponent.h
+    LightComponent.cpp
     component.h
     ${SHADERS}
      "component.cpp" "game.cpp" "gameObject.cpp")
