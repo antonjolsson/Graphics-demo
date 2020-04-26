@@ -18,6 +18,6 @@ public:
 
 	void update(float _dt) override;
 
-	BehaviourComponent(GameObject* _go, Engine* _engine);
+	BehaviourComponent(GameObject* _go, InputHandler* _engine);
 };
 

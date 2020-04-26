@@ -4,6 +4,7 @@
 namespace debug_gui {
 
 	inline void showDebugGUI(SDL_Window* _gWindow, Ship* _ship, GameObject* _camera) {
+		CameraComponent* cameraComp = _camera->getComponent<CameraComponent>();
 			// Inform imgui of new frame
 		ImGui_ImplSdlGL3_NewFrame(_gWindow);
 
@@ -29,7 +30,11 @@ namespace debug_gui {
 		
 		ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate,
 		            ImGui::GetIO().Framerate);
-		ImGui::SliderFloat("Field of view: ", &_camera->getComponent<CameraComponent>()->fieldOfView, 10.0f, 70.0f);
+		ImGui::SliderFloat("Field of view: ", &cameraComp->fieldOfView, 10.0f, 70.0f);
+		const vec3 cameraPos = _camera->getTransform().position;
+		const vec3 cameraDir = cameraComp->getCameraDirection();
+		ImGui::Text("Camera position: %.3f %.3f %.3f", cameraPos.x, cameraPos.y, cameraPos.z);
+		ImGui::Text("Camera direction: %.3f %.3f %.3f", cameraDir.x, cameraDir.y, cameraDir.z);
 		
 		/*ImGui::SliderFloat("Acceleration", &acceleration, 0.0f, 10.0f);
 		ImGui::SliderFloat("Drag coeff.", &dragCoeff, 0.0f, 10.0f);*/
@@ -44,8 +49,7 @@ namespace debug_gui {
 		ImGui::Text("Ship x-axis: %.3f %.3f %.3f", fighterModelMatrix[0].x, fighterModelMatrix[0].y, fighterModelMatrix[0].z);
 		ImGui::Text("Ship y-axis: %.3f %.3f %.3f", fighterModelMatrix[1].x, fighterModelMatrix[1].y, fighterModelMatrix[1].z);
 		ImGui::Text("Ship z-axis: %.3f %.3f %.3f", fighterModelMatrix[2].x, fighterModelMatrix[2].y, fighterModelMatrix[2].z);
-		const vec3 cameraPos = _camera->getTransform().position;
-		ImGui::Text("Camera position: %.3f %.3f %.3f", cameraPos.x, cameraPos.y, cameraPos.z);
+		
 		
 		// ----------------------------------------------------------
 

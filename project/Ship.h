@@ -5,7 +5,7 @@
 #include <GL/glew.h>
 
 #include "ParticleSystem.h"
-#include "engine.h"
+#include "InputHandler.h"
 #include "BehaviourComponent.h"
 #include "rigidBody.h"
 
@@ -21,7 +21,7 @@ public:
 	const vec4 INITIAL_POSITION{ 0.f, 15.f, 0.f, 1.f };
 	const vec3 EXHAUST_OFFSET{ 0.33, 3.1, 17.25 };
 
-	Ship(Engine* _engine, GLuint _shaderProgram, const bool _showHitbox);
+	Ship(InputHandler* _engine, GLuint _shaderProgram, const bool _showHitbox);
 
 	void update(float _dt) override;
 };
@@ -35,12 +35,12 @@ class ShipBehaviour : public BehaviourComponent {
 	const float MAX_SHIP_X_ROTATION_SPEED = MAX_SHIP_X_ROT / 5;
 	const float CLAMP_ROT_TO_ZERO_SPEED = 0.2f;
 
-	Engine::KeyStatus keyStatus;
+	InputHandler::KeyStatus keyStatus;
 	RigidBody* rigidBody;
 
 public:
 	
-	ShipBehaviour(Ship* _ship, Engine* _engine, RigidBody* _rigidBody);
+	ShipBehaviour(Ship* _ship, InputHandler* _engine, RigidBody* _rigidBody);
 	void update(float _dt) override;
 };
 

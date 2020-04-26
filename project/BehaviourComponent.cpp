@@ -15,7 +15,7 @@ void BehaviourComponent::update(float _dt)
 	
 }
 
-BehaviourComponent::BehaviourComponent(GameObject* _go, Engine* _engine) {
+BehaviourComponent::BehaviourComponent(GameObject* _go, InputHandler* _engine) {
 	go = _go;
-	engine = _engine;
+	inputHandler = _engine;
 }

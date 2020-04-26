@@ -37,7 +37,7 @@ private:
 
 public:
 	void setZeroAcc();
-	void alterAcceleration(glm::vec3 _vec);
+	void addAcceleration(glm::vec3 _vec);
 	void setRotationVelocity(glm::vec3 _velocity);
 	void setXRotationVel(float _x);
 	glm::vec3 getRotationVelocity() const;

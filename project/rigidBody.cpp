@@ -17,7 +17,7 @@ void RigidBody::setZeroAcc() {
 	acceleration = glm::vec3(0);
 }
 
-void RigidBody::alterAcceleration(const glm::vec3 _vec) {
+void RigidBody::addAcceleration(const glm::vec3 _vec) {
 	acceleration.x += _vec.x;
 	acceleration.y += _vec.y;
 	acceleration.z += _vec.z;

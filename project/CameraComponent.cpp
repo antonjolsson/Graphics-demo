@@ -13,6 +13,10 @@ float CameraComponent::getFarPlane() const {
 	return farPlane;
 }
 
+vec3 CameraComponent::getCameraDirection() const {
+	return cameraDirection;
+}
+
 void CameraComponent::setCameraDirection(const vec3& _cameraDirection) {
 	cameraDirection = _cameraDirection;
 }
@@ -20,26 +24,39 @@ void CameraComponent::setCameraDirection(const vec3& _cameraDirection) {
 void CameraComponent::init(GameObject* _camera) {
 	addGameObject(_camera);
 	if (tracingObject) traceObject();
-	setCameraDirection(normalize(vec3(0.0f) - _camera->getTransform().position));
+	else setCameraDirection(normalize(vec3(0.0f) - _camera->getTransform().position));
 }
 
-CameraComponent::CameraComponent(GameObject* _tracing, const int _winWidth, const int _winHeight) {
+void CameraComponent::setTracingObject(const bool _tracingObject) {
+	tracingObject = _tracingObject;
+}
+
+CameraComponent::CameraComponent(GameObject* _tracing, const int _winWidth, const int _winHeight, 
+	InputHandler* _inputHandler) {
 	tracingObject = true;
 	tracing = _tracing;
 	windowWidth = _winWidth;
 	windowHeight = _winHeight;
+	inputHandler = _inputHandler;
 }
 
 void CameraComponent::traceObject() {
-	go->getTransform().position = tracing->getTransform().position += tracingDistance;
+	go->getTransform().position = tracing->getTransform().position + tracingDistance;
 	cameraDirection = normalize(tracing->getTransform().position - go->getTransform().position);
 }
 
-void CameraComponent::update(float _dt, const int _windowHeight, const int _windowWidth) {
+auto CameraComponent::update(float _dt, const int _windowHeight, const int _windowWidth) -> void {
 	windowWidth = _windowWidth;
 	windowHeight = _windowHeight;
 	if (tracingObject) {
 		traceObject();
+	}
+	else {
+		keyStatus = inputHandler->getKeyStatus();
+		if (keyStatus.lowerCamera) go->getTransform().position -= _dt * speed * go->WORLD_UP;
+		if (keyStatus.raiseCamera) go->getTransform().position += _dt * speed * go->WORLD_UP;
+		if (keyStatus.forwardCamera) go->getTransform().position += _dt * speed * cameraDirection;
+		if (keyStatus.backwardCamera) go->getTransform().position -= _dt * speed * cameraDirection;
 	}
 }
 

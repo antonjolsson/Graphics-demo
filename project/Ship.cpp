@@ -2,27 +2,33 @@
 #include "Ship.h"
 
 #include <glm/gtx/transform.hpp>
+#include <iostream>
+
 
 
 #include "BehaviourComponent.h"
 
-ShipBehaviour::ShipBehaviour(Ship* _ship, Engine* _engine, RigidBody* _rigidBody): BehaviourComponent(_ship, _engine),
+ShipBehaviour::ShipBehaviour(Ship* _ship, InputHandler* _engine, RigidBody* _rigidBody): BehaviourComponent(_ship, _engine),
 	keyStatus() {
 	rigidBody = _rigidBody;
 }
 
 void ShipBehaviour::update(float _dt) {
-	keyStatus = engine->getKeyStatus();
+	keyStatus = inputHandler->getKeyStatus();
 	if (keyStatus.quit) {
 		go->send(QUIT);
 		return;
 	}
+	if (keyStatus.toggleDebugGui) {
+		go->send(TOGGLE_DEBUG_GUI);
+		std::cout << "Ship: toggleDebugGui = " << keyStatus.toggleDebugGui << std::endl;
+	}
 	if (keyStatus.forward) {
-		rigidBody->alterAcceleration(vec3(X_ACCELERATION, 0, 0));
+		rigidBody->addAcceleration(vec3(X_ACCELERATION, 0, 0));
 	}
 	else rigidBody->setZeroAcc();
 	if (keyStatus.reverse) {
-		rigidBody->alterAcceleration(vec3(-X_ACCELERATION, 0, 0));
+		rigidBody->addAcceleration(vec3(-X_ACCELERATION, 0, 0));
 	}
 	if (keyStatus.left) {
 		rigidBody->setRotationVelocity(vec3(go->getTransform().rotation.x > MAX_SHIP_X_ROT ? 0 : MAX_SHIP_X_ROTATION_SPEED,
@@ -56,9 +62,10 @@ void Ship::readMessages() {
 		default: ;
 		}
 	}
+	mailbox.clear();
 }
 
-Ship::Ship(Engine* _engine, const GLuint _shaderProgram, const bool _showHitbox) {
+Ship::Ship(InputHandler* _engine, const GLuint _shaderProgram, const bool _showHitbox) {
 	transform.position = INITIAL_POSITION;
 	mat4 shipModelMatrix = translate(Y_TRANSL * WORLD_UP);
 	auto* renderer = new ModelRenderComponent(this, _shaderProgram, fighterModel, shipModelMatrix);

@@ -3,22 +3,25 @@
 //
 
 #include "game.h"
+
+#include <iostream>
+
 #include "fbo.h"
 #include <labhelper.h>
 #include "CameraComponent.h"
 #include "AudioComponent.h"
 #include "DebugGUI.h"
-#include "engine.h"
+#include "InputHandler.h"
 #include "EnvironmentComponent.h"
 #include "hdr.h"
 #include "LightComponent.h"
 #include "Renderer.h"
 
-void Game::initEnemies(Engine*_engine, bool debug) {
+void Game::initEnemies(InputHandler*_engine, bool _debug) {
     
 }
 
-/*void Game::initCrazyRazy(Engine *_engine, bool debug, int index) {
+/*void Game::initCrazyRazy(InputHandler *_engine, bool debug, int index) {
     auto* crazyRazy = new CrazyRazy();
     crazyRazy->create(gameWidth, crazyRazy->TYPE, crazyRazy->INITIAL_MODE, crazyRazy->getStartPos(index));
     gameObjects.insert(crazyRazy);
@@ -40,7 +43,7 @@ void Game::initEnemies(Engine*_engine, bool debug) {
 /*void Game::initGUI() {
     gui = new GUI(gameWidth, gameHeight);
     auto* render = new GUIRenderComponent();
-    //render->create(gui, player, engine);
+    //render->create(gui, player, inputHandler);
     gui->addComponent(render);
     receivers.push_back(gui);
     gui->enabled = true;
@@ -99,10 +102,15 @@ void Game::readMessages() {
         case PLAYER_KILLED :
             send(GAME_OVER);
             break;
+        case TOGGLE_DEBUG_GUI :
+			debugGUI = !debugGUI;
+			std::cout << "Game: I toggled debugGUI!" << std::endl;
+			break;
         default:
             break;
 		}
     }
+	mailbox.clear();
 }
 
 bool Game::isQuitting() const {
@@ -119,7 +127,7 @@ void Game::initShaders()
     heightfieldProgram = labhelper::loadShaderProgram("../project/heightfield.vert", "../project/shading.frag");
 }
 
-void Game::initTerrain(Engine* _engine, const bool _showHitbox)
+void Game::initTerrain(InputHandler* _engine, const bool _showHitbox)
 {
 	
 	
@@ -147,21 +155,23 @@ GameObject* Game::initBackground()
 
 void Game::initCamera(const int _winWidth, const int _winHeight)
 {
-    auto cameraComponent = new CameraComponent(ship, _winWidth, _winHeight);
+    auto cameraComponent = new CameraComponent(ship, _winWidth, _winHeight, inputHandler);
+	cameraComponent->setTracingObject(false);
     camera = new Camera();
     camera->addComponent(cameraComponent);
     cameraComponent->init(camera);
+	gameObjects.insert(camera);
     receivers.push_back(camera);
 }
 
 void Game::initShip(const bool _showHitbox) {
-	ship = new Ship(engine, shaderProgram, _showHitbox);
+	ship = new Ship(inputHandler, shaderProgram, _showHitbox);
     ship->addReceiver(this);
     gameObjects.insert(ship);
     receivers.push_back(ship);
 }
 
-void Game::initRenderer(Engine* _engine, const bool _showHitbox, const int _winWidth, const int _winHeight, 
+void Game::initRenderer(InputHandler* _engine, const bool _showHitbox, const int _winWidth, const int _winHeight, 
     std::vector<GameObject*>* _lights, GameObject* _background) {
 	auto* renderComponents = new std::vector<ModelRenderComponent*>();
     for (auto go : gameObjects) {
@@ -175,8 +185,8 @@ void Game::initRenderer(Engine* _engine, const bool _showHitbox, const int _winW
 	renderer->setShadowMapProgram(simpleShaderProgram);
 }
 
-Game::Game(Engine* _engine, const bool _showHitbox, const int _winWidth, const int _winHeight, SDL_Window* _gWindow) {
-	engine = _engine;
+Game::Game(InputHandler* _engine, const bool _showHitbox, const int _winWidth, const int _winHeight, SDL_Window* _gWindow) {
+	inputHandler = _engine;
     showHitBox = _showHitbox;
     enabled = true;
 	gWindow = _gWindow;

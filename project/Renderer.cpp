@@ -8,7 +8,7 @@ void Renderer::setShadowMapProgram(const GLuint _shadowMapProgram) {
 	shadowMapProgram = _shadowMapProgram;
 }
 
-Renderer::Renderer(Engine* _engine, GameObject* _camera, std::vector<ModelRenderComponent*>* _renderComponents, 
+Renderer::Renderer(InputHandler* _engine, GameObject* _camera, std::vector<ModelRenderComponent*>* _renderComponents, 
                    const bool _showHitbox, const int _winWidth, const int _winHeight, std::vector<GameObject*>* _lights,
                    Ship* _ship, GameObject* _background) :
 	engine(_engine), camera(_camera), renderComponents(_renderComponents), showHitbox(_showHitbox), winWidth(_winWidth),

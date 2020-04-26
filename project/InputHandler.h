@@ -7,40 +7,9 @@
 
 #undef main
 
-/*struct SpriteSheet {
 
-    std::string filePath;
-    SDL_Color colorKey;
-};
-
-class Sprite
+class InputHandler
 {
-	SDL_Renderer * renderer;
-	SDL_Texture * texture;
-
-public:
-
-	Sprite(SDL_Renderer * renderer, SDL_Texture * texture, unsigned int scaling);
-
-	// Destroys the sprite instance
-	void destroy() const;
-
-	// draw the sprite at the given position.
-	// Valid coordinates are between (0,0) (upper left) and (width-32, height-32) (lower right).
-	// (All sprites are 32*32 pixels, clipping is not supported)
-    void draw(Vector2D screenPos, Vector2D sheetPos, Vector2D dimensions);
-    void draw(Vector2D screenPos, Vector2D sheetPos, Vector2D srcDims, Vector2D destDims, bool xFlipped);
-
-	void drawOutline(Vector2D screenPosition, Vector2D dimensions, SDL_Color color);
-
-	static SDL_Rect getRect(const Vector2D &position, const Vector2D &dimensions);
-};*/
-
-
-class Engine
-{
-    const char* WINDOW_TITLE = "Mega Man";
-    const char* ICON_FILE = "resource/icon.bmp";
 
     std::random_device randomSeed;
 
@@ -68,9 +37,9 @@ public:
 	// since the last update call.
 	// If update returns false, the application should terminate.
 
-	void swapBuffers();
+	void swapBuffers() const;
 
-	void clearWindow(SDL_Color _color);
+	void clearWindow(SDL_Color _color) const;
 
     // Return the total time spent in the game, in seconds.
 	float getElapsedTime();
@@ -86,12 +55,19 @@ public:
 		bool quit; // escape button
 		bool machinegun; // s
 		bool down; // d
+		
+		bool lowerCamera; // q
+		bool raiseCamera; // e
+		bool forwardCamera; // w
+		bool backwardCamera; // s TODO: find better name
+
+		bool toggleDebugGui; // g
 	};
 
 	// Returns the keyboard status. If a flag is set, the corresponding key is being held down.
     KeyStatus & getKeyStatus();
 
-    int getRandomInt(int min, int max);
+    int getRandomInt(int _min, int _max);
 
     //void drawText(int x, int y, const char *msg, TextAlign pos, SDL_Color color);
 

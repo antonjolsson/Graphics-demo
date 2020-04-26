@@ -8,7 +8,7 @@
 #include "AudioComponent.h"
 #include "Camera.h"
 #include "CameraComponent.h"
-#include "engine.h"
+#include "InputHandler.h"
 #include "Renderer.h"
 
 //#include "fbo.h"
@@ -28,9 +28,7 @@ public:
 class Game : public GameObject {
 
     const unsigned int MAX_NUM_GAME_OBJECTS = 10000;
-
     const float OPT_FRAMERATE = 60.f;
-	
     const vec3 LIGHT_POS_OFFSET{ 0, 50.0f, -40.0 };
 
 	const int ENV_ROUGHNESSES = 8;
@@ -41,7 +39,7 @@ class Game : public GameObject {
 	
     std::set<GameObject*> gameObjects;
 	
-    Engine* engine = nullptr;
+    InputHandler* inputHandler = nullptr;
 
     ObjectPool<GameObject>* playerCollObjects{};
     ObjectPool<GameObject>* enemyCollObjects{};
@@ -72,7 +70,7 @@ class Game : public GameObject {
 
 public:
 
-    void initEnemies(Engine*_engine, bool debug);
+    void initEnemies(InputHandler*_engine, bool _debug);
   
     //void initGUI();
     void init() override;
@@ -81,14 +79,13 @@ public:
     bool isQuitting() const;
 
     void initShaders();
-    void initTerrain(Engine* _engine, bool _showHitbox);
+    void initTerrain(InputHandler* _engine, bool _showHitbox);
     GameObject* initBackground();
-    void initCamera(const int _winWidth, const int _winHeight);
+    void initCamera(int _winWidth, int _winHeight);
     void initShip(bool _showHitbox);
-    void initRenderer(Engine * _engine, const bool _showHitbox, const int _winWidth, const int _winHeight, 
+    void initRenderer(InputHandler * _engine, bool _showHitbox, int _winWidth, int _winHeight, 
         std::vector<GameObject*>* _lights, GameObject * _background);
     void update(float _dt, int _windowWidth, int _windowHeight) override;
     GameObject* initLight();
-    Game(Engine* _engine, bool _showHitbox, int _winWidth, int _winHeight);
-    Game(Engine* _engine, const bool _showHitbox, const int _winWidth, const int _winHeight, SDL_Window* _gWindow);
+    Game(InputHandler* _engine, bool _showHitbox, int _winWidth, int _winHeight, SDL_Window* _gWindow);
 };
