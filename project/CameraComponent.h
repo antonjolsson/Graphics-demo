@@ -5,8 +5,12 @@
 
 class CameraComponent :public Component
 {
-	
+public:
 	float fieldOfView = 50.f;
+	void setFieldOfView(float _fieldOfView);
+	float getNearPlane() const;
+	float getFarPlane() const;
+private:
 	float nearPlane = 5.f;
 	float farPlane = 900.f;
 	vec3 cameraDirection{};
@@ -17,7 +21,7 @@ public:
 private:
 	GameObject* tracing = nullptr;
 	bool tracingObject;
-	vec3 tracingDistance{ 50, 50, 0 };
+	vec3 tracingDistance{ 50, 50, 0 }; // { 50, 50, 0 }
 	int windowWidth;
 	int windowHeight;
 

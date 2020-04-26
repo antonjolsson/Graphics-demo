@@ -67,6 +67,8 @@ class Game : public GameObject {
     GameAudioPlayer* audioPlayer;
     Renderer* renderer{};
     GameObject* camera{};
+    SDL_Window* gWindow;
+    bool debugGUI = true;
 
 public:
 
@@ -88,4 +90,5 @@ public:
     void update(float _dt, int _windowWidth, int _windowHeight) override;
     GameObject* initLight();
     Game(Engine* _engine, bool _showHitbox, int _winWidth, int _winHeight);
+    Game(Engine* _engine, const bool _showHitbox, const int _winWidth, const int _winHeight, SDL_Window* _gWindow);
 };

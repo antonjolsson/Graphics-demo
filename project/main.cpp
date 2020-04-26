@@ -299,15 +299,6 @@ void setLightUniforms(const GLuint _currentShaderProgram, const mat4& _viewMatri
 	labhelper::setUniformSlow(_currentShaderProgram, "viewInverse", inverse(_viewMatrix));
 }
 
-/*void setMatrixUniforms(const GLuint currentShaderProgram, const mat4& viewMatrix, const mat4& projectionMatrix, const mat4 _modelMatrix)
-{
-	labhelper::setUniformSlow(currentShaderProgram, "modelViewProjectionMatrix",
-		projectionMatrix * viewMatrix * _modelMatrix);
-	labhelper::setUniformSlow(currentShaderProgram, "modelViewMatrix", viewMatrix * _modelMatrix);
-	labhelper::setUniformSlow(currentShaderProgram, "normalMatrix",
-		inverse(transpose(viewMatrix * _modelMatrix)));
-}*/
-
 void drawTerrain(const mat4& _projMatrix, const mat4& _viewMatrix, const mat4& _lightViewMatrix, 
 	const mat4& _lightProjectionMatrix, const vec4& _viewSpaceLightPosition)
 {
@@ -358,59 +349,6 @@ void drawFromCamera(const mat4 projMatrix, const mat4 viewMatrix, const mat4 lig
 	drawLight(viewMatrix, projMatrix, vec3(lightPosition));
 }
 
-void bindEnvironmentMaps()
-{
-	glActiveTexture(GL_TEXTURE6);
-	glBindTexture(GL_TEXTURE_2D, environmentMap);
-	glActiveTexture(GL_TEXTURE7);
-	glBindTexture(GL_TEXTURE_2D, irradianceMap);
-	glActiveTexture(GL_TEXTURE8);
-	glBindTexture(GL_TEXTURE_2D, reflectionMap);
-	glActiveTexture(GL_TEXTURE0);
-}
-
-/*void drawShadowMap(const mat4 _lightViewMatrix, const mat4 _lightProjMatrix)
-{
-	if (shadowMapFB.width != shadowMapResolution || shadowMapFB.height != shadowMapResolution)
-	{
-		shadowMapFB.resize(shadowMapResolution, shadowMapResolution);
-	}
-	
-	if (shadowMapClampMode == ClampMode::EDGE)
-	{
-		glBindTexture(GL_TEXTURE_2D, shadowMapFB.depthBuffer);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	}
-
-	if (shadowMapClampMode == ClampMode::BORDER)
-	{
-		glBindTexture(GL_TEXTURE_2D, shadowMapFB.depthBuffer);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
-		vec4 border(shadowMapClampBorderShadowed ? 0.f : 1.f);
-		glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, &border.x);
-	}
-
-	if (usePolygonOffset)
-	{
-		glEnable(GL_POLYGON_OFFSET_FILL);
-		glPolygonOffset(polygonOffsetFactor, polygonOffsetUnits);
-	}
-
-	glBindFramebuffer(GL_FRAMEBUFFER, shadowMapFB.framebufferId);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	glViewport(0, 0, shadowMapFB.width, shadowMapFB.height);
-	drawScene(simpleShaderProgram, _lightViewMatrix, _lightProjMatrix, _lightViewMatrix, _lightProjMatrix);
-	labhelper::Material& screen = landingpadModel->m_materials[8];
-	screen.m_emission_texture.gl_id = shadowMapFB.colorTextureTargets[0];
-
-	if (usePolygonOffset)
-	{
-		glDisable(GL_POLYGON_OFFSET_FILL);
-	}
-}*/
-
 void setWindowSize() {
 	int w, h;
 	SDL_GetWindowSize(g_window, &w, &h);
@@ -435,8 +373,6 @@ void display()
 	lightPosition = vec3(rotate(lightRotation, worldUp) * vec4(LIGHT_POS_OFFSET, 1.f)) + vec3(fighterModelMatrix[3]);
 	const mat4 lightViewMatrix = lookAt(lightPosition, vec3(0.0f), worldUp);
 	const mat4 lightProjMatrix = perspective(radians(45.0f), 1.0f, 25.0f, 100.0f);
-
-	bindEnvironmentMaps();
 
 	//drawShadowMap(lightViewMatrix, lightProjMatrix);
 
@@ -547,60 +483,8 @@ bool handleEvents(void)
 	return quitEvent;
 }
 
-void gui()
-{
-	// Inform imgui of new frame
-	ImGui_ImplSdlGL3_NewFrame(g_window);
-
-	// ----------------- Set variables --------------------------
-	if (ImGui::CollapsingHeader("Shadow variables", "shadow_ch", true, false))
-	{
-		ImGui::SliderInt("Shadow Map Resolution", &shadowMapResolution, 32, 2048);
-		ImGui::Text("Polygon Offset");
-		ImGui::Checkbox("Use polygon offset", &usePolygonOffset);
-		ImGui::SliderFloat("Factor", &polygonOffsetFactor, 0.0f, 10.0f);
-		ImGui::SliderFloat("Units", &polygonOffsetUnits, 0.0f, 100.0f);
-		ImGui::Text("Clamp Mode");
-		ImGui::RadioButton("Clamp to edge", &shadowMapClampMode, ClampMode::EDGE);
-		ImGui::RadioButton("Clamp to border", &shadowMapClampMode, ClampMode::BORDER);
-		ImGui::Checkbox("Border as shadow", &shadowMapClampBorderShadowed);
-		ImGui::Checkbox("Use spot light", &useSpotLight);
-		ImGui::Checkbox("Use soft falloff", &useSoftFalloff);
-		ImGui::SliderFloat("Inner Deg.", &innerSpotlightAngle, 0.0f, 90.0f);
-		ImGui::SliderFloat("Outer Deg.", &outerSpotlightAngle, 0.0f, 90.0f);
-		ImGui::Checkbox("Use hardware PCF", &useHardwarePCF);
-		ImGui::Checkbox("Manual light only (right-click drag to move)", &lightManualOnly);
-	}
-	
-	ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate,
-	            ImGui::GetIO().Framerate);
-	ImGui::SliderFloat("Field of view: ", &fieldOfView, 10.0f, 70.0f);
-	ImGui::SliderFloat("Acceleration", &acceleration, 0.0f, 10.0f);
-	ImGui::SliderFloat("Drag coeff.", &dragCoeff, 0.0f, 10.0f);
-	ImGui::Text("Current ship speed: %.3f", shipSpeed);
-	ImGui::Text("Ship x-rotation: %.3f", shipXRotation);
-	ImGui::Text("Ship x-rotation speed: %.3f", shipXRotationSpeed);
-	ImGui::Text("Ship x-axis: %.3f %.3f %.3f", fighterModelMatrix[0].x, fighterModelMatrix[0].y, fighterModelMatrix[0].z);
-	ImGui::Text("Ship y-axis: %.3f %.3f %.3f", fighterModelMatrix[1].x, fighterModelMatrix[1].y, fighterModelMatrix[1].z);
-	ImGui::Text("Ship z-axis: %.3f %.3f %.3f", fighterModelMatrix[2].x, fighterModelMatrix[2].y, fighterModelMatrix[2].z);
-	ImGui::Text("Camera position: %.3f %.3f %.3f", cameraPosition[0], cameraPosition[1], cameraPosition[2]);
-	ImGui::SliderFloat("Exhaust x-offset", &exhXOffset, -20.0f, 20.0f);
-	ImGui::SliderFloat("Exhaust y-offset", &exhYOffset, -20.0f, 20.0f);
-	ImGui::SliderFloat("Exhaust z-offset", &exhZOffset, -2.0f, 2.0f);
-	// ----------------------------------------------------------
-
-	// Render the GUI.
-	ImGui::Render();
-}
-
 void updateShip(void) {
-
-	/*const mat4 rotMatrix = glm::eulerAngleYXZ(shipYRotation, shipXRotation, 0.f);
-	const vec4 translation = fighterModelMatrix[3];
-	fighterModelMatrix = rotMatrix * mat4(1.f);
-	fighterModelMatrix[3] = translation;
-
-	fighterModelMatrix = translate(fighterModelMatrix, shipSpeed * -xAxis);*/
+	
 	particleSystem.setExhaustOffset(vec3(exhXOffset, exhYOffset, exhZOffset));
 }
 
@@ -629,7 +513,7 @@ int main(int argc, char* argv[])
 
 	Mix_OpenAudio(22050, MIX_DEFAULT_FORMAT, 2, 4096);
 	
-	Game game(&engine, SHOW_HITBOX, WIN_WIDTH, WIN_HEIGHT);
+	Game game(&engine, SHOW_HITBOX, WIN_WIDTH, WIN_HEIGHT, g_window);
 	
 	//initGL();
 
@@ -646,17 +530,7 @@ int main(int argc, char* argv[])
 		deltaTime = currentTime - previousTime;
 
 		game.update(deltaTime, windowWidth, windowHeight);
-		
-		//updateShip();
-		// render to window
-		//display();
-
-		// Render overlay GUI.
-		if(showUI)
-		{
-			//gui();
-		}
-
+	
 		if (logger) logStats();
 
 		// Swap front and back buffer. This frame will now been displayed.

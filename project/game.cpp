@@ -7,6 +7,7 @@
 #include <labhelper.h>
 #include "CameraComponent.h"
 #include "AudioComponent.h"
+#include "DebugGUI.h"
 #include "engine.h"
 #include "EnvironmentComponent.h"
 #include "hdr.h"
@@ -61,6 +62,7 @@ void Game::update(const float _dt, const int _windowWidth, const int _windowHeig
         gameObject->update(_dt);
     camera->update(_dt, _windowWidth, _windowHeight);
     renderer->draw();
+	if (debugGUI) debug_gui::showDebugGUI(gWindow, ship, camera);
     //gui->update(score);
 }
 
@@ -173,11 +175,12 @@ void Game::initRenderer(Engine* _engine, const bool _showHitbox, const int _winW
 	renderer->setShadowMapProgram(simpleShaderProgram);
 }
 
-Game::Game(Engine* _engine, bool _showHitbox, const int _winWidth, const int _winHeight) {
+Game::Game(Engine* _engine, const bool _showHitbox, const int _winWidth, const int _winHeight, SDL_Window* _gWindow) {
 	engine = _engine;
     showHitBox = _showHitbox;
     enabled = true;
-
+	gWindow = _gWindow;
+	
     audioPlayer = new GameAudioPlayer();
     components.push_back(audioPlayer);
 
@@ -193,6 +196,7 @@ Game::Game(Engine* _engine, bool _showHitbox, const int _winWidth, const int _wi
     
 	const auto lights = new std::vector<GameObject*> {light};
     initRenderer(_engine, _showHitbox, _winWidth, _winHeight, lights, background);
+	
 }
 
 GameAudioPlayer::GameAudioPlayer()

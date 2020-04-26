@@ -47,6 +47,7 @@ add_executable ( ${PROJECT_NAME}
     component.h
     EnvironmentComponent.h
     EnvironmentComponent.cpp
+    DebugGUI.h
     ${SHADERS}
      "component.cpp" "game.cpp" "gameObject.cpp")
 

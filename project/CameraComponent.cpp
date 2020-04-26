@@ -1,6 +1,18 @@
 #include "CameraComponent.h"
 #include <glm/gtx/transform.hpp>
 
+void CameraComponent::setFieldOfView(const float _fieldOfView) {
+	fieldOfView = _fieldOfView;
+}
+
+float CameraComponent::getNearPlane() const {
+	return nearPlane;
+}
+
+float CameraComponent::getFarPlane() const {
+	return farPlane;
+}
+
 void CameraComponent::setCameraDirection(const vec3& _cameraDirection) {
 	cameraDirection = _cameraDirection;
 }

@@ -5,6 +5,14 @@
 #include <glm/gtx/transform.inl>
 
 
+glm::vec3 RigidBody::getRotationVelocity() const {
+	return rotationVelocity;
+}
+
+glm::vec3 RigidBody::getVelocity() const {
+	return velocity;
+}
+
 void RigidBody::setZeroAcc() {
 	acceleration = glm::vec3(0);
 }
@@ -15,7 +23,7 @@ void RigidBody::alterAcceleration(const glm::vec3 _vec) {
 	acceleration.z += _vec.z;
 }
 
-void RigidBody::setRotationVelocity(glm::vec3 _velocity) {
+void RigidBody::setRotationVelocity(const glm::vec3 _velocity) {
 	rotationVelocity = _velocity;
 }
 
@@ -30,24 +38,28 @@ void RigidBody::applyDrag()
 	velocity.z *= pow(dragCoeff, -abs(velocity.z));
 }
 
-void RigidBody::setRotation(const bool _frozenPos, float& _rotVelocity, const float _resetRotSpeedRot, float& _position) const {
+void RigidBody::setRotation(const bool _frozenPos, float& _rotVelocity, const float _resetRotSpeedRot, float& _rotation) const {
 	if (!_frozenPos) {
 		if (_rotVelocity == 0 && abs(_rotVelocity) < _resetRotSpeedRot) _rotVelocity = 0;
-		else _position += _rotVelocity;
+		else _rotation += _rotVelocity;
 	}
 }
 
 void RigidBody::update(const float _dt) {
 	glm::vec3& position = go->getTransform().position;
 	glm::vec3& rotation = go->getTransform().rotation;
-	if (accelerating) velocity += acceleration * _dt;
+	
+	velocity += acceleration * _dt;
 	applyDrag();
-	setRotation(frozenPositions.x, rotationVelocity.x, resetRotSpeedRot.x,
-		position.x);
-	setRotation(frozenPositions.y, rotationVelocity.y, resetRotSpeedRot.y,
-		position.y);
-	setRotation(frozenPositions.z, rotationVelocity.z, resetRotSpeedRot.z,
-		position.z);
+	acceleration = glm::vec3(0);
+	
+	setRotation(frozenRotations.x, rotationVelocity.x, resetRotSpeedRot.x,
+		rotation.x);
+	setRotation(frozenRotations.y, rotationVelocity.y, resetRotSpeedRot.y,
+		rotation.y);
+	setRotation(frozenRotations.z, rotationVelocity.z, resetRotSpeedRot.z,
+		rotation.z);
+	position += velocity * _dt;
 }
 
 RigidBody::RigidBody(GameObject* _go, const float _dragCoeff) {
