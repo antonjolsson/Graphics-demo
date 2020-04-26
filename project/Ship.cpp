@@ -61,7 +61,7 @@ void Ship::readMessages() {
 Ship::Ship(Engine* _engine, const GLuint _shaderProgram, const bool _showHitbox) {
 	transform.position = INITIAL_POSITION;
 	mat4 shipModelMatrix = translate(Y_TRANSL * WORLD_UP);
-	auto* renderer = new RenderComponent(this, _shaderProgram, fighterModel, shipModelMatrix);
+	auto* renderer = new ModelRenderComponent(this, _shaderProgram, fighterModel, shipModelMatrix);
 	auto* rigidBody = new RigidBody(this, DRAG_COEFF);
 	auto* behaviour = new ShipBehaviour(this, _engine, rigidBody);
 	addComponents(std::vector<Component*> {behaviour, renderer, rigidBody});

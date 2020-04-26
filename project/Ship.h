@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../../project/gameObject.h"
-#include "RenderComponent.h"
+#include "ModelRenderComponent.h"
 #include <GL/glew.h>
 
 #include "ParticleSystem.h"

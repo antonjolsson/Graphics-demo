@@ -4,7 +4,7 @@
 
 #include "Model.h"
 
-class RenderComponent : public Component
+class ModelRenderComponent : public Component
 {
 	labhelper::Model* model = nullptr;
 	GLuint shaderProgram;
@@ -18,7 +18,7 @@ public:
 	glm::mat4 getModelMatrix() const;
 
 	void update(float _dt) override;
-	RenderComponent(GameObject* _go, const GLuint _shaderProgram, labhelper::Model* _model, glm::mat4 _modelMatrix);
+	ModelRenderComponent(GameObject* _go, const GLuint _shaderProgram, labhelper::Model* _model, glm::mat4 _modelMatrix);
 
 };
 

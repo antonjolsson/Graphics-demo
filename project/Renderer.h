@@ -2,7 +2,7 @@
 #include <vector>
 
 #include "engine.h"
-#include "RenderComponent.h"
+#include "ModelRenderComponent.h"
 #include "CameraComponent.h"
 #include "ShadowMap.h"
 
@@ -13,7 +13,7 @@ class Renderer {
 	bool renderShadows = false;
 	Engine* engine;
 	GameObject* camera;
-	const std::vector<RenderComponent*>* renderComponents;
+	const std::vector<ModelRenderComponent*>* renderComponents;
 	bool showHitbox = false;
 	int winWidth;
 	int winHeight;
@@ -23,19 +23,21 @@ class Renderer {
 	
 	ShadowMap* shadowMap = nullptr;
 	GLuint shadowMapProgram = 0;
+	GameObject* background = nullptr;
 
 public:
 	void setShadowMapProgram(GLuint _shadowMapProgram);
 
-	Renderer(Engine* _engine, GameObject* _camera, std::vector<RenderComponent*>* _renderComponents, bool _showHitbox,
-	         int _winWidth, int _winHeight, std::vector<GameObject*>* _lights, Ship* _ship);
+	Renderer(Engine* _engine, GameObject* _camera, std::vector<ModelRenderComponent*>* _renderComponents, bool _showHitbox,
+	         int _winWidth, int _winHeight, std::vector<GameObject*>* _lights, Ship* _ship, GameObject* _background);
 	void setRenderShadows(bool _renderShadows);
 	void drawScene(GLuint _shaderProgram, mat4 _viewMatrix, mat4 _projMatrix, mat4 _lightViewMatrix, mat4 _lightProjMatrix) const;
 	void drawShadowMap(mat4 _viewMatrix, mat4 _projMatrix, mat4 _lightViewMatrix, mat4 _lightProjMatrix);
 	void bindEnvironmentMaps();
 	void setLightUniforms(const GLuint _currentShaderProgram, mat4 _viewMatrix, mat4 _lightViewMatrix, mat4 _lightProjMatrix, 
 		const vec4 _viewSpaceLightPosition) const;
-	void drawFromCamera(mat4 _projMatrix, mat4 _viewMatrix, mat4 _lightViewMatrix, mat4 _lightProjMatrix);
+	void drawFromCamera(mat4 _projMatrix, mat4 _viewMatrix, mat4 _lightViewMatrix, mat4 _lightProjMatrix) const;
+	void drawBackground(const mat4& _viewMatrix, const mat4& _projectionMatrix);
 	void draw();
 
 };

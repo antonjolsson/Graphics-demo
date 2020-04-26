@@ -33,6 +33,8 @@ class Game : public GameObject {
 	
     const vec3 LIGHT_POS_OFFSET{ 0, 50.0f, -40.0 };
 
+	const int ENV_ROUGHNESSES = 8;
+
     SDL_Color clearColor = {};
 
     Ship *ship{};
@@ -78,11 +80,12 @@ public:
 
     void initShaders();
     void initTerrain(Engine* _engine, bool _showHitbox);
-    void initBackground(Engine* _engine, bool _showHitbox);
-    void initCamera(Engine* _engine, const int _winWidth, const int _winHeight);
+    GameObject* initBackground();
+    void initCamera(const int _winWidth, const int _winHeight);
     void initShip(bool _showHitbox);
-    void initRenderer(Engine* _engine, bool _showHitbox, int _winWidth, int _winHeight, std::vector<GameObject*>* _lights);
-    void update(float _dt, int _windowWidth, int _windowHeight);
+    void initRenderer(Engine * _engine, const bool _showHitbox, const int _winWidth, const int _winHeight, 
+        std::vector<GameObject*>* _lights, GameObject * _background);
+    void update(float _dt, int _windowWidth, int _windowHeight) override;
     GameObject* initLight();
     Game(Engine* _engine, bool _showHitbox, int _winWidth, int _winHeight);
 };

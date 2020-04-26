@@ -17,7 +17,7 @@ public:
 private:
 	GameObject* tracing = nullptr;
 	bool tracingObject;
-	vec3 tracingDistance{ 50, 0, 0 };
+	vec3 tracingDistance{ 50, 50, 0 };
 	int windowWidth;
 	int windowHeight;
 

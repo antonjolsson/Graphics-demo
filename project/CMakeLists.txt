@@ -36,8 +36,8 @@ add_executable ( ${PROJECT_NAME}
     gameObject.h
     CameraComponent.h
     CameraComponent.cpp
-    RenderComponent.h
-    RenderComponent.cpp
+    ModelRenderComponent.h
+    ModelRenderComponent.cpp
     Camera.cpp
     Camera.h
     LightComponent.h
@@ -45,6 +45,8 @@ add_executable ( ${PROJECT_NAME}
     ShadowMap.cpp
     ShadowMap.h
     component.h
+    EnvironmentComponent.h
+    EnvironmentComponent.cpp
     ${SHADERS}
      "component.cpp" "game.cpp" "gameObject.cpp")
 

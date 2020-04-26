@@ -1,21 +1,21 @@
-#include "RenderComponent.h"
+#include "ModelRenderComponent.h"
 
 #include <glm/gtx/euler_angles.inl>
 #include <glm/gtx/transform.hpp>
 
-GLuint RenderComponent::getShaderProgram() const {
+GLuint ModelRenderComponent::getShaderProgram() const {
 	return shaderProgram;
 }
 
-labhelper::Model* RenderComponent::getModel() const {
+labhelper::Model* ModelRenderComponent::getModel() const {
 	return model;
 }
 
-glm::mat4 RenderComponent::getModelMatrix() const {
+glm::mat4 ModelRenderComponent::getModelMatrix() const {
 	return modelMatrix;
 }
 
-void RenderComponent::update(float _dt)
+void ModelRenderComponent::update(float _dt)
 {
 	const glm::mat4 rotMatrix = glm::eulerAngleYXZ(go->getTransform().position.y, go->getTransform().position.x,
 		0.f); // TODO: make generic?
@@ -26,7 +26,7 @@ void RenderComponent::update(float _dt)
 	//modelMatrix = glm::translate(modelMatrix, shipSpeed * -xAxis);
 }
 
-RenderComponent::RenderComponent(GameObject* _go, const GLuint _shaderProgram, labhelper::Model* _model,
+ModelRenderComponent::ModelRenderComponent(GameObject* _go, const GLuint _shaderProgram, labhelper::Model* _model,
 	glm::mat4 _modelMatrix) {
 	go = _go;
 	shaderProgram = _shaderProgram;

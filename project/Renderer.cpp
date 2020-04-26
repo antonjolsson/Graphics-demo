@@ -1,17 +1,20 @@
 #include "Renderer.h"
 #include <glm/gtx/transform.hpp>
+
+#include "EnvironmentComponent.h"
 #include "LightComponent.h"
 
 void Renderer::setShadowMapProgram(const GLuint _shadowMapProgram) {
 	shadowMapProgram = _shadowMapProgram;
 }
 
-Renderer::Renderer(Engine* _engine, GameObject* _camera, std::vector<RenderComponent*>* _renderComponents, 
+Renderer::Renderer(Engine* _engine, GameObject* _camera, std::vector<ModelRenderComponent*>* _renderComponents, 
                    const bool _showHitbox, const int _winWidth, const int _winHeight, std::vector<GameObject*>* _lights,
-                   Ship* _ship) :
+                   Ship* _ship, GameObject* _background) :
 	engine(_engine), camera(_camera), renderComponents(_renderComponents), showHitbox(_showHitbox), winWidth(_winWidth),
 	winHeight(_winHeight), lights(_lights) {
 	ship = _ship;
+	background = _background;
 	cameraComponent = camera->getComponent<CameraComponent>();
 	glEnable(GL_DEPTH_TEST); // enable Z-buffering
 	glEnable(GL_CULL_FACE);  // enables backface culling
@@ -67,10 +70,6 @@ void Renderer::drawShadowMap(const mat4 _viewMatrix, const mat4 _projMatrix, con
 	}
 }
 
-void Renderer::bindEnvironmentMaps() {
-	
-}
-
 void Renderer::setLightUniforms(const GLuint _currentShaderProgram, mat4 _viewMatrix, const mat4 _lightViewMatrix,
                                 const mat4 _lightProjMatrix, const vec4 _viewSpaceLightPosition) const {
 	const auto lightComp = (*lights)[0]->getComponent<LightComponent>(); // todo: refactor for several lights
@@ -79,7 +78,7 @@ void Renderer::setLightUniforms(const GLuint _currentShaderProgram, mat4 _viewMa
 		lightComp->getIntensityMultiplier());
 	labhelper::setUniformSlow(_currentShaderProgram, "viewSpaceLightPosition", vec3(_viewSpaceLightPosition));
 	labhelper::setUniformSlow(_currentShaderProgram, "viewSpaceLightDir",
-		normalize(vec3(_viewMatrix * vec4(vec3(ship->getComponent<RenderComponent>()->getModelMatrix()[3]) - 
+		normalize(vec3(_viewMatrix * vec4(vec3(ship->getComponent<ModelRenderComponent>()->getModelMatrix()[3]) - 
 			(*lights)[0]->getTransform().position, 0.0f)))); // TODO: remove ship dependency
 	labhelper::setUniformSlow(_currentShaderProgram, "spotOuterAngle",
 		std::cos(radians(lightComp->getOuterSpotlightAngle())));
@@ -97,15 +96,14 @@ void Renderer::setLightUniforms(const GLuint _currentShaderProgram, mat4 _viewMa
 	labhelper::setUniformSlow(_currentShaderProgram, "viewInverse", inverse(_viewMatrix));
 }
 
-
-
 void Renderer::drawFromCamera(const mat4 _projMatrix, const mat4 _viewMatrix, const mat4 _lightViewMatrix, 
-	const mat4 _lightProjMatrix) {
+	const mat4 _lightProjMatrix) const {
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glViewport(0, 0, winWidth, winHeight);
 	glClearColor(0.2f, 0.2f, 0.8f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+	if (background != nullptr) background->getComponent<EnvironmentComponent>()->draw(_viewMatrix, _projMatrix, camera);
 	drawScene(0, _viewMatrix, _projMatrix, _lightViewMatrix,
 		_lightProjMatrix);
 }
@@ -118,9 +116,10 @@ void Renderer::draw() {
 	const mat4 lightViewMatrix = (*lights)[0]->getComponent<LightComponent>()->getProjMatrix();
 	const mat4 lightProjMatrix = (*lights)[0]->getComponent<LightComponent>()->getViewMatrix();
 
-	bindEnvironmentMaps();
+	if (background != nullptr) background->getComponent<EnvironmentComponent>()->bindEnvMaps();
 
-	if (renderShadows) drawShadowMap(viewMatrix, projMatrix, lightViewMatrix, lightProjMatrix);
+	if (renderShadows) 
+		drawShadowMap(viewMatrix, projMatrix, lightViewMatrix, lightProjMatrix);
 
 	drawFromCamera(projMatrix, viewMatrix, lightViewMatrix, lightProjMatrix);
 }

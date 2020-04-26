@@ -104,14 +104,6 @@ private:
     SDL_Window * window{};
 	SDL_Renderer * renderer{};
 
-    /*struct Text {
-        //TTF_Font* font;
-        SDL_Surface* surface = nullptr;
-        SDL_Texture* texture;
-    };*/
-
-    //Text text{};
-
 	KeyStatus keys{};
 
     void initGameControllers();

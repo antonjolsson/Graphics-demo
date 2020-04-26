@@ -8,6 +8,8 @@
 #include "CameraComponent.h"
 #include "AudioComponent.h"
 #include "engine.h"
+#include "EnvironmentComponent.h"
+#include "hdr.h"
 #include "LightComponent.h"
 #include "Renderer.h"
 
@@ -50,6 +52,7 @@ void Game::init() {
 
 void Game::update(const float _dt, const int _windowWidth, const int _windowHeight) {
     readMessages();
+	if (quit) return;
     for (auto component : components) {
         component->update(_dt);
     }
@@ -120,12 +123,27 @@ void Game::initTerrain(Engine* _engine, const bool _showHitbox)
 	
 }
 
-void Game::initBackground(Engine* _engine, const bool _showHitbox)
+GameObject* Game::initBackground()
 {
-	
+	auto background = new GameObject();
+	auto envComp = new EnvironmentComponent(background, backgroundProgram);
+	background->addComponent(envComp);
+
+	std::vector<std::string> filenames;
+	filenames.reserve(ENV_ROUGHNESSES);
+	for(auto i = 0; i < ENV_ROUGHNESSES; i++)
+		filenames.push_back("../scenes/envmaps/" + envComp->getEnvmapBaseName() + "_dl_" + std::to_string(i) + ".hdr");
+
+	envComp->setReflectionMap(labhelper::loadHdrMipmapTexture(filenames));
+	envComp->setEnvironmentMap(labhelper::loadHdrTexture("../scenes/envmaps/" + envComp->getEnvmapBaseName() + ".hdr"));
+	envComp->setIrradianceMap(labhelper::loadHdrTexture("../scenes/envmaps/" + envComp->getEnvmapBaseName() + "_irradiance.hdr"));
+
+	gameObjects.insert(background);
+
+	return background;
 }
 
-void Game::initCamera(Engine* _engine, const int _winWidth, const int _winHeight)
+void Game::initCamera(const int _winWidth, const int _winHeight)
 {
     auto cameraComponent = new CameraComponent(ship, _winWidth, _winHeight);
     camera = new Camera();
@@ -142,14 +160,15 @@ void Game::initShip(const bool _showHitbox) {
 }
 
 void Game::initRenderer(Engine* _engine, const bool _showHitbox, const int _winWidth, const int _winHeight, 
-    std::vector<GameObject*>* _lights) {
-	auto* renderComponents = new std::vector<RenderComponent*>();
+    std::vector<GameObject*>* _lights, GameObject* _background) {
+	auto* renderComponents = new std::vector<ModelRenderComponent*>();
     for (auto go : gameObjects) {
-        auto renderComponent = go->getComponent<RenderComponent>();
+        auto renderComponent = go->getComponent<ModelRenderComponent>();
         if (renderComponent != nullptr)
             renderComponents->push_back(renderComponent);
     }
-    renderer = new Renderer(_engine, camera, renderComponents, _showHitbox, _winWidth, _winHeight, _lights, ship);
+    renderer = new Renderer(_engine, camera, renderComponents, _showHitbox, _winWidth, _winHeight, _lights, ship, 
+        _background);
     renderer->setRenderShadows(true);
 	renderer->setShadowMapProgram(simpleShaderProgram);
 }
@@ -167,13 +186,13 @@ Game::Game(Engine* _engine, bool _showHitbox, const int _winWidth, const int _wi
     
     initTerrain(_engine, _showHitbox);
     initEnemies(_engine, _showHitbox);
-    initBackground(_engine, _showHitbox);
+    auto background = initBackground();
 	
-    initCamera(_engine, _winWidth, _winHeight);
+    initCamera(_winWidth, _winHeight);
     GameObject* light = initLight();
     
 	const auto lights = new std::vector<GameObject*> {light};
-    initRenderer(_engine, _showHitbox, _winWidth, _winHeight, lights);
+    initRenderer(_engine, _showHitbox, _winWidth, _winHeight, lights, background);
 }
 
 GameAudioPlayer::GameAudioPlayer()
