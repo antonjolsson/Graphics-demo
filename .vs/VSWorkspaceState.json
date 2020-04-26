@@ -3,13 +3,11 @@
     "",
     "\\build",
     "\\build\\.vs",
-    "\\build\\.vs\\computer-graphics-labs",
-    "\\build\\.vs\\computer-graphics-labs\\v16",
     "\\build\\project",
     "\\external_src",
     "\\Local settings (.vs)",
     "\\project"
   ],
-  "SelectedNode": "\\build\\project\\project.sln",
+  "SelectedNode": "\\build\\foreignAttack.sln",
   "PreviewInSolutionExplorer": false
 }

@@ -13,6 +13,7 @@ source_group("Shaders" FILES ${SHADERS})
 # Build and link executable.
 add_executable ( ${PROJECT_NAME}
     main.cpp
+    fbo.h
     fbo.cpp
     hdr.cpp
     heightfield.cpp
@@ -41,6 +42,8 @@ add_executable ( ${PROJECT_NAME}
     Camera.h
     LightComponent.h
     LightComponent.cpp
+    ShadowMap.cpp
+    ShadowMap.h
     component.h
     ${SHADERS}
      "component.cpp" "game.cpp" "gameObject.cpp")

@@ -3,6 +3,7 @@
 #include "../../project/gameObject.h"
 #include "RenderComponent.h"
 #include <GL/glew.h>
+
 #include "ParticleSystem.h"
 #include "engine.h"
 #include "BehaviourComponent.h"
@@ -10,6 +11,7 @@
 
 class Ship : public GameObject {
 
+	const float Y_TRANSL = 15.0f;
 	labhelper::Model* fighterModel = labhelper::loadModelFromOBJ("../scenes/NewShip.obj");
 
 	void readMessages() override;

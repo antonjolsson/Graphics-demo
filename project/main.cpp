@@ -24,7 +24,6 @@ using namespace glm;
 
 #include <Model.h>
 #include "hdr.h"
-#include "fbo.h"
 #include "ParticleSystem.h"
 #include "main.h"
 
@@ -117,7 +116,7 @@ enum ClampMode
 	BORDER = 2
 };
 
-FboInfo shadowMapFB;
+//FboInfo shadowMapFB;
 int shadowMapResolution = 1024;
 int shadowMapClampMode = ClampMode::BORDER;
 bool shadowMapClampBorderShadowed = false;
@@ -243,9 +242,9 @@ void initGL()
 	///////////////////////////////////////////////////////////////////////
 	// Setup Framebuffer for shadow map rendering
 	///////////////////////////////////////////////////////////////////////
-	shadowMapFB.resize(shadowMapResolution, shadowMapResolution);
+	//shadowMapFB.resize(shadowMapResolution, shadowMapResolution);
 
-	glBindTexture(GL_TEXTURE_2D, shadowMapFB.depthBuffer);
+	//glBindTexture(GL_TEXTURE_2D, shadowMapFB.depthBuffer);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_FUNC, GL_LEQUAL);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_REF_TO_TEXTURE);
 }
@@ -300,23 +299,24 @@ void setLightUniforms(const GLuint _currentShaderProgram, const mat4& _viewMatri
 	labhelper::setUniformSlow(_currentShaderProgram, "viewInverse", inverse(_viewMatrix));
 }
 
-void setMatrixUniforms(const GLuint currentShaderProgram, const mat4& viewMatrix, const mat4& projectionMatrix, const mat4 modelMatrix)
+/*void setMatrixUniforms(const GLuint currentShaderProgram, const mat4& viewMatrix, const mat4& projectionMatrix, const mat4 _modelMatrix)
 {
 	labhelper::setUniformSlow(currentShaderProgram, "modelViewProjectionMatrix",
-		projectionMatrix * viewMatrix * modelMatrix);
-	labhelper::setUniformSlow(currentShaderProgram, "modelViewMatrix", viewMatrix * modelMatrix);
+		projectionMatrix * viewMatrix * _modelMatrix);
+	labhelper::setUniformSlow(currentShaderProgram, "modelViewMatrix", viewMatrix * _modelMatrix);
 	labhelper::setUniformSlow(currentShaderProgram, "normalMatrix",
-		inverse(transpose(viewMatrix * modelMatrix)));
-}
+		inverse(transpose(viewMatrix * _modelMatrix)));
+}*/
 
-void drawTerrain(const mat4& _projMatrix, const mat4& _viewMatrix, const mat4& _lightViewMatrix, const mat4& _lightProjectionMatrix, const vec4& _viewSpaceLightPosition)
+void drawTerrain(const mat4& _projMatrix, const mat4& _viewMatrix, const mat4& _lightViewMatrix, 
+	const mat4& _lightProjectionMatrix, const vec4& _viewSpaceLightPosition)
 {
 	mat4 modelMatrix({ TERRAIN_SCALING });
 	modelMatrix[3] = vec4{ 0, 0, 0, 1.0 };
 	glUseProgram(heightfieldProgram);
 	glUniform1i(glGetUniformLocation(heightfieldProgram, "has_diffuse_texture"), 1);
 	setLightUniforms(heightfieldProgram, _viewMatrix, _lightViewMatrix, _lightProjectionMatrix, _viewSpaceLightPosition);
-	setMatrixUniforms(heightfieldProgram, _viewMatrix, _projMatrix, modelMatrix);
+	//setMatrixUniforms(heightfieldProgram, _viewMatrix, _projMatrix, modelMatrix);
 	terrain.submitTriangles();
 }
 
@@ -328,15 +328,17 @@ void drawScene(const GLuint _currentShaderProgram,
 {
 	const vec4 viewSpaceLightPosition = _viewMatrix * vec4(lightPosition, 1.0f);
 	glActiveTexture(GL_TEXTURE10);
-	glBindTexture(GL_TEXTURE_2D, shadowMapFB.depthBuffer);
+	//glBindTexture(GL_TEXTURE_2D, shadowMapFB.depthBuffer);
 
-	drawTerrain(_projectionMatrix, _viewMatrix, _lightViewMatrix, _lightProjectionMatrix, viewSpaceLightPosition);
+	drawTerrain(_projectionMatrix, _viewMatrix, _lightViewMatrix, _lightProjectionMatrix, 
+		viewSpaceLightPosition);
 
 	glUseProgram(_currentShaderProgram);
-	setLightUniforms(_currentShaderProgram, _viewMatrix, _lightViewMatrix, _lightProjectionMatrix, viewSpaceLightPosition);
+	setLightUniforms(_currentShaderProgram, _viewMatrix, _lightViewMatrix, _lightProjectionMatrix, 
+		viewSpaceLightPosition);
 	
 	const mat4 modelMatrix(1.0f);
-	setMatrixUniforms(_currentShaderProgram, _viewMatrix, _projectionMatrix, modelMatrix);
+	//setMatrixUniforms(_currentShaderProgram, _viewMatrix, _projectionMatrix, modelMatrix);
 	render(landingpadModel);
 
 	//setMatrixUniforms(_currentShaderProgram, _viewMatrix, _projectionMatrix, fighterModelMatrix);
@@ -367,7 +369,7 @@ void bindEnvironmentMaps()
 	glActiveTexture(GL_TEXTURE0);
 }
 
-void drawShadowMap(const mat4 _lightViewMatrix, const mat4 _lightProjMatrix)
+/*void drawShadowMap(const mat4 _lightViewMatrix, const mat4 _lightProjMatrix)
 {
 	if (shadowMapFB.width != shadowMapResolution || shadowMapFB.height != shadowMapResolution)
 	{
@@ -407,7 +409,7 @@ void drawShadowMap(const mat4 _lightViewMatrix, const mat4 _lightProjMatrix)
 	{
 		glDisable(GL_POLYGON_OFFSET_FILL);
 	}
-}
+}*/
 
 void setWindowSize() {
 	int w, h;
@@ -419,7 +421,7 @@ void setWindowSize() {
 	}
 }
 
-void display(void)
+void display()
 {
 	const mat4 projMatrix = perspective(radians(fieldOfView), float(windowWidth) / float(windowHeight), 5.0f, 900.0f);
 	const mat4 viewMatrix = lookAt(cameraPosition, cameraPosition + cameraDirection, worldUp);
@@ -436,7 +438,7 @@ void display(void)
 
 	bindEnvironmentMaps();
 
-	drawShadowMap(lightViewMatrix, lightProjMatrix);
+	//drawShadowMap(lightViewMatrix, lightProjMatrix);
 
 	drawFromCamera(projMatrix, viewMatrix, lightViewMatrix, lightProjMatrix);
 }
@@ -629,7 +631,7 @@ int main(int argc, char* argv[])
 	
 	Game game(&engine, SHOW_HITBOX, WIN_WIDTH, WIN_HEIGHT);
 	
-	initGL();
+	//initGL();
 
 	auto quit = false;
 	const auto startTime = std::chrono::system_clock::now();
@@ -645,7 +647,7 @@ int main(int argc, char* argv[])
 
 		game.update(deltaTime, windowWidth, windowHeight);
 		
-		updateShip();
+		//updateShip();
 		// render to window
 		//display();
 

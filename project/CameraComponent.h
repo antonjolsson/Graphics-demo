@@ -6,9 +6,6 @@
 class CameraComponent :public Component
 {
 	
-	vec3 worldUp{ 0.0f, 1.0f, 0.0f };
-	vec3 xAxis{ 1.0f, 0.0f, 0.0f };
-	
 	float fieldOfView = 50.f;
 	float nearPlane = 5.f;
 	float farPlane = 900.f;
@@ -26,7 +23,8 @@ private:
 
 public:
 	
-	CameraComponent(Ship* _tracing, int _winWidth, int _winHeight);
+	CameraComponent(GameObject* _tracing, int _winWidth, int _winHeight);
+	void traceObject();
 
 	void update(float _dt, int _windowHeight, int _windowWidth);
 	mat4 getProjMatrix() const;

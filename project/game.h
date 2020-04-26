@@ -81,7 +81,7 @@ public:
     void initBackground(Engine* _engine, bool _showHitbox);
     void initCamera(Engine* _engine, const int _winWidth, const int _winHeight);
     void initShip(bool _showHitbox);
-    void initRenderer(Engine* _engine, bool _showHitbox, int _winWidth, int _winHeight, std::vector<GameObject*>& _lights);
+    void initRenderer(Engine* _engine, bool _showHitbox, int _winWidth, int _winHeight, std::vector<GameObject*>* _lights);
     void update(float _dt, int _windowWidth, int _windowHeight);
     GameObject* initLight();
     Game(Engine* _engine, bool _showHitbox, int _winWidth, int _winHeight);

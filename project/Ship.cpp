@@ -1,6 +1,9 @@
 #include "rigidBody.h"
 #include "Ship.h"
 
+#include <glm/gtx/transform.hpp>
+
+
 #include "BehaviourComponent.h"
 
 ShipBehaviour::ShipBehaviour(Ship* _ship, Engine* _engine, RigidBody* _rigidBody): BehaviourComponent(_ship, _engine),
@@ -55,9 +58,10 @@ void Ship::readMessages() {
 	}
 }
 
-Ship::Ship(Engine* _engine, GLuint _shaderProgram, const bool _showHitbox) {
+Ship::Ship(Engine* _engine, const GLuint _shaderProgram, const bool _showHitbox) {
 	transform.position = INITIAL_POSITION;
-	auto* renderer = new RenderComponent(this, _shaderProgram, fighterModel);
+	mat4 shipModelMatrix = translate(Y_TRANSL * WORLD_UP);
+	auto* renderer = new RenderComponent(this, _shaderProgram, fighterModel, shipModelMatrix);
 	auto* rigidBody = new RigidBody(this, DRAG_COEFF);
 	auto* behaviour = new ShipBehaviour(this, _engine, rigidBody);
 	addComponents(std::vector<Component*> {behaviour, renderer, rigidBody});

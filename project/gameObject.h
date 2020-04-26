@@ -43,6 +43,9 @@ protected:
 
 public:
 
+	const glm::vec3 WORLD_UP{ 0.0f, 1.0f, 0.0f };
+	const glm::vec3 X_AXIS{ 1.0f, 0.0f, 0.0f };
+
 	void setPosition(glm::vec3 _position);
 
 	void setRotation(const glm::vec3 _rotation);

@@ -1,8 +1,19 @@
 #include "RenderComponent.h"
 
-
 #include <glm/gtx/euler_angles.inl>
 #include <glm/gtx/transform.hpp>
+
+GLuint RenderComponent::getShaderProgram() const {
+	return shaderProgram;
+}
+
+labhelper::Model* RenderComponent::getModel() const {
+	return model;
+}
+
+glm::mat4 RenderComponent::getModelMatrix() const {
+	return modelMatrix;
+}
 
 void RenderComponent::update(float _dt)
 {
@@ -15,8 +26,10 @@ void RenderComponent::update(float _dt)
 	//modelMatrix = glm::translate(modelMatrix, shipSpeed * -xAxis);
 }
 
-RenderComponent::RenderComponent(GameObject* _go, GLuint _shaderProgram, labhelper::Model* _model): modelMatrix() {
+RenderComponent::RenderComponent(GameObject* _go, const GLuint _shaderProgram, labhelper::Model* _model,
+	glm::mat4 _modelMatrix) {
 	go = _go;
 	shaderProgram = _shaderProgram;
 	model = _model;
+	modelMatrix = _modelMatrix;
 }
