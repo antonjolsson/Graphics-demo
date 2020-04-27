@@ -1,17 +1,14 @@
 #pragma once
 
 #include <glm/vec2.hpp>
-#include <SDL_render.h>
 #include <random>
 #include <SDL_events.h>
 #include <SDL_gamecontroller.h>
-#include "vector2D.h"
 
 #undef main
 
 class InputHandler
 {
-
     std::random_device randomSeed;
 
     //Game Controller 1 handler

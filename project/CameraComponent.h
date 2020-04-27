@@ -1,12 +1,12 @@
 #pragma once
 
+#include <glm/mat4x2.hpp>
 #include "gameObject.h"
-#include "Ship.h"
 
 class CameraComponent :public Component
 {
 	const float ROTATION_SPEED = 0.005f;
-	InputHandler::KeyStatus keyStatus;
+	InputHandler::KeyStatus keyStatus{};
 	InputHandler::MouseStatus mouse;
 	float speed = 10;
 	bool mouseMovable = false;
@@ -20,11 +20,11 @@ public:
 private:
 	float nearPlane = 5.f;
 	float farPlane = 900.f;
-	vec3 cameraDirection {0.f};
+	glm::vec3 cameraDirection {0.f};
 
 public:
-	vec3 getCameraDirection() const;
-	void setCameraDirection(const vec3& _cameraDirection);
+	glm::vec3 getCameraDirection() const;
+	void setCameraDirection(const glm::vec3& _cameraDirection);
 	void init(GameObject* _camera);
 private:
 	GameObject* tracing = nullptr;
@@ -32,7 +32,7 @@ private:
 public:
 	void setTracingObject(bool _tracingObject);
 private:
-	vec3 tracingDistance{ 50, 50, 0 }; // { 50, 50, 0 }
+	glm::vec3 tracingDistance{ 50, 50, 0 }; // { 50, 50, 0 }
 	int windowWidth;
 	int windowHeight;
 
@@ -43,7 +43,7 @@ public:
 	void moveCamera(float _dt);
 
 	void update(float _dt, int _windowHeight, int _windowWidth);
-	mat4 getProjMatrix() const;
-	mat4 getViewMatrix() const;
+	glm::mat4 getProjMatrix() const;
+	glm::mat4 getViewMatrix() const;
 };
 

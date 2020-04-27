@@ -3,9 +3,7 @@
 //
 
 #include "game.h"
-
 #include <iostream>
-
 #include "fbo.h"
 #include <labhelper.h>
 #include "CameraComponent.h"
@@ -16,6 +14,7 @@
 #include "hdr.h"
 #include "LightComponent.h"
 #include "Renderer.h"
+#include "Camera.h"
 
 void Game::initEnemies(InputHandler*_engine, bool _debug) {
     

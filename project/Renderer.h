@@ -5,6 +5,7 @@
 #include "ModelRenderComponent.h"
 #include "CameraComponent.h"
 #include "ShadowMap.h"
+#include "Ship.h"
 
 class Renderer {
 	
@@ -38,6 +39,6 @@ public:
 		const vec4 _viewSpaceLightPosition) const;
 	void drawFromCamera(mat4 _projMatrix, mat4 _viewMatrix, mat4 _lightViewMatrix, mat4 _lightProjMatrix) const;
 	void drawBackground(const mat4& _viewMatrix, const mat4& _projectionMatrix);
-	void draw();
+	void draw() const;
 
 };

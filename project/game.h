@@ -6,8 +6,6 @@
 #include <SDL_audio.h>
 #include "Ship.h"
 #include "AudioComponent.h"
-#include "Camera.h"
-#include "CameraComponent.h"
 #include "InputHandler.h"
 #include "Renderer.h"
 

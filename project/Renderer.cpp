@@ -3,6 +3,7 @@
 
 #include "EnvironmentComponent.h"
 #include "LightComponent.h"
+#include "Ship.h"
 
 void Renderer::setShadowMapProgram(const GLuint _shadowMapProgram) {
 	shadowMapProgram = _shadowMapProgram;
@@ -108,7 +109,7 @@ void Renderer::drawFromCamera(const mat4 _projMatrix, const mat4 _viewMatrix, co
 		_lightProjMatrix);
 }
 
-void Renderer::draw() {
+void Renderer::draw() const {
 	// TODO: abstract common fields and methods for matrices!
 	
 	const mat4 projMatrix = cameraComponent->getProjMatrix();

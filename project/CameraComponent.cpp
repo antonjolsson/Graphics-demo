@@ -17,18 +17,18 @@ void CameraComponent::setMouseMovable(bool _mouseMovable) {
 	mouseMovable = _mouseMovable;
 }
 
-vec3 CameraComponent::getCameraDirection() const {
+glm::vec3 CameraComponent::getCameraDirection() const {
 	return cameraDirection;
 }
 
-void CameraComponent::setCameraDirection(const vec3& _cameraDirection) {
+void CameraComponent::setCameraDirection(const glm::vec3& _cameraDirection) {
 	cameraDirection = _cameraDirection;
 }
 
 void CameraComponent::init(GameObject* _camera) {
 	addGameObject(_camera);
 	if (tracingObject) traceObject();
-	else setCameraDirection(normalize(vec3(0.0f) - _camera->getTransform().position));
+	else setCameraDirection(glm::normalize(glm::vec3(0.0f) - _camera->getTransform().position));
 }
 
 void CameraComponent::setTracingObject(const bool _tracingObject) {
@@ -49,7 +49,7 @@ void CameraComponent::traceObject() {
 	cameraDirection = normalize(tracing->getTransform().position - go->getTransform().position);
 }
 
-void CameraComponent::moveCamera(float _dt) {
+void CameraComponent::moveCamera(const float _dt) {
 	keyStatus = inputHandler->getKeyStatus();
 	if (keyStatus.lowerCamera) go->getTransform().position -= _dt * speed * go->WORLD_UP;
 	if (keyStatus.raiseCamera) go->getTransform().position += _dt * speed * go->WORLD_UP;
@@ -59,14 +59,14 @@ void CameraComponent::moveCamera(float _dt) {
 	if (mouseMovable) {
 		mouse = inputHandler->getMouseStatus();
 		if (mouse.isDragging) {
-			const mat4 yaw = rotate(ROTATION_SPEED * -mouse.deltaX, go->WORLD_UP);
-			const mat4 pitch = rotate(ROTATION_SPEED * -mouse.deltaY, normalize(cross(cameraDirection, go->WORLD_UP)));
-			cameraDirection = vec3(pitch * yaw * vec4(cameraDirection, 0.0f));
+			const glm::mat4 yaw = rotate(ROTATION_SPEED * -mouse.deltaX, go->WORLD_UP);
+			const glm::mat4 pitch = rotate(ROTATION_SPEED * -mouse.deltaY, normalize(cross(cameraDirection, go->WORLD_UP)));
+			cameraDirection = glm::vec3(pitch * yaw * glm::vec4(cameraDirection, 0.0f));
 		}
 	}
 }
 
-auto CameraComponent::update(float _dt, const int _windowHeight, const int _windowWidth) -> void {
+auto CameraComponent::update(const float _dt, const int _windowHeight, const int _windowWidth) -> void {
 	windowWidth = _windowWidth;
 	windowHeight = _windowHeight;
 	if (tracingObject) {
@@ -75,10 +75,10 @@ auto CameraComponent::update(float _dt, const int _windowHeight, const int _wind
 	else moveCamera(_dt);
 }
 
-mat4 CameraComponent::getProjMatrix() const {
-	return perspective(radians(fieldOfView), float(windowWidth) / float(windowHeight), nearPlane, farPlane);
+glm::mat4 CameraComponent::getProjMatrix() const {
+	return glm::perspective(glm::radians(fieldOfView), float(windowWidth) / float(windowHeight), nearPlane, farPlane);
 }
 
-mat4 CameraComponent::getViewMatrix() const {
+glm::mat4 CameraComponent::getViewMatrix() const {
 	return lookAt(go->getTransform().position, go->getTransform().position + cameraDirection, go->WORLD_UP);
 }

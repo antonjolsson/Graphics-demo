@@ -1,7 +1,5 @@
 #pragma once
 
-// GameObject represents objects which moves are drawn
-
 #include <glm/detail/type_vec3.hpp>
 #include <vector>
 #include <map>
@@ -45,13 +43,13 @@ protected:
 	std::set<Message> mailbox;
 
 public:
+	const glm::vec3 WORLD_UP{ 0.0f, 1.0f, 0.0f };
+	const glm::vec3 X_AXIS{ 1.0f, 0.0f, 0.0f };
 	
 	glm::vec3 getPosition() const;
 	glm::vec3 getRotation() const;
 	glm::vec3 getScale() const;
-	const glm::vec3 WORLD_UP{ 0.0f, 1.0f, 0.0f };
-	const glm::vec3 X_AXIS{ 1.0f, 0.0f, 0.0f };
-
+	
 	void setPosition(glm::vec3 _position);
 
 	void setRotation(const glm::vec3 _rotation);
@@ -59,7 +57,8 @@ public:
 	void setScale(const glm::vec3 _scale);
 
 	Transform& getTransform(void);
-	virtual void update(float _dt, int _windowWidth, int _windowHeight);
+
+	virtual void update(float _dt, int _windowWidth, int _windowHeight) {}
 
 	GameObject() = default;
 	GameObject(glm::vec3 _position, glm::vec3 _rotation, glm::vec3 _scale);
