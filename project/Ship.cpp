@@ -8,7 +8,8 @@
 
 #include "BehaviourComponent.h"
 
-ShipBehaviour::ShipBehaviour(Ship* _ship, InputHandler* _engine, RigidBody* _rigidBody): BehaviourComponent(_ship, _engine),
+ShipBehaviour::ShipBehaviour(Ship* _ship, InputHandler* _inputhandler, RigidBody* _rigidBody):
+BehaviourComponent(_ship, _inputhandler),
 	keyStatus() {
 	rigidBody = _rigidBody;
 }

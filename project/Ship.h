@@ -40,7 +40,7 @@ class ShipBehaviour : public BehaviourComponent {
 
 public:
 	
-	ShipBehaviour(Ship* _ship, InputHandler* _engine, RigidBody* _rigidBody);
+	ShipBehaviour(Ship* _ship, InputHandler* _inputhandler, RigidBody* _rigidBody);
 	void update(float _dt) override;
 };
 

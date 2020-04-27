@@ -1,64 +1,30 @@
 //#pragma clang diagnostic push
 //#pragma ide diagnostic ignored "hicpp-signed-bitwise"
 //#pragma ide diagnostic ignored "MemberFunctionCanBeStatic"
-//
-// Created by Anton Olsson on 2020-01-29.
-//
 
 #include "InputHandler.h"
-
-
 #include <iostream>
 #include <SDL.h>
-
 #include "../external/SDL2_mixer/include/SDL_mixer.h"
-
-
-bool InputHandler::init(const int _width, const int _height, const unsigned int _scaling) {
-
-    if (SDL_Init(SDL_INIT_EVERYTHING) != 0) {
-        SDL_Log("Unable to initialize SDL: %s", SDL_GetError());
-        return false;
-    }
-    if (SDL_CreateWindowAndRenderer(_width, _height, SDL_WINDOW_ALLOW_HIGHDPI, &window, &renderer) != 0) {
-        SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Couldn't create window and renderer: %s", SDL_GetError());
-        return false;
-    }
-    /*if (TTF_Init() != 0) {
-        SDL_Log("Unable to initialize SDL_ttf");
-        return false;
-    }*/
-    if( Mix_OpenAudio( 22050, MIX_DEFAULT_FORMAT, 2, 4096 ) == -1 ) {
-        return false;
-    }
-    initGameControllers();
-    return true;
-}
+#include "imgui_impl_sdl_gl3.h"
+#include <imgui_impl_sdl_gl3.cpp>
 
 void InputHandler::initGameControllers() { //Check for joysticks
     if (SDL_NumJoysticks() >= 1) gameController = SDL_GameControllerOpen(0);
 }
 
 void InputHandler::destroy() {
-    SDL_DestroyRenderer(renderer);
-    SDL_DestroyWindow(window);
-    //TTF_CloseFont(text.font);
-    //TTF_Quit();
     SDL_GameControllerClose(gameController);
     gameController = nullptr;
-    Mix_CloseAudio();
     SDL_Quit();
 }
 
 InputHandler::KeyStatus& InputHandler::getKeyStatus() {
-    SDL_Event e;
+    return keys;
+}
 
-	//Reset toggle keys
-	keys.toggleDebugGui = false;
-	
-    while (SDL_PollEvent(&e)) {
-    	
-        // check keyboard state (which keys are still pressed)
+void InputHandler::checkPressedKeys() {
+	// check keyboard state (which keys are still pressed)
         const uint8_t* state = SDL_GetKeyboardState(nullptr);
     	//Player
         keys.left = state[SDL_SCANCODE_LEFT] ||
@@ -82,18 +48,65 @@ InputHandler::KeyStatus& InputHandler::getKeyStatus() {
     	keys.raiseCamera = state[SDL_SCANCODE_E];
     	keys.forwardCamera = state[SDL_SCANCODE_W];
     	keys.backwardCamera = state[SDL_SCANCODE_S];
-    	
-        keys.quit = (e.type == SDL_QUIT || state[SDL_SCANCODE_ESCAPE] ||
-            SDL_GameControllerGetButton(gameController, SDL_CONTROLLER_BUTTON_START) != 0);
-
-    	keys.toggleDebugGui = state[SDL_SCANCODE_G];
-    }
-    return keys;
 }
 
-// Time in seconds
-float InputHandler::getElapsedTime() {
-    return (float) SDL_GetTicks() / 1000;
+void InputHandler::resetInput() {
+	keys.toggleDebugGui = false;
+	keys.quit = false;
+
+	mouse.deltaX = 0;
+	mouse.deltaY = 0;
+}
+
+void InputHandler::initMouseDrag(const SDL_Event _event) {
+	if (_event.button.button == SDL_BUTTON_LEFT)
+		mouse.isDragging = true;
+	else if (_event.button.button == SDL_BUTTON_RIGHT)
+		mouse.isMouseRightDragging = true;
+	int x; int y;
+	SDL_GetMouseState(&x, &y);
+	mouse.prevMouseCoords.x = x;
+	mouse.prevMouseCoords.y = y;
+}
+
+void InputHandler::setMouseMovement(const SDL_Event _event) {
+	// More info at https://wiki.libsdl.org/SDL_MouseMotionEvent
+	mouse.deltaX = _event.motion.x - mouse.prevMouseCoords.x;
+	mouse.deltaY = _event.motion.y - mouse.prevMouseCoords.y;
+	mouse.prevMouseCoords.x = _event.motion.x;
+	mouse.prevMouseCoords.y = _event.motion.y;
+}
+
+void InputHandler::processInput(bool _showDebugGUI) {
+	SDL_Event event;
+
+	resetInput();
+
+	// Allow ImGui to capture events.
+	ImGuiIO& io = ImGui::GetIO();
+    while (SDL_PollEvent(&event)) {
+    	
+    	ImGui_ImplSdlGL3_ProcessEvent(&event);
+
+		if (event.type == SDL_QUIT || (event.type == SDL_KEYUP && event.key.keysym.sym == SDLK_ESCAPE))
+			keys.quit = true;
+		if (event.type == SDL_KEYUP && event.key.keysym.sym == SDLK_g)
+			keys.toggleDebugGui = true;
+    	else if (event.type == SDL_MOUSEBUTTONDOWN && (!_showDebugGUI || !ImGui::GetIO().WantCaptureMouse)
+			&& (event.button.button == SDL_BUTTON_LEFT || event.button.button == SDL_BUTTON_RIGHT)
+			&& !(mouse.isDragging || mouse.isMouseRightDragging)) {
+			initMouseDrag(event);
+		}
+
+		if (!(SDL_GetMouseState(nullptr, nullptr) & SDL_BUTTON(SDL_BUTTON_LEFT)))
+			mouse.isDragging = false;
+		if (!(SDL_GetMouseState(nullptr, nullptr) & SDL_BUTTON(SDL_BUTTON_RIGHT)))
+			mouse.isMouseRightDragging = false;
+		if (event.type == SDL_MOUSEMOTION)
+			setMouseMovement(event);
+    }
+	if (!io.WantCaptureKeyboard)
+			checkPressedKeys();
 }
 
 void InputHandler::quit() {
@@ -101,16 +114,11 @@ void InputHandler::quit() {
     exit(0);
 }
 
-void InputHandler::swapBuffers() const {
-    SDL_RenderPresent(renderer);
+InputHandler::MouseStatus& InputHandler::getMouseStatus() {
+	return mouse;
 }
 
-void InputHandler::clearWindow(const SDL_Color _color) const {
-    SDL_SetRenderDrawColor(renderer, _color.r, _color.g, _color.b, _color.a);
-    SDL_RenderClear(renderer);
-}
-
-// Useful for inputHandler extension
+// TODO: move
 int InputHandler::getRandomInt(int _min, const int max) {
     std::mt19937 rng(randomSeed());
     std::uniform_int_distribution<int> uniformIntDist(_min, max - 1);

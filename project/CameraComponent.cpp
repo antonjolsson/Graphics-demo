@@ -13,6 +13,10 @@ float CameraComponent::getFarPlane() const {
 	return farPlane;
 }
 
+void CameraComponent::setMouseMovable(bool _mouseMovable) {
+	mouseMovable = _mouseMovable;
+}
+
 vec3 CameraComponent::getCameraDirection() const {
 	return cameraDirection;
 }
@@ -45,19 +49,30 @@ void CameraComponent::traceObject() {
 	cameraDirection = normalize(tracing->getTransform().position - go->getTransform().position);
 }
 
+void CameraComponent::moveCamera(float _dt) {
+	keyStatus = inputHandler->getKeyStatus();
+	if (keyStatus.lowerCamera) go->getTransform().position -= _dt * speed * go->WORLD_UP;
+	if (keyStatus.raiseCamera) go->getTransform().position += _dt * speed * go->WORLD_UP;
+	if (keyStatus.forwardCamera) go->getTransform().position += _dt * speed * cameraDirection;
+	if (keyStatus.backwardCamera) go->getTransform().position -= _dt * speed * cameraDirection;
+
+	if (mouseMovable) {
+		mouse = inputHandler->getMouseStatus();
+		if (mouse.isDragging) {
+			const mat4 yaw = rotate(ROTATION_SPEED * -mouse.deltaX, go->WORLD_UP);
+			const mat4 pitch = rotate(ROTATION_SPEED * -mouse.deltaY, normalize(cross(cameraDirection, go->WORLD_UP)));
+			cameraDirection = vec3(pitch * yaw * vec4(cameraDirection, 0.0f));
+		}
+	}
+}
+
 auto CameraComponent::update(float _dt, const int _windowHeight, const int _windowWidth) -> void {
 	windowWidth = _windowWidth;
 	windowHeight = _windowHeight;
 	if (tracingObject) {
 		traceObject();
 	}
-	else {
-		keyStatus = inputHandler->getKeyStatus();
-		if (keyStatus.lowerCamera) go->getTransform().position -= _dt * speed * go->WORLD_UP;
-		if (keyStatus.raiseCamera) go->getTransform().position += _dt * speed * go->WORLD_UP;
-		if (keyStatus.forwardCamera) go->getTransform().position += _dt * speed * cameraDirection;
-		if (keyStatus.backwardCamera) go->getTransform().position -= _dt * speed * cameraDirection;
-	}
+	else moveCamera(_dt);
 }
 
 mat4 CameraComponent::getProjMatrix() const {

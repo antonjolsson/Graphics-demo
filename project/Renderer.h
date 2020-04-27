@@ -32,7 +32,7 @@ public:
 	         int _winWidth, int _winHeight, std::vector<GameObject*>* _lights, Ship* _ship, GameObject* _background);
 	void setRenderShadows(bool _renderShadows);
 	void drawScene(GLuint _shaderProgram, mat4 _viewMatrix, mat4 _projMatrix, mat4 _lightViewMatrix, mat4 _lightProjMatrix) const;
-	void drawShadowMap(mat4 _viewMatrix, mat4 _projMatrix, mat4 _lightViewMatrix, mat4 _lightProjMatrix);
+	void drawShadowMap(mat4 _viewMatrix, mat4 _projMatrix, mat4 _lightViewMatrix, mat4 _lightProjMatrix) const;
 	void bindEnvironmentMaps();
 	void setLightUniforms(const GLuint _currentShaderProgram, mat4 _viewMatrix, mat4 _lightViewMatrix, mat4 _lightProjMatrix, 
 		const vec4 _viewSpaceLightPosition) const;

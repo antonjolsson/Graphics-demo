@@ -13,7 +13,6 @@ class Component {
 protected:
 
     //const Vector2D GRAVITY {0, 600};
-    InputHandler* inputHandler = nullptr;	// used to access the inputHandler
 	GameObject* go = nullptr;		// the game object this component is part of
 	std::set<GameObject*>* gameObjects = nullptr;	// the global container of game objects
 

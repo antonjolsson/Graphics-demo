@@ -379,110 +379,6 @@ void display()
 	drawFromCamera(projMatrix, viewMatrix, lightViewMatrix, lightProjMatrix);
 }
 
-bool handleEvents(void)
-{
-	// check events (keyboard among other)
-	SDL_Event event;
-	bool quitEvent = false;
-
-	// Allow ImGui to capture events.
-	ImGuiIO& io = ImGui::GetIO();
-
-	while (SDL_PollEvent(&event))
-	{
-		ImGui_ImplSdlGL3_ProcessEvent(&event);
-
-		if (event.type == SDL_QUIT || (event.type == SDL_KEYUP && event.key.keysym.sym == SDLK_ESCAPE))
-		{
-			quitEvent = true;
-		}
-		if (event.type == SDL_KEYUP && event.key.keysym.sym == SDLK_g)
-		{
-			showUI = !showUI;
-		}
-		else if (event.type == SDL_MOUSEBUTTONDOWN && (!showUI || !ImGui::GetIO().WantCaptureMouse)
-			&& (event.button.button == SDL_BUTTON_LEFT || event.button.button == SDL_BUTTON_RIGHT)
-			&& !(g_isMouseDragging || g_isMouseRightDragging))
-		{
-			if (event.button.button == SDL_BUTTON_LEFT)
-			{
-				g_isMouseDragging = true;
-			}
-			else if (event.button.button == SDL_BUTTON_RIGHT)
-			{
-				g_isMouseRightDragging = true;
-			}
-			int x;
-			int y;
-			SDL_GetMouseState(&x, &y);
-			g_prevMouseCoords.x = x;
-			g_prevMouseCoords.y = y;
-		}
-
-		if (!(SDL_GetMouseState(nullptr, nullptr) & SDL_BUTTON(SDL_BUTTON_LEFT)))
-		{
-			g_isMouseDragging = false;
-		}
-		if (!(SDL_GetMouseState(nullptr, nullptr) & SDL_BUTTON(SDL_BUTTON_RIGHT)))
-		{
-			g_isMouseRightDragging = false;
-		}
-
-		if (event.type == SDL_MOUSEMOTION)
-		{
-			// More info at https://wiki.libsdl.org/SDL_MouseMotionEvent
-			const int deltaX = event.motion.x - g_prevMouseCoords.x;
-			const int deltaY = event.motion.y - g_prevMouseCoords.y;
-			if (g_isMouseDragging)
-			{
-				const float rotationSpeed = 0.005f;
-				mat4 yaw = rotate(rotationSpeed * -deltaX, worldUp);
-				mat4 pitch = rotate(rotationSpeed * -deltaY, normalize(cross(cameraDirection, worldUp)));
-				cameraDirection = vec3(pitch * yaw * vec4(cameraDirection, 0.0f));
-			}
-			else if (g_isMouseRightDragging)
-			{
-				const float rotationSpeed = 0.01f;
-				lightRotation += deltaX * rotationSpeed;
-			}
-			g_prevMouseCoords.x = event.motion.x;
-			g_prevMouseCoords.y = event.motion.y;
-		}
-	}
-
-	if (!io.WantCaptureKeyboard)
-	{
-		// check keyboard state (which keys are still pressed)
-		const uint8_t* state = SDL_GetKeyboardState(nullptr);
-		vec3 cameraRight = cross(cameraDirection, worldUp);
-		if (state[SDL_SCANCODE_W])
-		{
-			cameraPosition += deltaTime * cameraSpeed * cameraDirection;
-		}
-		if (state[SDL_SCANCODE_S])
-		{
-			cameraPosition -= deltaTime * cameraSpeed * cameraDirection;
-		}
-		/*if (state[SDL_SCANCODE_A])
-		{
-			cameraPosition -= deltaTime * cameraSpeed * cameraRight;
-		}
-		if (state[SDL_SCANCODE_D])
-		{
-			cameraPosition += deltaTime * cameraSpeed * cameraRight;
-		}*/
-		if (state[SDL_SCANCODE_Q])
-		{
-			cameraPosition -= deltaTime * cameraSpeed * worldUp;
-		}
-		if (state[SDL_SCANCODE_E])
-		{
-			cameraPosition += deltaTime * cameraSpeed * worldUp;
-		}
-	}
-	return quitEvent;
-}
-
 void updateShip(void) {
 	
 	particleSystem.setExhaustOffset(vec3(exhXOffset, exhYOffset, exhZOffset));
@@ -536,8 +432,6 @@ int main(int argc, char* argv[])
 		// Swap front and back buffer. This frame will now been displayed.
 		SDL_GL_SwapWindow(g_window);
 
-		// check events (keyboard among other)
-		//quit = handleEvents();
 	}
 	// Free Models
 	freeModel(fighterModel);
@@ -546,5 +440,7 @@ int main(int argc, char* argv[])
 
 	// Shut down everything. This includes the window and all other subsystems.
 	labhelper::shutDown(g_window);
+
+	Mix_CloseAudio();
 	return 0;
 }

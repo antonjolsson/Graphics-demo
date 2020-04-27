@@ -57,6 +57,7 @@ void Game::init() {
 void Game::update(const float _dt, const int _windowWidth, const int _windowHeight) {
     readMessages();
 	if (quit) return;
+	inputHandler->processInput(debugGUI);
     for (auto component : components) {
         component->update(_dt);
     }
@@ -70,7 +71,7 @@ void Game::update(const float _dt, const int _windowWidth, const int _windowHeig
 }
 
 GameObject* Game::initLight() {
-    auto lightComponent = new LightComponent();
+    auto lightComponent = new LightComponent(true, inputHandler);
     auto light = new GameObject(ship->getTransform().position + LIGHT_POS_OFFSET, vec3(0),
         vec3(1));
     light->addComponent(lightComponent);
@@ -104,7 +105,6 @@ void Game::readMessages() {
             break;
         case TOGGLE_DEBUG_GUI :
 			debugGUI = !debugGUI;
-			std::cout << "Game: I toggled debugGUI!" << std::endl;
 			break;
         default:
             break;
@@ -157,6 +157,7 @@ void Game::initCamera(const int _winWidth, const int _winHeight)
 {
     auto cameraComponent = new CameraComponent(ship, _winWidth, _winHeight, inputHandler);
 	cameraComponent->setTracingObject(false);
+	cameraComponent->setMouseMovable(true);
     camera = new Camera();
     camera->addComponent(cameraComponent);
     cameraComponent->init(camera);

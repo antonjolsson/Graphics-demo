@@ -110,6 +110,22 @@ void GameObject::init(const int _hp, const int _attackDamage) {
     init();
 }
 
+void GameObject::setEnabled(const bool _enabled) {
+	enabled = _enabled;
+}
+
+glm::vec3 GameObject::getPosition() const {
+	return transform.position;
+}
+
+glm::vec3 GameObject::getRotation() const {
+	return transform.position;
+}
+
+glm::vec3 GameObject::getScale() const {
+	return  transform.position;
+}
+
 void GameObject::setPosition(const glm::vec3 _position)
 {
     transform.position = _position;
@@ -143,11 +159,7 @@ void GameObject::update(const float _dt, int _windowWidth, int _windowHeight) {
 GameObject::GameObject(const glm::vec3 _position, const glm::vec3 _rotation, const glm::vec3 _scale)
 {
     transform = { _position, _rotation, _scale };
-}
-
-void GameObject::setEnabled(const bool _enabled)
-{
-	enabled = _enabled;
+	enabled = true;
 }
 
 bool GameObject::isEnabled() const

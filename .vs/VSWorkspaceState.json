@@ -1,12 +1,15 @@
 {
   "ExpandedNodes": [
     "",
+    "\\bin",
     "\\build",
     "\\build\\.vs",
     "\\build\\project",
+    "\\external",
     "\\external_src",
     "\\Local settings (.vs)",
-    "\\project"
+    "\\project",
+    "\\scenes\\envmaps"
   ],
   "SelectedNode": "\\build\\foreignAttack.sln",
   "PreviewInSolutionExplorer": false

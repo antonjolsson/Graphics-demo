@@ -1,12 +1,13 @@
 #pragma once
 
+#include <glm/vec2.hpp>
 #include <SDL_render.h>
 #include <random>
+#include <SDL_events.h>
 #include <SDL_gamecontroller.h>
 #include "vector2D.h"
 
 #undef main
-
 
 class InputHandler
 {
@@ -18,33 +19,16 @@ class InputHandler
 
 public:
 
-    //Sprite *createColliderSprite();
-
-    //Sprite *createSprite(const SpriteSheet& sheet);
-
-	//enum TextAlign {NO_CHANGE, CENTER, LEFT};
-
-	// Destroys the avancez library instance
 	void destroy();
-
-	// Destroys the avancez library instance and exits
 	void quit();
 
-	// Creates the main window. Returns true on success.
-    bool init(int _width, int _height, unsigned int _scaling);
+    void checkPressedKeys();
+    void resetInput();
+    void initMouseDrag(SDL_Event _event);
+    void setMouseMovement(SDL_Event _event);
+    void processInput(bool _showDebugGUI);
 
-	// Clears the screen and draws all sprites and texts which have been drawn
-	// since the last update call.
-	// If update returns false, the application should terminate.
-
-	void swapBuffers() const;
-
-	void clearWindow(SDL_Color _color) const;
-
-    // Return the total time spent in the game, in seconds.
-	float getElapsedTime();
-
-	struct KeyStatus
+    struct KeyStatus
 	{
 		bool missile; // space / gamepad a
         bool up; // a / gamepad b
@@ -67,20 +51,22 @@ public:
 	// Returns the keyboard status. If a flag is set, the corresponding key is being held down.
     KeyStatus & getKeyStatus();
 
+    struct MouseStatus {
+	    glm::ivec2 prevMouseCoords = { -1, -1 };
+		bool isDragging = false;
+		bool isMouseRightDragging = false;
+    	int deltaX = 0;
+    	int deltaY = 0;
+    };
+
+	MouseStatus& getMouseStatus();
+
     int getRandomInt(int _min, int _max);
-
-    //void drawText(int x, int y, const char *msg, TextAlign pos, SDL_Color color);
-
-    //void setFont(const char *filePath, int fontSize, SDL_Color color);
-
-    //Sprite *createSprite(const char *filePath);
 
 private:
 
-    SDL_Window * window{};
-	SDL_Renderer * renderer{};
-
 	KeyStatus keys{};
+	MouseStatus mouse{};
 
     void initGameControllers();
 

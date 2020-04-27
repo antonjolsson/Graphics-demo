@@ -3,8 +3,9 @@
 
 class BehaviourComponent : public Component
 {
-	
+protected:
 	int attackDamage_ = 0;
+	InputHandler* inputHandler;
 public:
 	int getAttackDamage() const;
 	bool isInvincibleAfterHit() const;
@@ -18,6 +19,6 @@ public:
 
 	void update(float _dt) override;
 
-	BehaviourComponent(GameObject* _go, InputHandler* _engine);
+	BehaviourComponent(GameObject* _go, InputHandler* _inputHandler);
 };
 

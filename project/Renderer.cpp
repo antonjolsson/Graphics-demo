@@ -56,7 +56,7 @@ void Renderer::drawScene(const GLuint _shaderProgram, const mat4 _viewMatrix, co
 }
 
 void Renderer::drawShadowMap(const mat4 _viewMatrix, const mat4 _projMatrix, const mat4 _lightViewMatrix, 
-	const mat4 _lightProjMatrix) {
+	const mat4 _lightProjMatrix) const {
 	shadowMap->draw();
 	drawScene(shadowMapProgram, _viewMatrix, _projMatrix, _lightViewMatrix,
 		_lightProjMatrix);

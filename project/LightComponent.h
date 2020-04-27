@@ -4,8 +4,11 @@
 #include "component.h"
 
 class LightComponent : public Component {
-
+	const float ROTATION_SPEED = 0.01f;
 	glm::vec3 color = glm::vec3(1.f, 1.f, 1.f);
+	bool movable = false;
+	InputHandler* inputHandler = nullptr;
+	float lightRotation = 0;
 public:
 	glm::vec3 getColor() const;
 	float getInnerSpotlightAngle() const;
@@ -24,9 +27,12 @@ private:
 	
 public:
 
-	LightComponent();
+	LightComponent(bool _movable, InputHandler* _inputHandler);
 
-	glm::mat4 getProjMatrix();
-	glm::mat4 getViewMatrix();
+	glm::mat4 getProjMatrix() const;
+	glm::mat4 getViewMatrix() const;
+
+	void update(float _dt) override;
+
 };
 

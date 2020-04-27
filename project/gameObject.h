@@ -33,6 +33,9 @@ protected:
 
     bool enabled = false;
 
+public:
+	void setEnabled(bool _enabled);
+protected:
 	std::vector<GameObject*> receivers;
 	std::vector<Component*> components;
 
@@ -42,7 +45,10 @@ protected:
 	std::set<Message> mailbox;
 
 public:
-
+	
+	glm::vec3 getPosition() const;
+	glm::vec3 getRotation() const;
+	glm::vec3 getScale() const;
 	const glm::vec3 WORLD_UP{ 0.0f, 1.0f, 0.0f };
 	const glm::vec3 X_AXIS{ 1.0f, 0.0f, 0.0f };
 
@@ -58,7 +64,6 @@ public:
 	GameObject() = default;
 	GameObject(glm::vec3 _position, glm::vec3 _rotation, glm::vec3 _scale);
 	
-    void setEnabled(bool _enabled);
     bool isEnabled() const;
 
     bool isGameOver() const;
