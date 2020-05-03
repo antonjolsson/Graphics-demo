@@ -3,20 +3,12 @@
 #include <glm/gtx/euler_angles.inl>
 #include <glm/gtx/transform.hpp>
 
-GLuint ModelRenderComponent::getShaderProgram() const {
-	return shaderProgram;
-}
-
-void ModelRenderComponent::render() const {
+void ModelRenderComponent::render() {
 	labhelper::render(model);
 }
 
 labhelper::Model* ModelRenderComponent::getModel() const {
 	return model;
-}
-
-glm::mat4 ModelRenderComponent::getModelMatrix() const {
-	return modelMatrix;
 }
 
 void ModelRenderComponent::update(float _dt)
@@ -31,7 +23,7 @@ void ModelRenderComponent::update(float _dt)
 }
 
 ModelRenderComponent::ModelRenderComponent(GameObject* _go, const GLuint _shaderProgram, labhelper::Model* _model,
-	glm::mat4 _modelMatrix) {
+                                           const glm::mat4 _modelMatrix) {
 	go = _go;
 	shaderProgram = _shaderProgram;
 	model = _model;

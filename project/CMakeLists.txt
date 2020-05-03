@@ -16,8 +16,6 @@ add_executable ( ${PROJECT_NAME}
     fbo.h
     fbo.cpp
     hdr.cpp
-    heightfield.cpp
-    heightfield.h
     ParticleSystem.cpp
     ParticleSystem.h
     InputHandler.cpp
@@ -49,6 +47,10 @@ add_executable ( ${PROJECT_NAME}
     EnvironmentComponent.h
     EnvironmentComponent.cpp
     DebugGUI.h
+    RenderComponent.h
+    RenderComponent.cpp
+    HeightFieldComp.h
+    HeightFieldComp.cpp
     ${SHADERS}
      "component.cpp" "game.cpp" "gameObject.cpp")
 

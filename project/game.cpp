@@ -176,9 +176,9 @@ void Game::initShip(const bool _showHitbox) {
 
 void Game::initRenderer(InputHandler* _engine, const bool _showHitbox, const int _winWidth, const int _winHeight, 
     std::vector<GameObject*>* _lights, GameObject* _background) {
-	auto* renderComponents = new std::vector<ModelRenderComponent*>();
+	auto* renderComponents = new std::vector<RenderComponent*>();
     for (auto go : gameObjects) {
-        auto renderComponent = go->getComponent<ModelRenderComponent>();
+        auto renderComponent = go->getComponent<RenderComponent>();
         if (renderComponent != nullptr)
             renderComponents->push_back(renderComponent);
     }
@@ -200,9 +200,9 @@ Game::Game(InputHandler* _engine, const bool _showHitbox, const int _winWidth, c
 	initShaders();
     initShip(_showHitbox);
     
-    initTerrain(_showHitbox);
+    //initTerrain(_showHitbox);
     initEnemies(_engine, _showHitbox);
-    auto background = initBackground();
+	const auto background = initBackground();
 	
     initCamera(_winWidth, _winHeight);
     GameObject* light = initLight();

@@ -3,23 +3,21 @@
 #include <GL/glew.h>
 
 #include "Model.h"
+#include "RenderComponent.h"
 
-class ModelRenderComponent : public Component
+class ModelRenderComponent : public RenderComponent
 {
 	labhelper::Model* model = nullptr;
-	GLuint shaderProgram;
-public:
-	GLuint getShaderProgram() const;
-	void render() const;
-private:
-	glm::mat4 modelMatrix{};
 
 public:
+	
+	void render() override;
+
+
 	labhelper::Model* getModel() const;
-	glm::mat4 getModelMatrix() const;
 
 	void update(float _dt) override;
-	ModelRenderComponent(GameObject* _go, const GLuint _shaderProgram, labhelper::Model* _model, glm::mat4 _modelMatrix);
+	ModelRenderComponent(GameObject* _go, GLuint _shaderProgram, labhelper::Model* _model, glm::mat4 _modelMatrix);
 
 };
 

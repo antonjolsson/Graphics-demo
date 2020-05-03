@@ -145,8 +145,10 @@ void HeightFieldComp::generateMesh(const int _tesselation)
 	createVBOs(_tesselation);
 }
 
-void HeightFieldComp::update(float _dt)
+void HeightFieldComp::render()
 {
+	glUniform1i(glGetUniformLocation(heightfieldProgram, "has_diffuse_texture"), 1);
+	
 	if(m_vao == UINT32_MAX)
 	{
 		std::cout << "No vertex array is generated, cannot draw anything.\n";
@@ -161,4 +163,9 @@ void HeightFieldComp::update(float _dt)
 	glBindTexture(GL_TEXTURE_2D, m_texid_diffuse);
 	glDrawElements(GL_TRIANGLES, m_numIndices, GL_UNSIGNED_INT, 0);
 	//glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+}
+
+void HeightFieldComp::update(float _dt) {
+	mat4 modelMatrix({terrainScaling});
+	modelMatrix[3] = vec4{ 0, 0, 0, 1.0 };
 }

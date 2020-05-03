@@ -4,6 +4,7 @@
 #include "InputHandler.h"
 #include "ModelRenderComponent.h"
 #include "CameraComponent.h"
+#include "RenderComponent.h"
 #include "ShadowMap.h"
 #include "Ship.h"
 
@@ -14,7 +15,7 @@ class Renderer {
 	bool renderShadows = false;
 	InputHandler* engine;
 	GameObject* camera;
-	const std::vector<ModelRenderComponent*>* renderComponents;
+	const std::vector<RenderComponent*>* renderComponents;
 	bool showHitbox = false;
 	int winWidth;
 	int winHeight;
@@ -29,12 +30,11 @@ class Renderer {
 public:
 	void setShadowMapProgram(GLuint _shadowMapProgram);
 
-	Renderer(InputHandler* _engine, GameObject* _camera, std::vector<ModelRenderComponent*>* _renderComponents, bool _showHitbox,
+	Renderer(InputHandler* _engine, GameObject* _camera, std::vector<RenderComponent*>* _renderComponents, bool _showHitbox,
 	         int _winWidth, int _winHeight, std::vector<GameObject*>* _lights, Ship* _ship, GameObject* _background);
 	void setRenderShadows(bool _renderShadows);
 	void drawScene(GLuint _shaderProgram, mat4 _viewMatrix, mat4 _projMatrix, mat4 _lightViewMatrix, mat4 _lightProjMatrix) const;
 	void drawShadowMap(mat4 _viewMatrix, mat4 _projMatrix, mat4 _lightViewMatrix, mat4 _lightProjMatrix) const;
-	void bindEnvironmentMaps();
 	void setLightUniforms(const GLuint _currentShaderProgram, mat4 _viewMatrix, mat4 _lightViewMatrix, mat4 _lightProjMatrix, 
 		const vec4 _viewSpaceLightPosition) const;
 	void drawFromCamera(mat4 _projMatrix, mat4 _viewMatrix, mat4 _lightViewMatrix, mat4 _lightProjMatrix) const;

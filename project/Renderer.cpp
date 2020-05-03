@@ -3,13 +3,14 @@
 
 #include "EnvironmentComponent.h"
 #include "LightComponent.h"
+#include "RenderComponent.h"
 #include "Ship.h"
 
 void Renderer::setShadowMapProgram(const GLuint _shadowMapProgram) {
 	shadowMapProgram = _shadowMapProgram;
 }
 
-Renderer::Renderer(InputHandler* _engine, GameObject* _camera, std::vector<ModelRenderComponent*>* _renderComponents, 
+Renderer::Renderer(InputHandler* _engine, GameObject* _camera, std::vector<RenderComponent*>* _renderComponents, 
                    const bool _showHitbox, const int _winWidth, const int _winHeight, std::vector<GameObject*>* _lights,
                    Ship* _ship, GameObject* _background) :
 	engine(_engine), camera(_camera), renderComponents(_renderComponents), showHitbox(_showHitbox), winWidth(_winWidth),

@@ -2,11 +2,12 @@
 #include <GL/glew.h>
 #include "gameObject.h"
 #include "labhelper.h"
+#include "RenderComponent.h"
 
-class HeightFieldComp : public Component {
+class HeightFieldComp : public RenderComponent {
 	
 	int tesselation = 1024;
-	int terrainScaling = 250.0f;
+	float terrainScaling = 250.0f;
 
 	GLuint heightfieldProgram = labhelper::loadShaderProgram("../project/heightfield.vert",
 		"../project/shading.frag");
@@ -34,6 +35,7 @@ public:
 
 	// generate mesh
 	void generateMesh(int _tesselation);
+	void render();
 
 	// render height map
 	void update(float _dt) override;
