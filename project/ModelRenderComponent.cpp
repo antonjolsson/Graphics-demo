@@ -3,7 +3,7 @@
 #include <glm/gtx/euler_angles.inl>
 #include <glm/gtx/transform.hpp>
 
-void ModelRenderComponent::render() {
+void ModelRenderComponent::render(const GLuint _compShaderProgram) {
 	labhelper::render(model);
 }
 

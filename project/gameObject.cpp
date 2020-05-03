@@ -145,6 +145,10 @@ GameObject::Transform& GameObject::getTransform()
     return transform;
 }
 
+GameObject::GameObject() {
+	enabled = true;
+}
+
 GameObject::GameObject(const glm::vec3 _position, const glm::vec3 _rotation, const glm::vec3 _scale)
 {
     transform = { _position, _rotation, _scale };

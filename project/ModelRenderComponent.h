@@ -5,14 +5,13 @@
 #include "Model.h"
 #include "RenderComponent.h"
 
-class ModelRenderComponent : public RenderComponent
+class ModelRenderComponent final : public RenderComponent
 {
 	labhelper::Model* model = nullptr;
 
 public:
 	
-	void render() override;
-
+	void render(GLuint _compShaderProgram) override;
 
 	labhelper::Model* getModel() const;
 

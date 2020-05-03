@@ -29,6 +29,7 @@ HeightFieldComp::HeightFieldComp(const std::string& _heightfieldPath, const std:
 	generateMesh(tesselation);
 	loadHeightField(_heightfieldPath);
 	loadDiffuseTexture(_terrainPhotoPath);
+	shaderProgram = HEIGHTFIELD_PROGRAM;
 }
 
 void HeightFieldComp::loadHeightField(const std::string& _heightFieldPath)
@@ -145,9 +146,10 @@ void HeightFieldComp::generateMesh(const int _tesselation)
 	createVBOs(_tesselation);
 }
 
-void HeightFieldComp::render()
+void HeightFieldComp::render(const GLuint _compShaderProgram)
 {
-	glUniform1i(glGetUniformLocation(heightfieldProgram, "has_diffuse_texture"), 1);
+	//glUniform1i(glGetUniformLocation(HEIGHTFIELD_PROGRAM, "has_diffuse_texture"), 1);
+	glUniform1i(glGetUniformLocation(_compShaderProgram, "has_diffuse_texture"), 1);
 	
 	if(m_vao == UINT32_MAX)
 	{
@@ -166,6 +168,6 @@ void HeightFieldComp::render()
 }
 
 void HeightFieldComp::update(float _dt) {
-	mat4 modelMatrix({terrainScaling});
+	modelMatrix = mat4 ({terrainScaling});
 	modelMatrix[3] = vec4{ 0, 0, 0, 1.0 };
 }

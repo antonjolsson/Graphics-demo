@@ -60,7 +60,7 @@ public:
 
 	virtual void update(float _dt, int _windowWidth, int _windowHeight) {}
 
-	GameObject() = default;
+	GameObject();
 	GameObject(glm::vec3 _position, glm::vec3 _rotation, glm::vec3 _scale);
 	
     bool isEnabled() const;

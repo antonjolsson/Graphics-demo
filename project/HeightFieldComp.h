@@ -9,7 +9,7 @@ class HeightFieldComp : public RenderComponent {
 	int tesselation = 1024;
 	float terrainScaling = 250.0f;
 
-	GLuint heightfieldProgram = labhelper::loadShaderProgram("../project/heightfield.vert",
+	const GLuint HEIGHTFIELD_PROGRAM = labhelper::loadShaderProgram("../project/heightfield.vert",
 		"../project/shading.frag");
 	
 public:
@@ -35,7 +35,7 @@ public:
 
 	// generate mesh
 	void generateMesh(int _tesselation);
-	void render();
+	void render(GLuint _compShaderProgram) override;
 
 	// render height map
 	void update(float _dt) override;

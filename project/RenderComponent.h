@@ -12,8 +12,9 @@ protected:
 	GLuint shaderProgram = 0;
 	
 public:
+	
 	GLuint getShaderProgram() const;
-	virtual void render(){}
+	virtual void render(const GLuint _compShaderProgram){}
 	glm::mat4 getModelMatrix() const;;
 
 };

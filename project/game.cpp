@@ -200,7 +200,7 @@ Game::Game(InputHandler* _engine, const bool _showHitbox, const int _winWidth, c
 	initShaders();
     initShip(_showHitbox);
     
-    //initTerrain(_showHitbox);
+    initTerrain(_showHitbox);
     initEnemies(_engine, _showHitbox);
 	const auto background = initBackground();
 	
