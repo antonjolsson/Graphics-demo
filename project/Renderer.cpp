@@ -51,8 +51,8 @@ void Renderer::drawScene(const GLuint _shaderProgram, const mat4 _viewMatrix, co
 		// What's this doing?
 		glActiveTexture(GL_TEXTURE10);
 		glBindTexture(GL_TEXTURE_2D,shadowMap->getShadowMapFB().depthBuffer);
-		
-		render(renderComponent->getModel());
+
+		renderComponent->render();
 	}
 }
 

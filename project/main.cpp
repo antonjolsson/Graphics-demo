@@ -1,6 +1,6 @@
 
 #include "game.h"
-#include "heightfield.h"
+#include "HeightFieldComp.h"
 #ifdef _WIN32
 extern "C" _declspec(dllexport) unsigned int NvOptimusEnablement = 0x00000001;
 #endif
@@ -161,7 +161,7 @@ const std::string HEIGHTFIELD_PATH = "../scenes/nlsFinland/L3123F.png";
 const std::string TERRAIN_PHOTO_PATH = "../scenes/nlsFinland/L3123F_downscaled.jpg";
 const int TERRAIN_TESSELATION = 1024;
 const int TERRAIN_SCALING = 250;
-HeightField terrain;
+//HeightFieldComp terrain();
 
 void loadShaders(const bool _isReload)
 {
@@ -187,12 +187,12 @@ void initShip(void) {
 	if (FPS_ADJ_SPEED) acceleration *= FPS_ADJ_SPEED_CONST;
 }
 
-void initTerrain()
+/*void initTerrain()
 {
 	terrain.generateMesh(TERRAIN_TESSELATION);
 	terrain.loadHeightField(HEIGHTFIELD_PATH);
 	terrain.loadDiffuseTexture(TERRAIN_PHOTO_PATH);
-}
+}*/
 
 void initGL()
 {
@@ -207,7 +207,7 @@ void initGL()
 	particleProgram = labhelper::loadShaderProgram("../project/particle.vert", "../project/particle.frag");
 	heightfieldProgram = labhelper::loadShaderProgram("../project/heightfield.vert", "../project/shading.frag");
 
-	initTerrain();
+	//initTerrain();
 
 	particleSystem = ParticleSystem(MAX_PARTICLES);
 	initShip();
@@ -308,7 +308,7 @@ void drawTerrain(const mat4& _projMatrix, const mat4& _viewMatrix, const mat4& _
 	glUniform1i(glGetUniformLocation(heightfieldProgram, "has_diffuse_texture"), 1);
 	setLightUniforms(heightfieldProgram, _viewMatrix, _lightViewMatrix, _lightProjectionMatrix, _viewSpaceLightPosition);
 	//setMatrixUniforms(heightfieldProgram, _viewMatrix, _projMatrix, modelMatrix);
-	terrain.submitTriangles();
+	//terrain.update();
 }
 
 void drawScene(const GLuint _currentShaderProgram,

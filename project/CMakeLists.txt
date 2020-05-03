@@ -17,10 +17,11 @@ add_executable ( ${PROJECT_NAME}
     fbo.cpp
     hdr.cpp
     heightfield.cpp
+    heightfield.h
     ParticleSystem.cpp
     ParticleSystem.h
-    engine.cpp
-    engine.h
+    InputHandler.cpp
+    InputHandler.h
     vector2D.h
     BehaviourComponent.h
     BehaviourComponent.cpp

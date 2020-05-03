@@ -15,6 +15,7 @@
 #include "LightComponent.h"
 #include "Renderer.h"
 #include "Camera.h"
+#include "HeightFieldComp.h"
 
 void Game::initEnemies(InputHandler*_engine, bool _debug) {
     
@@ -123,13 +124,15 @@ void Game::initShaders()
     shaderProgram = labhelper::loadShaderProgram("../project/shading.vert", "../project/shading.frag");
     simpleShaderProgram = labhelper::loadShaderProgram("../project/simple.vert", "../project/simple.frag");
     particleProgram = labhelper::loadShaderProgram("../project/particle.vert", "../project/particle.frag");
-    heightfieldProgram = labhelper::loadShaderProgram("../project/heightfield.vert", "../project/shading.frag");
+   
 }
 
-void Game::initTerrain(InputHandler* _engine, const bool _showHitbox)
-{
-	
-	
+void Game::initTerrain(const bool _showHitbox) {
+	auto terrain = new GameObject();
+	auto heightFieldComp = new HeightFieldComp(HEIGHTFIELD_PATH, TERRAIN_PHOTO_PATH, terrain);
+	terrain->addComponent(heightFieldComp);
+	gameObjects.insert(terrain);
+	receivers.push_back(terrain);
 }
 
 GameObject* Game::initBackground()
@@ -197,7 +200,7 @@ Game::Game(InputHandler* _engine, const bool _showHitbox, const int _winWidth, c
 	initShaders();
     initShip(_showHitbox);
     
-    initTerrain(_engine, _showHitbox);
+    initTerrain(_showHitbox);
     initEnemies(_engine, _showHitbox);
     auto background = initBackground();
 	

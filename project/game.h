@@ -31,6 +31,9 @@ class Game : public GameObject {
 
 	const int ENV_ROUGHNESSES = 8;
 
+	const std::string HEIGHTFIELD_PATH = "../scenes/nlsFinland/L3123F.png";
+	const std::string TERRAIN_PHOTO_PATH = "../scenes/nlsFinland/L3123F_downscaled.jpg";
+
     SDL_Color clearColor = {};
 
     Ship *ship{};
@@ -58,7 +61,6 @@ class Game : public GameObject {
     GLuint simpleParticleProgram{};
     GLuint particleProgram{};
     GLuint backgroundProgram{};
-    GLuint heightfieldProgram{};
 
     GameAudioPlayer* audioPlayer;
     Renderer* renderer{};
@@ -77,7 +79,7 @@ public:
     bool isQuitting() const;
 
     void initShaders();
-    void initTerrain(InputHandler* _engine, bool _showHitbox);
+    void initTerrain(bool _showHitbox);
     GameObject* initBackground();
     void initCamera(int _winWidth, int _winHeight);
     void initShip(bool _showHitbox);

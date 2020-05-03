@@ -7,6 +7,10 @@ GLuint ModelRenderComponent::getShaderProgram() const {
 	return shaderProgram;
 }
 
+void ModelRenderComponent::render() const {
+	labhelper::render(model);
+}
+
 labhelper::Model* ModelRenderComponent::getModel() const {
 	return model;
 }

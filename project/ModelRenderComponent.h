@@ -10,8 +10,9 @@ class ModelRenderComponent : public Component
 	GLuint shaderProgram;
 public:
 	GLuint getShaderProgram() const;
+	void render() const;
 private:
-	glm::mat4 modelMatrix;
+	glm::mat4 modelMatrix{};
 
 public:
 	labhelper::Model* getModel() const;
