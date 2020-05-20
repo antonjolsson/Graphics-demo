@@ -8,6 +8,7 @@ class RigidBody : public Component
 
 public:
 	glm::vec3 getVelocity() const;
+	void setYRotationVel(float _y);
 private:
 	glm::vec3 rotationVelocity{ 0 };
 
@@ -42,7 +43,7 @@ public:
 	void setXRotationVel(float _x);
 	glm::vec3 getRotationVelocity() const;
 private:
-	void applyDrag();
+	void applyDrag(float _dt);
 
 	void setRotation(bool _frozenPos, float& _rotVelocity, float _resetRotSpeedRot, float& _rotation) const;
 	

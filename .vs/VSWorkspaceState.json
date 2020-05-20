@@ -4,12 +4,9 @@
     "\\bin",
     "\\build",
     "\\build\\.vs",
-    "\\build\\project",
     "\\external",
     "\\external_src",
-    "\\Local settings (.vs)",
-    "\\project",
-    "\\scenes\\envmaps"
+    "\\project"
   ],
   "SelectedNode": "\\build\\foreignAttack.sln",
   "PreviewInSolutionExplorer": false

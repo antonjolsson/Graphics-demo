@@ -43,6 +43,7 @@ namespace debug_gui {
 		const vec3 shipRotation = _ship->getTransform().rotation;
 		ImGui::Text("Ship rotation: %.3f %.3f %.3f", shipRotation.x, shipRotation.y, shipRotation.z);
 		ImGui::Text("Ship x-rotation speed: %.3f", _ship->getComponent<RigidBody>()->getRotationVelocity().x);
+		ImGui::Text("Ship y-rotation speed: %.3f", _ship->getComponent<RigidBody>()->getRotationVelocity().y);
 		const vec3 shipPosition = _ship->getTransform().position;
 		ImGui::Text("Ship position: %.3f %.3f %.3f", shipPosition.x, shipPosition.y, shipPosition.z);
 		mat4 fighterModelMatrix = _ship->getComponent<ModelRenderComponent>()->getModelMatrix();

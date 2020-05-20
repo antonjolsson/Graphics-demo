@@ -3,6 +3,7 @@
 #include <glm/detail/_vectorize.hpp>
 #include <glm/gtx/euler_angles.inl>
 #include <glm/gtx/transform.inl>
+#include <iostream>
 
 
 glm::vec3 RigidBody::getRotationVelocity() const {
@@ -11,6 +12,10 @@ glm::vec3 RigidBody::getRotationVelocity() const {
 
 glm::vec3 RigidBody::getVelocity() const {
 	return velocity;
+}
+
+void RigidBody::setYRotationVel(const float _y) {
+	rotationVelocity.y = _y;
 }
 
 void RigidBody::setZeroAcc() {
@@ -31,11 +36,11 @@ void RigidBody::setXRotationVel(const float _x) {
 	rotationVelocity.x = _x;
 }
 
-void RigidBody::applyDrag()
+void RigidBody::applyDrag(const float _dt)
 {
-	velocity.x *= pow(dragCoeff, -abs(velocity.x));
-	velocity.y *= pow(dragCoeff, -abs(velocity.y));
-	velocity.z *= pow(dragCoeff, -abs(velocity.z));
+	velocity.x *= pow(dragCoeff, -abs(velocity.x * _dt));
+	velocity.y *= pow(dragCoeff, -abs(velocity.y) * _dt);
+	velocity.z *= pow(dragCoeff, -abs(velocity.z) * _dt);
 }
 
 void RigidBody::setRotation(const bool _frozenPos, float& _rotVelocity, const float _resetRotSpeedRot, float& _rotation) const {
@@ -49,8 +54,10 @@ void RigidBody::update(const float _dt) {
 	glm::vec3& position = go->getTransform().position;
 	glm::vec3& rotation = go->getTransform().rotation;
 	
-	velocity += acceleration * _dt;
-	applyDrag();
+	position += velocity * _dt;
+	
+	//velocity += acceleration * _dt;
+	velocity += acceleration;
 	acceleration = glm::vec3(0);
 	
 	setRotation(frozenRotations.x, rotationVelocity.x, resetRotSpeedRot.x,
@@ -59,7 +66,8 @@ void RigidBody::update(const float _dt) {
 		rotation.y);
 	setRotation(frozenRotations.z, rotationVelocity.z, resetRotSpeedRot.z,
 		rotation.z);
-	position += velocity * _dt;
+
+	applyDrag(_dt);
 }
 
 RigidBody::RigidBody(GameObject* _go, const float _dragCoeff) {

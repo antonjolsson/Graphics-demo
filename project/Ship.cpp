@@ -25,11 +25,11 @@ void ShipBehaviour::update(float _dt) {
 		std::cout << "Ship: toggleDebugGui = " << keyStatus.toggleDebugGui << std::endl;
 	}
 	if (keyStatus.forward) {
-		rigidBody->addAcceleration(vec3(X_ACCELERATION, 0, 0));
+		rigidBody->addAcceleration(vec3(-X_ACCELERATION, 0, 0));
 	}
 	else rigidBody->setZeroAcc();
 	if (keyStatus.reverse) {
-		rigidBody->addAcceleration(vec3(-X_ACCELERATION, 0, 0));
+		rigidBody->addAcceleration(vec3(X_ACCELERATION, 0, 0));
 	}
 	if (keyStatus.left) {
 		rigidBody->setRotationVelocity(vec3(go->getTransform().rotation.x > MAX_SHIP_X_ROT ? 0 : MAX_SHIP_X_ROTATION_SPEED,
@@ -41,6 +41,7 @@ void ShipBehaviour::update(float _dt) {
 	}
 	else {
 		rigidBody->setXRotationVel(0);
+		rigidBody->setYRotationVel(0);
 		if (go->getTransform().rotation.x > CLAMP_ROT_TO_ZERO_SPEED) rigidBody->setXRotationVel(-MAX_SHIP_X_ROTATION_SPEED);
 		else if (go->getTransform().rotation.x < -CLAMP_ROT_TO_ZERO_SPEED) 
 			rigidBody->setXRotationVel(MAX_SHIP_X_ROTATION_SPEED);

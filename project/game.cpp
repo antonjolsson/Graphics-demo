@@ -124,7 +124,6 @@ void Game::initShaders()
     shaderProgram = labhelper::loadShaderProgram("../project/shading.vert", "../project/shading.frag");
     simpleShaderProgram = labhelper::loadShaderProgram("../project/simple.vert", "../project/simple.frag");
     particleProgram = labhelper::loadShaderProgram("../project/particle.vert", "../project/particle.frag");
-   
 }
 
 void Game::initTerrain(const bool _showHitbox) {
@@ -158,7 +157,7 @@ GameObject* Game::initBackground()
 void Game::initCamera(const int _winWidth, const int _winHeight)
 {
     auto cameraComponent = new CameraComponent(ship, _winWidth, _winHeight, inputHandler);
-	cameraComponent->setTracingObject(false);
+	cameraComponent->setTracingObject(true);
 	cameraComponent->setMouseMovable(true);
     camera = new Camera();
     camera->addComponent(cameraComponent);
