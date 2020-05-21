@@ -58,9 +58,6 @@ void RigidBody::setRotation(const bool _frozenPos, float& _rotVelocity, const fl
 }
 
 void RigidBody::update(const float _dt) {
-	
-	
-
 	glm::vec3& position = go->getTransform().position;
 	glm::vec3& rotation = go->getTransform().rotation;
 
@@ -81,9 +78,6 @@ void RigidBody::update(const float _dt) {
 	modelMatrix = rotMatrix * glm::mat4(1.f);
 	modelMatrix[3] = translation;
 	modelMatrix[3] -= glm::vec4(velocity, 0);
-
-
-	
 
 	position = modelMatrix[3];
 
