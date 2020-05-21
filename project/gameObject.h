@@ -1,6 +1,7 @@
 #pragma once
 
 #include <glm/detail/type_vec3.hpp>
+#include <glm/mat4x4.hpp>
 #include <vector>
 #include <map>
 #include "component.h"
@@ -30,9 +31,11 @@ protected:
 	Transform transform;
 
     bool enabled = false;
+	glm::mat4 modelMatrix;
 
 public:
 	void setEnabled(bool _enabled);
+	glm::mat4& getModelMatrix();
 protected:
 	std::vector<GameObject*> receivers;
 	std::vector<Component*> components;
@@ -43,8 +46,9 @@ protected:
 	std::set<Message> mailbox;
 
 public:
-	const glm::vec3 WORLD_UP{ 0.0f, 1.0f, 0.0f };
 	const glm::vec3 X_AXIS{ 1.0f, 0.0f, 0.0f };
+	const glm::vec3 Y_AXIS{ 0.0f, 1.0f, 0.0f };
+	const glm::vec3 Z_AXIS{ 0.0f, 0.0f, 1.0f };
 	
 	glm::vec3 getPosition() const;
 	glm::vec3 getRotation() const;

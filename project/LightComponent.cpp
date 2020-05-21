@@ -28,12 +28,12 @@ glm::mat4 LightComponent::getProjMatrix() const {
 }
 
 glm::mat4 LightComponent::getViewMatrix() const {
-	return lookAt(go->getTransform().position, glm::vec3(0.0f), go->WORLD_UP);
+	return lookAt(go->getTransform().position, glm::vec3(0.0f), go->Y_AXIS);
 }
 
 void LightComponent::update(const float _dt) {
 	if (inputHandler->getMouseStatus().isMouseRightDragging) {
 		lightRotation += inputHandler->getMouseStatus().deltaX * ROTATION_SPEED * _dt;
-		go->setPosition(glm::vec3(glm::rotate(lightRotation, go->WORLD_UP) * glm::vec4(go->getPosition(), 1.f)));
+		go->setPosition(glm::vec3(glm::rotate(lightRotation, go->Y_AXIS) * glm::vec4(go->getPosition(), 1.f)));
 	}
 }

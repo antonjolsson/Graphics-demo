@@ -1,6 +1,9 @@
 
 #include "gameObject.h"
 
+#include <glm/mat4x2.hpp>
+
+
 
 #include "../external/SDL2_mixer/include/SDL_mixer.h"
 #include "BehaviourComponent.h"
@@ -113,6 +116,10 @@ void GameObject::setEnabled(const bool _enabled) {
 	enabled = _enabled;
 }
 
+glm::mat4& GameObject::getModelMatrix(){
+	return modelMatrix;
+}
+
 glm::vec3 GameObject::getPosition() const {
 	return transform.position;
 }
@@ -147,12 +154,14 @@ GameObject::Transform& GameObject::getTransform()
 
 GameObject::GameObject() {
 	enabled = true;
+	modelMatrix = glm::mat4(1.f);
 }
 
 GameObject::GameObject(const glm::vec3 _position, const glm::vec3 _rotation, const glm::vec3 _scale)
 {
     transform = { _position, _rotation, _scale };
-	enabled = true;
+	modelMatrix = glm::mat4(1.f); // TODO: set from transform
+	modelMatrix[3] = glm::vec4(_position, 1.f);
 }
 
 bool GameObject::isEnabled() const

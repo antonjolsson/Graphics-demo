@@ -2,9 +2,8 @@
 #include <glm/detail/_vectorize.hpp>
 #include <glm/detail/_vectorize.hpp>
 #include <glm/gtx/euler_angles.inl>
-#include <glm/gtx/transform.inl>
+#include <glm/gtc/matrix_transform.hpp>
 #include <iostream>
-
 
 glm::vec3 RigidBody::getRotationVelocity() const {
 	return rotationVelocity;
@@ -51,15 +50,10 @@ void RigidBody::setRotation(const bool _frozenPos, float& _rotVelocity, const fl
 }
 
 void RigidBody::update(const float _dt) {
+
 	glm::vec3& position = go->getTransform().position;
 	glm::vec3& rotation = go->getTransform().rotation;
-	
-	position += velocity * _dt;
-	
-	//velocity += acceleration * _dt;
-	velocity += acceleration;
-	acceleration = glm::vec3(0);
-	
+
 	setRotation(frozenRotations.x, rotationVelocity.x, resetRotSpeedRot.x,
 		rotation.x);
 	setRotation(frozenRotations.y, rotationVelocity.y, resetRotSpeedRot.y,
@@ -67,7 +61,18 @@ void RigidBody::update(const float _dt) {
 	setRotation(frozenRotations.z, rotationVelocity.z, resetRotSpeedRot.z,
 		rotation.z);
 
+	velocity += acceleration;
+	acceleration = glm::vec3(0);
 	applyDrag(_dt);
+	
+	glm::mat4& modelMatrix = go->getModelMatrix();
+	const glm::mat4 rotMatrix = glm::eulerAngleYXZ(rotation.y, rotation.x, 0.f);
+	const glm::vec4 translation = modelMatrix[3];
+	modelMatrix = rotMatrix * glm::mat4(1.f);
+	modelMatrix[3] = translation;
+	modelMatrix = translate(modelMatrix,velocity * -go->X_AXIS);
+
+	position = modelMatrix[3];
 }
 
 RigidBody::RigidBody(GameObject* _go, const float _dragCoeff) {

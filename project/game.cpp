@@ -157,7 +157,7 @@ GameObject* Game::initBackground()
 void Game::initCamera(const int _winWidth, const int _winHeight)
 {
     auto cameraComponent = new CameraComponent(ship, _winWidth, _winHeight, inputHandler);
-	cameraComponent->setTracingObject(true);
+	cameraComponent->setTracingObject(false);
 	cameraComponent->setMouseMovable(true);
     camera = new Camera();
     camera->addComponent(cameraComponent);
@@ -208,7 +208,6 @@ Game::Game(InputHandler* _engine, const bool _showHitbox, const int _winWidth, c
     
 	const auto lights = new std::vector<GameObject*> {light};
     initRenderer(_engine, _showHitbox, _winWidth, _winHeight, lights, background);
-	
 }
 
 GameAudioPlayer::GameAudioPlayer()

@@ -4,8 +4,6 @@
 #include <glm/gtx/transform.hpp>
 #include <iostream>
 
-
-
 #include "BehaviourComponent.h"
 
 ShipBehaviour::ShipBehaviour(Ship* _ship, InputHandler* _inputhandler, RigidBody* _rigidBody):
@@ -25,27 +23,30 @@ void ShipBehaviour::update(float _dt) {
 		std::cout << "Ship: toggleDebugGui = " << keyStatus.toggleDebugGui << std::endl;
 	}
 	if (keyStatus.forward) {
-		rigidBody->addAcceleration(vec3(-X_ACCELERATION, 0, 0));
+		rigidBody->addAcceleration(vec3(X_ACCELERATION, 0, 0));
 	}
 	else rigidBody->setZeroAcc();
 	if (keyStatus.reverse) {
-		rigidBody->addAcceleration(vec3(X_ACCELERATION, 0, 0));
+		rigidBody->addAcceleration(vec3(-X_ACCELERATION, 0, 0));
 	}
 	if (keyStatus.left) {
 		rigidBody->setRotationVelocity(vec3(go->getTransform().rotation.x > MAX_SHIP_X_ROT ? 0 : MAX_SHIP_X_ROTATION_SPEED,
 			MAX_SHIP_Y_ROTATION_SPEED, 0));
 	}
 	else if (keyStatus.right) {
-		rigidBody->setRotationVelocity(vec3(go->getTransform().rotation.x <= MAX_SHIP_X_ROT ? 0 : MAX_SHIP_X_ROTATION_SPEED,
+		rigidBody->setRotationVelocity(vec3(go->getTransform().rotation.x <= -MAX_SHIP_X_ROT ? 0 : -MAX_SHIP_X_ROTATION_SPEED,
 			-MAX_SHIP_Y_ROTATION_SPEED, 0));
 	}
 	else {
-		rigidBody->setXRotationVel(0);
 		rigidBody->setYRotationVel(0);
 		if (go->getTransform().rotation.x > CLAMP_ROT_TO_ZERO_SPEED) rigidBody->setXRotationVel(-MAX_SHIP_X_ROTATION_SPEED);
 		else if (go->getTransform().rotation.x < -CLAMP_ROT_TO_ZERO_SPEED) 
 			rigidBody->setXRotationVel(MAX_SHIP_X_ROTATION_SPEED);
 		else rigidBody->setXRotationVel(0);
+
+		if (rigidBody->getRotationVelocity().x == 0 && abs(go->getTransform().rotation.x) < CLAMP_ROT_TO_ZERO_SPEED)
+			go->getTransform().rotation.x = 0;
+		else go->getTransform().rotation.x += rigidBody->getRotationVelocity().x;
 	}
 	if (keyStatus.machinegun) {
 		// TODO
@@ -69,8 +70,8 @@ void Ship::readMessages() {
 
 Ship::Ship(InputHandler* _engine, const GLuint _shaderProgram, const bool _showHitbox) {
 	transform.position = INITIAL_POSITION;
-	mat4 shipModelMatrix = translate(Y_TRANSL * WORLD_UP);
-	auto* renderer = new ModelRenderComponent(this, _shaderProgram, fighterModel, shipModelMatrix);
+	modelMatrix = translate(Y_TRANSL * Y_AXIS);
+	auto* renderer = new ModelRenderComponent(this, _shaderProgram, fighterModel, modelMatrix);
 	auto* rigidBody = new RigidBody(this, DRAG_COEFF);
 	auto* behaviour = new ShipBehaviour(this, _engine, rigidBody);
 	addComponents(std::vector<Component*> {behaviour, renderer, rigidBody});

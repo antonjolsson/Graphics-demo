@@ -51,16 +51,16 @@ void CameraComponent::traceObject() {
 
 void CameraComponent::moveCamera(const float _dt) {
 	keyStatus = inputHandler->getKeyStatus();
-	if (keyStatus.lowerCamera) go->getTransform().position -= _dt * speed * go->WORLD_UP;
-	if (keyStatus.raiseCamera) go->getTransform().position += _dt * speed * go->WORLD_UP;
+	if (keyStatus.lowerCamera) go->getTransform().position -= _dt * speed * go->Y_AXIS;
+	if (keyStatus.raiseCamera) go->getTransform().position += _dt * speed * go->Y_AXIS;
 	if (keyStatus.forwardCamera) go->getTransform().position += _dt * speed * cameraDirection;
 	if (keyStatus.backwardCamera) go->getTransform().position -= _dt * speed * cameraDirection;
 
 	if (mouseMovable) {
 		mouse = inputHandler->getMouseStatus();
 		if (mouse.isDragging) {
-			const glm::mat4 yaw = rotate(ROTATION_SPEED * -mouse.deltaX, go->WORLD_UP);
-			const glm::mat4 pitch = rotate(ROTATION_SPEED * -mouse.deltaY, normalize(cross(cameraDirection, go->WORLD_UP)));
+			const glm::mat4 yaw = rotate(ROTATION_SPEED * -mouse.deltaX, go->Y_AXIS);
+			const glm::mat4 pitch = rotate(ROTATION_SPEED * -mouse.deltaY, normalize(cross(cameraDirection, go->Y_AXIS)));
 			cameraDirection = glm::vec3(pitch * yaw * glm::vec4(cameraDirection, 0.0f));
 		}
 	}
@@ -80,5 +80,5 @@ glm::mat4 CameraComponent::getProjMatrix() const {
 }
 
 glm::mat4 CameraComponent::getViewMatrix() const {
-	return lookAt(go->getTransform().position, go->getTransform().position + cameraDirection, go->WORLD_UP);
+	return lookAt(go->getTransform().position, go->getTransform().position + cameraDirection, go->Y_AXIS);
 }
