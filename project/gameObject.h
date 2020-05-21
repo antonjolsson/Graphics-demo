@@ -21,6 +21,7 @@ class GameObject
 {
 protected:
 
+	// Model/local coordinates
 	struct Transform
 	{
 		glm::vec3 position { 0 };

@@ -1,4 +1,6 @@
 #include "CameraComponent.h"
+
+#include <glm/gtx/rotate_vector.inl>
 #include <glm/gtx/transform.hpp>
 
 void CameraComponent::setFieldOfView(const float _fieldOfView) {
@@ -45,16 +47,19 @@ CameraComponent::CameraComponent(GameObject* _tracing, const int _winWidth, cons
 }
 
 void CameraComponent::traceObject() {
-	go->getTransform().position = tracing->getTransform().position + tracingDistance;
+	go->getTransform().position = translate(tracing->getModelMatrix(), tracingDistance)[3];
 	cameraDirection = normalize(tracing->getTransform().position - go->getTransform().position);
 }
 
 void CameraComponent::moveCamera(const float _dt) {
 	keyStatus = inputHandler->getKeyStatus();
-	if (keyStatus.lowerCamera) go->getTransform().position -= _dt * speed * go->Y_AXIS;
-	if (keyStatus.raiseCamera) go->getTransform().position += _dt * speed * go->Y_AXIS;
-	if (keyStatus.forwardCamera) go->getTransform().position += _dt * speed * cameraDirection;
-	if (keyStatus.backwardCamera) go->getTransform().position -= _dt * speed * cameraDirection;
+
+	glm::vec3* position = tracingObject ? &tracingDistance : &go->getTransform().position;
+	
+	if (keyStatus.lowerCamera) *position -= _dt * speed * go->Y_AXIS;
+	if (keyStatus.raiseCamera) *position += _dt * speed * go->Y_AXIS;
+	if (keyStatus.forwardCamera) *position += _dt * speed * cameraDirection;
+	if (keyStatus.backwardCamera) *position -= _dt * speed * cameraDirection;
 
 	if (mouseMovable) {
 		mouse = inputHandler->getMouseStatus();
@@ -72,7 +77,7 @@ auto CameraComponent::update(const float _dt, const int _windowHeight, const int
 	if (tracingObject) {
 		traceObject();
 	}
-	else moveCamera(_dt);
+	moveCamera(_dt);
 }
 
 glm::mat4 CameraComponent::getProjMatrix() const {

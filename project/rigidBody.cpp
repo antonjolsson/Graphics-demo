@@ -66,7 +66,7 @@ void RigidBody::update(const float _dt) {
 	applyDrag(_dt);
 	
 	glm::mat4& modelMatrix = go->getModelMatrix();
-	const glm::mat4 rotMatrix = glm::eulerAngleYXZ(rotation.y, rotation.x, 0.f);
+	const glm::mat4 rotMatrix = glm::eulerAngleYXZ(rotation.y, rotation.x, rotation.z);
 	const glm::vec4 translation = modelMatrix[3];
 	modelMatrix = rotMatrix * glm::mat4(1.f);
 	modelMatrix[3] = translation;

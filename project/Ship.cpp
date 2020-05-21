@@ -30,12 +30,12 @@ void ShipBehaviour::update(float _dt) {
 		rigidBody->addAcceleration(vec3(-X_ACCELERATION, 0, 0));
 	}
 	if (keyStatus.left) {
-		rigidBody->setRotationVelocity(vec3(go->getTransform().rotation.x > MAX_SHIP_X_ROT ? 0 : MAX_SHIP_X_ROTATION_SPEED,
-			MAX_SHIP_Y_ROTATION_SPEED, 0));
+		rigidBody->setRotationVelocity(vec3(!X_ROTATION || go->getTransform().rotation.x > MAX_SHIP_X_ROT ? 0 
+			: MAX_SHIP_X_ROTATION_SPEED, MAX_SHIP_Y_ROTATION_SPEED, 0));
 	}
 	else if (keyStatus.right) {
-		rigidBody->setRotationVelocity(vec3(go->getTransform().rotation.x <= -MAX_SHIP_X_ROT ? 0 : -MAX_SHIP_X_ROTATION_SPEED,
-			-MAX_SHIP_Y_ROTATION_SPEED, 0));
+		rigidBody->setRotationVelocity(vec3(!X_ROTATION || go->getTransform().rotation.x <= -MAX_SHIP_X_ROT ? 0 :
+			-MAX_SHIP_X_ROTATION_SPEED, -MAX_SHIP_Y_ROTATION_SPEED, 0));
 	}
 	else {
 		rigidBody->setYRotationVel(0);
