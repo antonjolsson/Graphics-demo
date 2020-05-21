@@ -17,6 +17,14 @@ void RigidBody::setYRotationVel(const float _y) {
 	rotationVelocity.y = _y;
 }
 
+glm::vec3 RigidBody::getAcceleration() const {
+	return acceleration;
+}
+
+void RigidBody::setVelocity(const glm::vec3 _velocity) {
+	velocity = _velocity;
+}
+
 void RigidBody::setZeroAcc() {
 	acceleration = glm::vec3(0);
 }
@@ -50,6 +58,8 @@ void RigidBody::setRotation(const bool _frozenPos, float& _rotVelocity, const fl
 }
 
 void RigidBody::update(const float _dt) {
+	
+	
 
 	glm::vec3& position = go->getTransform().position;
 	glm::vec3& rotation = go->getTransform().rotation;
@@ -62,7 +72,7 @@ void RigidBody::update(const float _dt) {
 		rotation.z);
 
 	velocity += acceleration;
-	acceleration = glm::vec3(0);
+	
 	applyDrag(_dt);
 	
 	glm::mat4& modelMatrix = go->getModelMatrix();
@@ -70,9 +80,14 @@ void RigidBody::update(const float _dt) {
 	const glm::vec4 translation = modelMatrix[3];
 	modelMatrix = rotMatrix * glm::mat4(1.f);
 	modelMatrix[3] = translation;
-	modelMatrix = translate(modelMatrix,velocity * -go->X_AXIS);
+	modelMatrix[3] -= glm::vec4(velocity, 0);
+
+
+	
 
 	position = modelMatrix[3];
+
+	acceleration = glm::vec3(0);
 }
 
 RigidBody::RigidBody(GameObject* _go, const float _dragCoeff) {

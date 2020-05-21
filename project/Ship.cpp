@@ -23,11 +23,15 @@ void ShipBehaviour::update(float _dt) {
 		std::cout << "Ship: toggleDebugGui = " << keyStatus.toggleDebugGui << std::endl;
 	}
 	if (keyStatus.forward) {
-		rigidBody->addAcceleration(vec3(X_ACCELERATION, 0, 0));
+		//rigidBody->addAcceleration(vec3(X_ACCELERATION, 0, 0));
+		//rigidBody->addAcceleration(X_ACCELERATION * go->getModelMatrix()[0]);
+		rigidBody->setVelocity(10 * X_ACCELERATION * go->getModelMatrix()[0]);
 	}
-	else rigidBody->setZeroAcc();
+	//else rigidBody->setZeroAcc();
 	if (keyStatus.reverse) {
-		rigidBody->addAcceleration(vec3(-X_ACCELERATION, 0, 0));
+		//rigidBody->addAcceleration(vec3(-X_ACCELERATION, 0, 0));
+		//rigidBody->addAcceleration(-X_ACCELERATION * go->getModelMatrix()[0]);
+		rigidBody->setVelocity(10 * -X_ACCELERATION * go->getModelMatrix()[0]);
 	}
 	if (keyStatus.left) {
 		rigidBody->setRotationVelocity(vec3(!X_ROTATION || go->getTransform().rotation.x > MAX_SHIP_X_ROT ? 0 

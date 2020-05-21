@@ -4,7 +4,7 @@
 namespace debug_gui {
 
 	inline void showDebugGUI(SDL_Window* _gWindow, Ship* _ship, GameObject* _camera) {
-		CameraComponent* cameraComp = _camera->getComponent<CameraComponent>();
+		auto* cameraComp = _camera->getComponent<CameraComponent>();
 			// Inform imgui of new frame
 		ImGui_ImplSdlGL3_NewFrame(_gWindow);
 
@@ -40,8 +40,11 @@ namespace debug_gui {
 		ImGui::SliderFloat("Drag coeff.", &dragCoeff, 0.0f, 10.0f);*/
 		const vec3 shipVelocity = _ship->getComponent<RigidBody>()->getVelocity();
 		ImGui::Text("Current ship speed: %.3f %.3f %.3f", shipVelocity.x, shipVelocity.y, shipVelocity.z);
+		const vec3 shipAcceleration = _ship->getComponent<RigidBody>()->getAcceleration();
+		ImGui::Text("Current ship acc: %.3f %.3f %.3f", shipAcceleration.x, shipAcceleration.y, shipAcceleration.z);
 		const vec3 shipRotation = _ship->getTransform().rotation;
-		ImGui::Text("Ship rotation: %.3f %.3f %.3f", shipRotation.x, shipRotation.y, shipRotation.z);
+		ImGui::Text("Ship rotation: %.3f %.3f %.3f", fmod(shipRotation.x, 2 * M_PI), fmod(shipRotation.y, 2 * M_PI), 
+			fmod(shipRotation.z, 2 * M_PI));
 		ImGui::Text("Ship x-rotation speed: %.3f", _ship->getComponent<RigidBody>()->getRotationVelocity().x);
 		ImGui::Text("Ship y-rotation speed: %.3f", _ship->getComponent<RigidBody>()->getRotationVelocity().y);
 		const vec3 shipPosition = _ship->getTransform().position;
