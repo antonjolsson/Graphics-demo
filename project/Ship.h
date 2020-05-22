@@ -29,8 +29,8 @@ public:
 class ShipBehaviour final : public BehaviourComponent {
 
 	const bool X_ROTATION = false;
-	const float DRAG_COEFF = 1.1f;
-	const float X_ACCELERATION = 0.020f;
+	const float DRAG_COEFF = 1000.1f;
+	const float X_ACCELERATION = 0.4f;
 	const float MAX_SHIP_X_ROT = M_PI / 6;;
 	const float MAX_SHIP_Y_ROTATION_SPEED = M_PI / 100;
 	const float MAX_SHIP_X_ROTATION_SPEED = MAX_SHIP_X_ROT / 5;

@@ -32,7 +32,10 @@ private:
 public:
 	void setTracingObject(bool _tracingObject);
 private:
-	glm::vec3 tracingDistance{ 50, 50, 0 }; // { 50, 50, 0 }
+	
+	glm::vec3 tracingDistance{ 55, 25, 0 }; // { 50, 50, 0 }
+	glm::vec3 tracingDirectionOffs {0, 10, 0};
+	
 	int windowWidth;
 	int windowHeight;
 

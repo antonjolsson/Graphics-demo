@@ -48,7 +48,7 @@ CameraComponent::CameraComponent(GameObject* _tracing, const int _winWidth, cons
 
 void CameraComponent::traceObject() {
 	go->getTransform().position = translate(tracing->getModelMatrix(), tracingDistance)[3];
-	cameraDirection = normalize(tracing->getTransform().position - go->getTransform().position);
+	cameraDirection = normalize(tracing->getTransform().position - go->getTransform().position + tracingDirectionOffs);
 }
 
 void CameraComponent::moveCamera(const float _dt) {

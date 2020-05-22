@@ -45,9 +45,9 @@ void RigidBody::setXRotationVel(const float _x) {
 
 void RigidBody::applyDrag(const float _dt)
 {
-	velocity.x *= pow(dragCoeff, -abs(velocity.x * _dt));
-	velocity.y *= pow(dragCoeff, -abs(velocity.y) * _dt);
-	velocity.z *= pow(dragCoeff, -abs(velocity.z) * _dt);
+	velocity.x *= pow(dragCoeff, -abs(velocity.x * _dt * dragCoeff));
+	velocity.y *= pow(dragCoeff, -abs(velocity.y) * _dt * dragCoeff);
+	velocity.z *= pow(dragCoeff, -abs(velocity.z) * _dt * dragCoeff);
 }
 
 void RigidBody::setRotation(const bool _frozenPos, float& _rotVelocity, const float _resetRotSpeedRot, float& _rotation) const {

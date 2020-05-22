@@ -32,6 +32,8 @@ void GameObject::update(const float _dt) {
 	for (auto& component : components) {
         component->update(_dt);
 	}
+
+	modelMatrix[3] = glm::vec4(getPosition(), 1);
 }
 
 void GameObject::destroy() {

@@ -15,4 +15,6 @@ void Camera::update(const float _dt, const int _windowWidth, const int _windowHe
         if (component != cameraComponent)
 			component->update(_dt);
     }
+
+	GameObject::update(_dt);
 }

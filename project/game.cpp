@@ -3,6 +3,10 @@
 //
 
 #include "game.h"
+
+
+#include <glm/detail/_vectorize.hpp>
+#include <glm/detail/_vectorize.hpp>
 #include <iostream>
 #include "fbo.h"
 #include <labhelper.h>
@@ -66,19 +70,23 @@ void Game::update(const float _dt, const int _windowWidth, const int _windowHeig
         gameObject->update(_dt);
     camera->update(_dt, _windowWidth, _windowHeight);
     renderer->draw();
-	if (debugGUI) debug_gui::showDebugGUI(gWindow, ship, camera);
+	if (debugGUI) debug_gui::showDebugGUI(gWindow, ship, camera, sun);
     //gui->update(score);
 }
 
-GameObject* Game::initLight() {
+GameObject* Game::initLight(const vec3 _position) {
     auto lightComponent = new LightComponent(true, inputHandler);
-    auto light = new GameObject(ship->getTransform().position + LIGHT_POS_OFFSET, vec3(0),
+    sun = new GameObject(_position, vec3(0),
         vec3(1));
-    light->addComponent(lightComponent);
-    lightComponent->addGameObject(light);
-    gameObjects.insert(light);
-    receivers.push_back(light);
-    return light;
+    const auto renderer = new ModelRenderComponent(sun, shaderProgram, sphereModel, mat4(1.f));
+    sun->addComponent(lightComponent);
+    if (renderer!= nullptr) sun->addComponent(renderer);
+    lightComponent->addGameObject(sun);
+	renderer->addGameObject(sun);
+	sun->setEnabled(true);
+    gameObjects.insert(sun);
+    receivers.push_back(sun);
+    return sun;
 }
 
 void Game::destroy() {
@@ -204,9 +212,10 @@ Game::Game(InputHandler* _engine, const bool _showHitbox, const int _winWidth, c
 	const auto background = initBackground();
 	
     initCamera(_winWidth, _winHeight);
-    GameObject* light = initLight();
+    //GameObject* spotLight = initLight(ship->getTransform().position + SPOTLIGHT_POS_OFFSET);
+	GameObject* sun = initLight(SUN_POSITION);
     
-	const auto lights = new std::vector<GameObject*> {light};
+	const auto lights = new std::vector<GameObject*> {sun};
     initRenderer(_engine, _showHitbox, _winWidth, _winHeight, lights, background);
 }
 

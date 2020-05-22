@@ -3,7 +3,7 @@
 
 namespace debug_gui {
 
-	inline void showDebugGUI(SDL_Window* _gWindow, Ship* _ship, GameObject* _camera) {
+	inline void showDebugGUI(SDL_Window* _gWindow, Ship* _ship, GameObject* _camera, GameObject* _sun) {
 		auto* cameraComp = _camera->getComponent<CameraComponent>();
 			// Inform imgui of new frame
 		ImGui_ImplSdlGL3_NewFrame(_gWindow);
@@ -53,7 +53,11 @@ namespace debug_gui {
 		ImGui::Text("Ship x-axis: %.3f %.3f %.3f", fighterModelMatrix[0].x, fighterModelMatrix[0].y, fighterModelMatrix[0].z);
 		ImGui::Text("Ship y-axis: %.3f %.3f %.3f", fighterModelMatrix[1].x, fighterModelMatrix[1].y, fighterModelMatrix[1].z);
 		ImGui::Text("Ship z-axis: %.3f %.3f %.3f", fighterModelMatrix[2].x, fighterModelMatrix[2].y, fighterModelMatrix[2].z);
-		
+		vec3 sunPos = _sun->getPosition();
+		ImGui::SliderFloat("Sun x-pos: ", &sunPos.x, -300.0f, 300.0f);
+		ImGui::SliderFloat("Sun y-pos: ", &sunPos.y, -300.0f, 300.0f);
+		ImGui::SliderFloat("Sun z-pos: ", &sunPos.z, -300.0f, 300.0f);
+		_sun->setPosition(sunPos);
 		
 		// ----------------------------------------------------------
 

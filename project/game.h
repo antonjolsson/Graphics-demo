@@ -9,7 +9,7 @@
 #include "InputHandler.h"
 #include "Renderer.h"
 
-//#include "fbo.h"
+using namespace glm;
 
 class GameAudioPlayer : public AudioComponent
 {
@@ -27,12 +27,14 @@ class Game : public GameObject {
 
     const unsigned int MAX_NUM_GAME_OBJECTS = 10000;
     const float OPT_FRAMERATE = 60.f;
-    const vec3 LIGHT_POS_OFFSET{ 0, 50.0f, -40.0 };
+    const vec3 SPOTLIGHT_POS_OFFSET{ 0, 50.0f, -40.0 };
 
 	const int ENV_ROUGHNESSES = 8;
 
 	const std::string HEIGHTFIELD_PATH = "../scenes/nlsFinland/L3123F.png";
 	const std::string TERRAIN_PHOTO_PATH = "../scenes/nlsFinland/L3123F_downscaled.jpg";
+
+	labhelper::Model* sphereModel = labhelper::loadModelFromOBJ("../scenes/sphere.obj");
 
     SDL_Color clearColor = {};
 
@@ -67,6 +69,8 @@ class Game : public GameObject {
     GameObject* camera{};
     SDL_Window* gWindow;
     bool debugGUI = true;
+    vec3 SUN_POSITION {160, 1120, -3000};
+    GameObject* sun;
 
 public:
 
@@ -86,6 +90,6 @@ public:
     void initRenderer(InputHandler * _engine, bool _showHitbox, int _winWidth, int _winHeight, 
         std::vector<GameObject*>* _lights, GameObject * _background);
     void update(float _dt, int _windowWidth, int _windowHeight) override;
-    GameObject* initLight();
+    GameObject* initLight(glm::vec3 _position);
     Game(InputHandler* _engine, bool _showHitbox, int _winWidth, int _winHeight, SDL_Window* _gWindow);
 };
