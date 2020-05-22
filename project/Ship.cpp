@@ -10,6 +10,7 @@ ShipBehaviour::ShipBehaviour(Ship* _ship, InputHandler* _inputhandler, RigidBody
 BehaviourComponent(_ship, _inputhandler),
 	keyStatus() {
 	rigidBody = _rigidBody;
+	rigidBody->setDragCoeff(SHIP_DRAG_COEFF);
 }
 
 void ShipBehaviour::update(float _dt) {
@@ -23,10 +24,10 @@ void ShipBehaviour::update(float _dt) {
 		std::cout << "Ship: toggleDebugGui = " << keyStatus.toggleDebugGui << std::endl;
 	}
 	if (keyStatus.forward) {
-		rigidBody->setVelocity(X_ACCELERATION * go->getModelMatrix()[0]);
+		rigidBody->addAcceleration(X_ACCELERATION * go->getModelMatrix()[0]);
 	}
 	if (keyStatus.reverse) {
-		rigidBody->setVelocity(-X_ACCELERATION * go->getModelMatrix()[0]);
+		rigidBody->addAcceleration(-X_ACCELERATION * go->getModelMatrix()[0]);
 	}
 	if (keyStatus.left) {
 		rigidBody->setRotationVelocity(vec3(!X_ROTATION || go->getTransform().rotation.x > MAX_SHIP_X_ROT ? 0 

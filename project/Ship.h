@@ -28,19 +28,18 @@ public:
 
 class ShipBehaviour final : public BehaviourComponent {
 
-	const bool X_ROTATION = false;
-	const float DRAG_COEFF = 1000.1f;
-	const float X_ACCELERATION = 0.4f;
-	const float MAX_SHIP_X_ROT = M_PI / 6;;
-	const float MAX_SHIP_Y_ROTATION_SPEED = M_PI / 100;
-	const float MAX_SHIP_X_ROTATION_SPEED = MAX_SHIP_X_ROT / 5;
-	const float CLAMP_ROT_TO_ZERO_SPEED = 0.2f;
-
 	InputHandler::KeyStatus keyStatus;
 	RigidBody* rigidBody;
 
 public:
-	
+
+	const float SHIP_DRAG_COEFF = 0.99;
+	const bool X_ROTATION = false;
+	const float X_ACCELERATION = 0.1f;
+	const float MAX_SHIP_X_ROT = M_PI / 6;;
+	const float MAX_SHIP_Y_ROTATION_SPEED = M_PI / 100;
+	const float MAX_SHIP_X_ROTATION_SPEED = MAX_SHIP_X_ROT / 5;
+	const float CLAMP_ROT_TO_ZERO_SPEED = 0.2f;
 	ShipBehaviour(Ship* _ship, InputHandler* _inputhandler, RigidBody* _rigidBody);
 	void update(float _dt) override;
 };

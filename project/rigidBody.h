@@ -5,12 +5,14 @@ class RigidBody : public Component
 {
 	glm::vec3 acceleration{ 0 };
 	glm::vec3 velocity{ 0 };
+	const float MAX_VELOCITY = 1;
 
 public:
 	glm::vec3 getVelocity() const;
 	void setYRotationVel(float _y);
 	glm::vec3 getAcceleration() const;
 	void setVelocity(glm::vec3 _velocity);
+	void setDragCoeff(const float _dragCoeff);
 
 private:
 	glm::vec3 rotationVelocity{ 0 };
@@ -35,7 +37,7 @@ private:
 
 
 	//float mass = 1; TODO: Implement
-	float dragCoeff = 0;
+	float dragCoeff = 0.99f;
 
 	//bool useGravity = false; TODO: Implement
 

@@ -165,7 +165,7 @@ GameObject* Game::initBackground()
 void Game::initCamera(const int _winWidth, const int _winHeight)
 {
     auto cameraComponent = new CameraComponent(ship, _winWidth, _winHeight, inputHandler);
-	cameraComponent->setTracingObject(false);
+	cameraComponent->setTracingObject(true);
 	cameraComponent->setMouseMovable(true);
     camera = new Camera();
     camera->addComponent(cameraComponent);

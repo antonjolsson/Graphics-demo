@@ -25,6 +25,10 @@ void RigidBody::setVelocity(const glm::vec3 _velocity) {
 	velocity = _velocity;
 }
 
+void RigidBody::setDragCoeff(const float _dragCoeff) {
+	dragCoeff = _dragCoeff;
+}
+
 void RigidBody::setZeroAcc() {
 	acceleration = glm::vec3(0);
 }
@@ -45,9 +49,15 @@ void RigidBody::setXRotationVel(const float _x) {
 
 void RigidBody::applyDrag(const float _dt)
 {
-	velocity.x *= pow(dragCoeff, -abs(velocity.x * _dt * dragCoeff));
+	/* Probably the "real" solution
+	velocity.x *= pow(dragCoeff, -abs(velocity.x) * _dt * dragCoeff);
 	velocity.y *= pow(dragCoeff, -abs(velocity.y) * _dt * dragCoeff);
 	velocity.z *= pow(dragCoeff, -abs(velocity.z) * _dt * dragCoeff);
+	*/
+	
+	velocity.x *= dragCoeff;
+	velocity.y *= dragCoeff;
+	velocity.z *= dragCoeff;
 }
 
 void RigidBody::setRotation(const bool _frozenPos, float& _rotVelocity, const float _resetRotSpeedRot, float& _rotation) const {
@@ -69,6 +79,9 @@ void RigidBody::update(const float _dt) {
 		rotation.z);
 
 	velocity += acceleration;
+
+	if (length(velocity) > MAX_VELOCITY)
+		velocity = MAX_VELOCITY * normalize(velocity);
 	
 	applyDrag(_dt);
 	
