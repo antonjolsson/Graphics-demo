@@ -10,6 +10,7 @@ class CameraComponent :public Component
 	InputHandler::MouseStatus mouse;
 	float speed = 10;
 	bool mouseMovable = false;
+	bool toggleCameraButtonDown = false;
 public:
 	float fieldOfView = 50.f;
 	InputHandler* inputHandler;
@@ -20,6 +21,7 @@ public:
 private:
 	float nearPlane = 5.f;
 	float farPlane = 900.f;
+	glm::vec3 staticCameraDirection {0.f};
 	glm::vec3 cameraDirection {0.f};
 
 public:
@@ -32,7 +34,7 @@ private:
 public:
 	void setTracingObject(bool _tracingObject);
 private:
-	
+	glm::vec3 staticCameraPos { 50, 50, 0 }; 
 	glm::vec3 tracingDistance{ 55, 25, 0 }; // { 50, 50, 0 }
 	glm::vec3 tracingDirectionOffs {0, 10, 0};
 	

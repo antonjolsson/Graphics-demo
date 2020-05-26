@@ -36,6 +36,7 @@ public:
 		bool quit; // escape button
 		bool machinegun; // s
 		bool down; // d
+    	bool toggleCamera; // c
 		
 		bool lowerCamera; // q
 		bool raiseCamera; // e
@@ -43,6 +44,7 @@ public:
 		bool backwardCamera; // s TODO: find better name
 
 		bool toggleDebugGui; // g
+		
 	};
 
 	// Returns the keyboard status. If a flag is set, the corresponding key is being held down.

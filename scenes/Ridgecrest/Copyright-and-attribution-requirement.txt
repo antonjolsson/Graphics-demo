@@ -1,0 +1,13 @@
+Copyright and attribution requirement
+
+OpenTopoMap and OpenStreetMap
+For an electronic 3D map with a map layer based on OpenTopoMap / OpenStreetMap data, 
+the credit should appear in the corner of the map. For example : © OSM Contributors / OpenTopoMap
+
+MapTiler
+For an electronic 3D map with satellite texture layer based on MapTiler data, 
+the credit should appear in the corner of the map. For example: © MapTiler
+
+Print
+For printed maps, images or video recording a similar attribution should be made in a 
+clearly visible textual description near the map, in the same fashion as if you cite a photograph.

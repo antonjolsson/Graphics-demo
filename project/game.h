@@ -31,8 +31,25 @@ class Game : public GameObject {
 
 	const int ENV_ROUGHNESSES = 8;
 
-	const std::string HEIGHTFIELD_PATH = "../scenes/nlsFinland/L3123F.png";
-	const std::string TERRAIN_PHOTO_PATH = "../scenes/nlsFinland/L3123F_downscaled.jpg";
+	struct HeightfieldData {
+		const std::string heightfield;
+		const std::string texture;
+	};
+
+	HeightfieldData finland {
+	"../scenes/nlsFinland/L3123F.png",
+		"../scenes/nlsFinland/L3123F_downscaled.jpg"
+	};
+
+	HeightfieldData california {
+	"../scenes/Ridgecrest/heightmap-high-resolution.png",
+		"../scenes/Ridgecrest/texture-high-resolution.png"
+	};
+
+	HeightfieldData heightfieldData = finland;
+
+	const std::string HEIGHTFIELD_PATH = heightfieldData.heightfield;
+	const std::string TERRAIN_PHOTO_PATH = heightfieldData.texture;
 
 	labhelper::Model* sphereModel = labhelper::loadModelFromOBJ("../scenes/sphere.obj");
 

@@ -48,6 +48,7 @@ void InputHandler::checkPressedKeys() {
     	keys.raiseCamera = state[SDL_SCANCODE_E];
     	keys.forwardCamera = state[SDL_SCANCODE_W];
     	keys.backwardCamera = state[SDL_SCANCODE_S];
+		keys.toggleCamera = state[SDL_SCANCODE_C];
 }
 
 void InputHandler::resetInput() {

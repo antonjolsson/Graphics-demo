@@ -44,6 +44,7 @@ CameraComponent::CameraComponent(GameObject* _tracing, const int _winWidth, cons
 	windowWidth = _winWidth;
 	windowHeight = _winHeight;
 	inputHandler = _inputHandler;
+	staticCameraDirection = glm::normalize(tracing->getTransform().position - staticCameraPos);
 }
 
 void CameraComponent::traceObject() {
@@ -54,7 +55,21 @@ void CameraComponent::traceObject() {
 void CameraComponent::moveCamera(const float _dt) {
 	keyStatus = inputHandler->getKeyStatus();
 
-	glm::vec3* position = tracingObject ? &tracingDistance : &go->getTransform().position;
+	if (keyStatus.toggleCamera) {
+		if (!toggleCameraButtonDown) {
+			toggleCameraButtonDown = true;
+			tracingObject = !tracingObject;
+			if (tracingObject)
+				traceObject();
+			else {
+				go->getTransform().position = staticCameraPos;
+				cameraDirection = staticCameraDirection;
+			}
+		}
+	}
+	else toggleCameraButtonDown = false;
+
+	glm::vec3* position = &go->getTransform().position;
 	
 	if (keyStatus.lowerCamera) *position -= _dt * speed * go->Y_AXIS;
 	if (keyStatus.raiseCamera) *position += _dt * speed * go->Y_AXIS;
