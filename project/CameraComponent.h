@@ -11,6 +11,7 @@ class CameraComponent :public Component
 	float speed = 10;
 	bool mouseMovable = false;
 	bool toggleCameraButtonDown = false;
+	float tracingJerkiness = 0.125f;
 public:
 	float fieldOfView = 50.f;
 	InputHandler* inputHandler;

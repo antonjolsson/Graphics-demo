@@ -1,5 +1,7 @@
 #include "CameraComponent.h"
 
+
+#include <glm/gtx/compatibility.hpp>
 #include <glm/gtx/rotate_vector.inl>
 #include <glm/gtx/transform.hpp>
 
@@ -15,7 +17,7 @@ float CameraComponent::getFarPlane() const {
 	return farPlane;
 }
 
-void CameraComponent::setMouseMovable(bool _mouseMovable) {
+void CameraComponent::setMouseMovable(const bool _mouseMovable) {
 	mouseMovable = _mouseMovable;
 }
 
@@ -48,7 +50,8 @@ CameraComponent::CameraComponent(GameObject* _tracing, const int _winWidth, cons
 }
 
 void CameraComponent::traceObject() {
-	go->getTransform().position = translate(tracing->getModelMatrix(), tracingDistance)[3];
+	const glm::vec3 desiredPos = translate(tracing->getModelMatrix(), tracingDistance)[3];
+	go->getTransform().position = lerp(go->getTransform().position, desiredPos, tracingJerkiness);
 	cameraDirection = normalize(tracing->getTransform().position - go->getTransform().position + tracingDirectionOffs);
 }
 
