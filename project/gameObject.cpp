@@ -1,6 +1,8 @@
 
 #include "gameObject.h"
 
+
+#include <glm/gtx/euler_angles.inl>
 #include <glm/mat4x2.hpp>
 
 
@@ -162,7 +164,7 @@ GameObject::GameObject() {
 GameObject::GameObject(const glm::vec3 _position, const glm::vec3 _rotation, const glm::vec3 _scale)
 {
     transform = { _position, _rotation, _scale };
-	modelMatrix = glm::mat4(1.f); // TODO: set from transform
+	modelMatrix = glm::eulerAngleYXZ(transform.rotation.y, transform.rotation.x, transform.rotation.z);
 	modelMatrix[3] = glm::vec4(_position, 1.f);
 }
 

@@ -12,10 +12,11 @@ void Renderer::setShadowMapProgram(const GLuint _shadowMapProgram) {
 
 Renderer::Renderer(InputHandler* _engine, GameObject* _camera, std::vector<RenderComponent*>* _renderComponents, 
                    const bool _showHitbox, const int _winWidth, const int _winHeight, std::vector<GameObject*>* _lights,
-                   Ship* _ship, GameObject* _background) :
+                   Ship* _ship, GameObject* _background, GameObject* _landingPad) :
 	engine(_engine), camera(_camera), renderComponents(_renderComponents), showHitbox(_showHitbox), winWidth(_winWidth),
 	winHeight(_winHeight), lights(_lights) {
 	ship = _ship;
+	landingPad = _landingPad;
 	background = _background;
 	cameraComponent = camera->getComponent<CameraComponent>();
 	glEnable(GL_DEPTH_TEST); // enable Z-buffering
@@ -57,13 +58,12 @@ void Renderer::drawScene(const GLuint _shaderProgram, const mat4 _viewMatrix, co
 	}
 }
 
-void Renderer::drawShadowMap(const mat4 _viewMatrix, const mat4 _projMatrix, const mat4 _lightViewMatrix, 
-	const mat4 _lightProjMatrix) const {
+void Renderer::drawShadowMap(const mat4 _lightViewMatrix, const mat4 _lightProjMatrix) const {
 	shadowMap->draw();
-	drawScene(shadowMapProgram, _viewMatrix, _projMatrix, _lightViewMatrix,
+	drawScene(shadowMapProgram, _lightViewMatrix, _lightProjMatrix, _lightViewMatrix,
 		_lightProjMatrix);
-	static labhelper::Model* landingpadModel = labhelper::loadModelFromOBJ("../scenes/landingpad.obj"); // TODO: REMOVE
-	labhelper::Material& screen = landingpadModel->m_materials[8];
+	//static labhelper::Model* landingpadModel = labhelper::loadModelFromOBJ("../scenes/landingpad.obj"); // TODO: REMOVE
+	labhelper::Material& screen = landingPad->getComponent<ModelRenderComponent>()->getModel()->m_materials[8];
 	screen.m_emission_texture.gl_id = shadowMap->getShadowMapFB().colorTextureTargets[0];
 
 	if (shadowMap->usesPolygonOffset())
@@ -115,13 +115,13 @@ void Renderer::draw() const {
 	
 	const mat4 projMatrix = cameraComponent->getProjMatrix();
 	const mat4 viewMatrix = cameraComponent->getViewMatrix();
-	const mat4 lightViewMatrix = (*lights)[0]->getComponent<LightComponent>()->getProjMatrix();
-	const mat4 lightProjMatrix = (*lights)[0]->getComponent<LightComponent>()->getViewMatrix();
+	const mat4 lightProjMatrix = (*lights)[0]->getComponent<LightComponent>()->getProjMatrix();
+	const mat4 lightViewMatrix = (*lights)[0]->getComponent<LightComponent>()->getViewMatrix();
 
 	if (background != nullptr) background->getComponent<EnvironmentComponent>()->bindEnvMaps();
 
 	if (renderShadows) 
-		drawShadowMap(viewMatrix, projMatrix, lightViewMatrix, lightProjMatrix);
+		drawShadowMap(lightViewMatrix, lightProjMatrix);
 
 	drawFromCamera(projMatrix, viewMatrix, lightViewMatrix, lightProjMatrix);
 }

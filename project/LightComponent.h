@@ -16,8 +16,8 @@ public:
 	float getIntensityMultiplier() const;
 private:
 
-	// Default spotlight
-	/*
+	//Default spotlight
+	
 	bool useSpotLight = true;
 	float innerSpotlightAngle = 20.3f;
 	float outerSpotlightAngle = 24.0f;
@@ -27,9 +27,9 @@ private:
 	float aspectRatio = 1;
 	float nearPlane = 25;
 	float farPlane = 100;
-	*/
 
 	// SUN
+	/*
 	bool useSpotLight = false;
 	float innerSpotlightAngle = 180.0f;
 	float outerSpotlightAngle = 180.0f;
@@ -39,6 +39,7 @@ private:
 	float aspectRatio = 1;
 	float nearPlane = 25;
 	float farPlane = 10000;
+	*/
 	
 public:
 

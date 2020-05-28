@@ -1,6 +1,18 @@
 #pragma once
 #include <vector>
 
+
+
+#include "AudioComponent.h"
+#include "AudioComponent.h"
+#include "AudioComponent.h"
+#include "AudioComponent.h"
+#include "AudioComponent.h"
+#include "AudioComponent.h"
+#include "AudioComponent.h"
+#include "AudioComponent.h"
+#include "AudioComponent.h"
+#include "AudioComponent.h"
 #include "InputHandler.h"
 #include "ModelRenderComponent.h"
 #include "CameraComponent.h"
@@ -12,7 +24,7 @@ class Renderer {
 	
 	const int AA_SAMPLES = 16;
 	float environmentMultiplier = 2.5f;
-	bool renderShadows = false;
+	bool renderShadows = true;
 	InputHandler* engine;
 	GameObject* camera;
 	const std::vector<RenderComponent*>* renderComponents;
@@ -26,15 +38,16 @@ class Renderer {
 	ShadowMap* shadowMap = nullptr;
 	GLuint shadowMapProgram = 0;
 	GameObject* background = nullptr;
+	GameObject* landingPad;
 
 public:
 	void setShadowMapProgram(GLuint _shadowMapProgram);
 
 	Renderer(InputHandler* _engine, GameObject* _camera, std::vector<RenderComponent*>* _renderComponents, bool _showHitbox,
-	         int _winWidth, int _winHeight, std::vector<GameObject*>* _lights, Ship* _ship, GameObject* _background);
+	         int _winWidth, int _winHeight, std::vector<GameObject*>* _lights, Ship* _ship, GameObject* _background, GameObject* _landingPad);
 	void setRenderShadows(bool _renderShadows);
 	void drawScene(GLuint _shaderProgram, mat4 _viewMatrix, mat4 _projMatrix, mat4 _lightViewMatrix, mat4 _lightProjMatrix) const;
-	void drawShadowMap(mat4 _viewMatrix, mat4 _projMatrix, mat4 _lightViewMatrix, mat4 _lightProjMatrix) const;
+	void drawShadowMap(mat4 _lightViewMatrix, mat4 _lightProjMatrix) const;
 	void setLightUniforms(const GLuint _currentShaderProgram, mat4 _viewMatrix, mat4 _lightViewMatrix, mat4 _lightProjMatrix, 
 		const vec4 _viewSpaceLightPosition) const;
 	void drawFromCamera(mat4 _projMatrix, mat4 _viewMatrix, mat4 _lightViewMatrix, mat4 _lightProjMatrix) const;

@@ -89,6 +89,15 @@ GameObject* Game::initLight(const vec3 _position) {
     return sun;
 }
 
+void Game::initLandingPad(const bool _showHitbox) {
+	landingPad = new GameObject(vec3(0), vec3{0, 3 * M_PI / 4, 0}, vec3(1));
+	const auto renderer = new ModelRenderComponent(landingPad, shaderProgram, landingPadModel, mat4(1.f));
+	landingPad->addComponent(renderer);
+	landingPad->setEnabled(true);
+	gameObjects.insert(landingPad);
+	receivers.push_back(landingPad);
+}
+
 void Game::destroy() {
     for (auto gameObject : gameObjects)
         gameObject->destroy();
@@ -165,7 +174,7 @@ GameObject* Game::initBackground()
 void Game::initCamera(const int _winWidth, const int _winHeight)
 {
     auto cameraComponent = new CameraComponent(ship, _winWidth, _winHeight, inputHandler);
-	cameraComponent->setTracingObject(true);
+	cameraComponent->setTracingObject(false);
 	cameraComponent->setMouseMovable(true);
     camera = new Camera();
     camera->addComponent(cameraComponent);
@@ -190,13 +199,13 @@ void Game::initRenderer(InputHandler* _engine, const bool _showHitbox, const int
             renderComponents->push_back(renderComponent);
     }
     renderer = new Renderer(_engine, camera, renderComponents, _showHitbox, _winWidth, _winHeight, _lights, ship, 
-        _background);
+        _background, landingPad);
     renderer->setRenderShadows(true);
 	renderer->setShadowMapProgram(simpleShaderProgram);
 }
 
-Game::Game(InputHandler* _engine, const bool _showHitbox, const int _winWidth, const int _winHeight, SDL_Window* _gWindow) {
-	inputHandler = _engine;
+Game::Game(InputHandler* _inputHandler, const bool _showHitbox, const int _winWidth, const int _winHeight, SDL_Window* _gWindow) {
+	inputHandler = _inputHandler;
     showHitBox = _showHitbox;
     enabled = true;
 	gWindow = _gWindow;
@@ -206,17 +215,18 @@ Game::Game(InputHandler* _engine, const bool _showHitbox, const int _winWidth, c
 
 	initShaders();
     initShip(_showHitbox);
-    
+
+	initLandingPad(_showHitbox);
     initTerrain(_showHitbox);
-    initEnemies(_engine, _showHitbox);
+    initEnemies(_inputHandler, _showHitbox);
 	const auto background = initBackground();
 	
     initCamera(_winWidth, _winHeight);
-    //GameObject* spotLight = initLight(ship->getTransform().position + SPOTLIGHT_POS_OFFSET);
-	GameObject* sun = initLight(SUN_POSITION);
+    GameObject* spotLight = initLight(ship->getTransform().position + SPOTLIGHT_POS_OFFSET);
+	//GameObject* sun = initLight(SUN_POSITION);
     
-	const auto lights = new std::vector<GameObject*> {sun};
-    initRenderer(_engine, _showHitbox, _winWidth, _winHeight, lights, background);
+	const auto lights = new std::vector<GameObject*> {spotLight};
+    initRenderer(_inputHandler, _showHitbox, _winWidth, _winHeight, lights, background);
 }
 
 GameAudioPlayer::GameAudioPlayer()

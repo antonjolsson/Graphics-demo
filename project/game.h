@@ -30,8 +30,9 @@ class Game : public GameObject {
     const vec3 SPOTLIGHT_POS_OFFSET{ 0, 50.0f, -40.0 };
 
 	const int ENV_ROUGHNESSES = 8;
+    GameObject* landingPad;
 
-	struct HeightfieldData {
+    struct HeightfieldData {
 		const std::string heightfield;
 		const std::string texture;
 	};
@@ -52,6 +53,7 @@ class Game : public GameObject {
 	const std::string TERRAIN_PHOTO_PATH = heightfieldData.texture;
 
 	labhelper::Model* sphereModel = labhelper::loadModelFromOBJ("../scenes/sphere.obj");
+	labhelper::Model* landingPadModel = labhelper::loadModelFromOBJ("../scenes/landingpad.obj");
 
     SDL_Color clearColor = {};
 
@@ -108,5 +110,6 @@ public:
         std::vector<GameObject*>* _lights, GameObject * _background);
     void update(float _dt, int _windowWidth, int _windowHeight) override;
     GameObject* initLight(glm::vec3 _position);
-    Game(InputHandler* _engine, bool _showHitbox, int _winWidth, int _winHeight, SDL_Window* _gWindow);
+    void initLandingPad(const bool _showHitbox);
+    Game(InputHandler* _inputHandler, bool _showHitbox, int _winWidth, int _winHeight, SDL_Window* _gWindow);
 };
