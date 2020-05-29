@@ -70,24 +70,24 @@ void Game::update(const float _dt, const int _windowWidth, const int _windowHeig
         gameObject->update(_dt);
     camera->update(_dt, _windowWidth, _windowHeight);
     renderer->draw();
-	if (debugGUI) debug_gui::showDebugGUI(gWindow, ship, camera, sun);
+	if (debugGUI) debug_gui::showDebugGUI(gWindow, ship, camera, light);
     //gui->update(score);
 }
 
 GameObject* Game::initLight(const vec3 _position) {
     auto lightComponent = new LightComponent(true, inputHandler);
-    sun = new GameObject(_position, vec3(0),
+    light = new GameObject(_position, vec3(0),
         vec3(1));
-    const auto renderer = new ModelRenderComponent(sun, shaderProgram, sphereModel, mat4(1.f));
+    const auto renderer = new ModelRenderComponent(light, shaderProgram, sphereModel, mat4(1.f));
 	renderComponents->push_back(renderer);
-    sun->addComponent(lightComponent);
-    if (renderer!= nullptr) sun->addComponent(renderer);
-    lightComponent->addGameObject(sun);
-	renderer->addGameObject(sun);
-	sun->setEnabled(true);
-    gameObjects.insert(sun);
-    receivers.push_back(sun);
-    return sun;
+    light->addComponent(lightComponent);
+    if (renderer!= nullptr) light->addComponent(renderer);
+    lightComponent->addGameObject(light);
+	renderer->addGameObject(light);
+	light->setEnabled(true);
+    gameObjects.insert(light);
+    receivers.push_back(light);
+    return light;
 }
 
 void Game::initLandingPad(const bool _showHitbox) {
@@ -227,10 +227,10 @@ Game::Game(InputHandler* _inputHandler, const bool _showHitbox, const int _winWi
     initEnemies(_inputHandler, _showHitbox);
 	
     initCamera(_winWidth, _winHeight);
-    GameObject* spotLight = initLight(ship->getTransform().position + SPOTLIGHT_POS_OFFSET);
-	//GameObject* sun = initLight(SUN_POSITION);
+    //GameObject* light = initLight(ship->getTransform().position + SPOTLIGHT_POS_OFFSET);
+	GameObject* light = initLight(SUN_POSITION);
     
-	const auto lights = new std::vector<GameObject*> {spotLight};
+	const auto lights = new std::vector<GameObject*> {light};
     initRenderer(_inputHandler, _showHitbox, _winWidth, _winHeight, lights, background);
 }
 

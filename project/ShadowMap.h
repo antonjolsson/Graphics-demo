@@ -17,14 +17,14 @@ class ShadowMap {
 public:
 	FboInfo getShadowMapFB() const;
 private:
-	int shadowMapResolution = 1024;
+	int shadowMapResolution = 20000; // 1024
 	int shadowMapClampMode = ClampMode::BORDER;
 	bool shadowMapClampBorderShadowed = false;
 	bool usePolygonOffset = true;
 public:
 	bool usesPolygonOffset() const;
 private:
-	bool useSoftFalloff = false;
+	bool useSoftFalloff = true;
 	bool useHardwarePCF = true;
 	float polygonOffsetFactor = 5.83f;
 	float polygonOffsetUnits = 58.3f;

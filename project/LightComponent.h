@@ -17,29 +17,29 @@ public:
 private:
 
 	//Default spotlight
-	
+
+	/*
 	bool useSpotLight = true;
 	float innerSpotlightAngle = 20.3f;
 	float outerSpotlightAngle = 24.0f;
-	float pointLightIntensityMultiplier = 100000.0f;
+	float pointLightIntensityMultiplier = 500000.0f;
 
 	float fieldOfView = glm::radians(45.f);
 	float aspectRatio = 1;
 	float nearPlane = 25;
 	float farPlane = 10000;
+	*/
 
 	// SUN
-	/*
 	bool useSpotLight = false;
 	float innerSpotlightAngle = 180.0f;
 	float outerSpotlightAngle = 180.0f;
 	float pointLightIntensityMultiplier = 10000000.0f;
 
-	float fieldOfView = glm::radians(180.f);
+	float fieldOfView = glm::radians(45.f);
 	float aspectRatio = 1;
 	float nearPlane = 25;
 	float farPlane = 10000;
-	*/
 	
 public:
 

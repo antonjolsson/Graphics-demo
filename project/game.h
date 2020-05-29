@@ -27,7 +27,7 @@ class Game : public GameObject {
 
     const unsigned int MAX_NUM_GAME_OBJECTS = 10000;
     const float OPT_FRAMERATE = 60.f;
-    const vec3 SPOTLIGHT_POS_OFFSET{ 0, 250.0f, -240.0 };
+    const vec3 SPOTLIGHT_POS_OFFSET{ 0, 550.0f, -440.0 };
 
 	const int ENV_ROUGHNESSES = 8;
     GameObject* landingPad = nullptr;
@@ -88,8 +88,8 @@ class Game : public GameObject {
     GameObject* camera{};
     SDL_Window* gWindow;
     bool debugGUI = true;
-    vec3 SUN_POSITION {160, 1120, -3000};
-    GameObject* sun;
+    vec3 SUN_POSITION = vec3{160, 1120, -3000};
+    GameObject* light;
 
 	std::vector<RenderComponent*>* renderComponents;
 
