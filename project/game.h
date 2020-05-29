@@ -27,10 +27,10 @@ class Game : public GameObject {
 
     const unsigned int MAX_NUM_GAME_OBJECTS = 10000;
     const float OPT_FRAMERATE = 60.f;
-    const vec3 SPOTLIGHT_POS_OFFSET{ 0, 50.0f, -40.0 };
+    const vec3 SPOTLIGHT_POS_OFFSET{ 0, 250.0f, -240.0 };
 
 	const int ENV_ROUGHNESSES = 8;
-    GameObject* landingPad;
+    GameObject* landingPad = nullptr;
 
     struct HeightfieldData {
 		const std::string heightfield;
@@ -90,6 +90,8 @@ class Game : public GameObject {
     bool debugGUI = true;
     vec3 SUN_POSITION {160, 1120, -3000};
     GameObject* sun;
+
+	std::vector<RenderComponent*>* renderComponents;
 
 public:
 

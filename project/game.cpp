@@ -79,6 +79,7 @@ GameObject* Game::initLight(const vec3 _position) {
     sun = new GameObject(_position, vec3(0),
         vec3(1));
     const auto renderer = new ModelRenderComponent(sun, shaderProgram, sphereModel, mat4(1.f));
+	renderComponents->push_back(renderer);
     sun->addComponent(lightComponent);
     if (renderer!= nullptr) sun->addComponent(renderer);
     lightComponent->addGameObject(sun);
@@ -93,6 +94,7 @@ void Game::initLandingPad(const bool _showHitbox) {
 	landingPad = new GameObject(vec3(0), vec3{0, 3 * M_PI / 4, 0}, vec3(1));
 	const auto renderer = new ModelRenderComponent(landingPad, shaderProgram, landingPadModel, mat4(1.f));
 	landingPad->addComponent(renderer);
+	renderComponents->push_back(renderer);
 	landingPad->setEnabled(true);
 	gameObjects.insert(landingPad);
 	receivers.push_back(landingPad);
@@ -146,6 +148,7 @@ void Game::initShaders()
 void Game::initTerrain(const bool _showHitbox) {
 	auto terrain = new GameObject();
 	auto heightFieldComp = new HeightFieldComp(HEIGHTFIELD_PATH, TERRAIN_PHOTO_PATH, terrain);
+	renderComponents->push_back(heightFieldComp);
 	terrain->addComponent(heightFieldComp);
 	gameObjects.insert(terrain);
 	receivers.push_back(terrain);
@@ -188,16 +191,17 @@ void Game::initShip(const bool _showHitbox) {
     ship->addReceiver(this);
     gameObjects.insert(ship);
     receivers.push_back(ship);
+	renderComponents->push_back(ship->getComponent<ModelRenderComponent>());
 }
 
 void Game::initRenderer(InputHandler* _engine, const bool _showHitbox, const int _winWidth, const int _winHeight, 
     std::vector<GameObject*>* _lights, GameObject* _background) {
-	auto* renderComponents = new std::vector<RenderComponent*>();
-    for (auto go : gameObjects) {
+	//auto* renderComponents = new std::vector<RenderComponent*>();
+    /*for (auto go : gameObjects) {
         auto renderComponent = go->getComponent<RenderComponent>();
         if (renderComponent != nullptr)
             renderComponents->push_back(renderComponent);
-    }
+    }*/
     renderer = new Renderer(_engine, camera, renderComponents, _showHitbox, _winWidth, _winHeight, _lights, ship, 
         _background, landingPad);
     renderer->setRenderShadows(true);
@@ -209,17 +213,18 @@ Game::Game(InputHandler* _inputHandler, const bool _showHitbox, const int _winWi
     showHitBox = _showHitbox;
     enabled = true;
 	gWindow = _gWindow;
-	
+
+	renderComponents = new std::vector<RenderComponent*>();
     audioPlayer = new GameAudioPlayer();
     components.push_back(audioPlayer);
 
 	initShaders();
-    initShip(_showHitbox);
-
-	initLandingPad(_showHitbox);
-    initTerrain(_showHitbox);
-    initEnemies(_inputHandler, _showHitbox);
+    
 	const auto background = initBackground();
+    initTerrain(_showHitbox);
+	//initLandingPad(_showHitbox);
+	initShip(_showHitbox);
+    initEnemies(_inputHandler, _showHitbox);
 	
     initCamera(_winWidth, _winHeight);
     GameObject* spotLight = initLight(ship->getTransform().position + SPOTLIGHT_POS_OFFSET);

@@ -21,12 +21,12 @@ private:
 	bool useSpotLight = true;
 	float innerSpotlightAngle = 20.3f;
 	float outerSpotlightAngle = 24.0f;
-	float pointLightIntensityMultiplier = 10000.0f;
+	float pointLightIntensityMultiplier = 100000.0f;
 
 	float fieldOfView = glm::radians(45.f);
 	float aspectRatio = 1;
 	float nearPlane = 25;
-	float farPlane = 100;
+	float farPlane = 10000;
 
 	// SUN
 	/*

@@ -62,9 +62,10 @@ void Renderer::drawShadowMap(const mat4 _lightViewMatrix, const mat4 _lightProjM
 	shadowMap->draw();
 	drawScene(shadowMapProgram, _lightViewMatrix, _lightProjMatrix, _lightViewMatrix,
 		_lightProjMatrix);
-	//static labhelper::Model* landingpadModel = labhelper::loadModelFromOBJ("../scenes/landingpad.obj"); // TODO: REMOVE
-	labhelper::Material& screen = landingPad->getComponent<ModelRenderComponent>()->getModel()->m_materials[8];
-	screen.m_emission_texture.gl_id = shadowMap->getShadowMapFB().colorTextureTargets[0];
+	if (landingPad != nullptr) {
+		labhelper::Material& screen = landingPad->getComponent<ModelRenderComponent>()->getModel()->m_materials[8];
+		screen.m_emission_texture.gl_id = shadowMap->getShadowMapFB().colorTextureTargets[0];
+	}
 
 	if (shadowMap->usesPolygonOffset())
 	{

@@ -32,7 +32,10 @@ void CameraComponent::setCameraDirection(const glm::vec3& _cameraDirection) {
 void CameraComponent::init(GameObject* _camera) {
 	addGameObject(_camera);
 	if (tracingObject) traceObject();
-	else setCameraDirection(glm::normalize(glm::vec3(0.0f) - _camera->getTransform().position));
+	else {
+		setCameraDirection(glm::normalize(glm::vec3(0.0f) - _camera->getTransform().position));
+		go->getTransform().position = staticCameraPos;
+	}
 }
 
 void CameraComponent::setTracingObject(const bool _tracingObject) {
@@ -41,7 +44,7 @@ void CameraComponent::setTracingObject(const bool _tracingObject) {
 
 CameraComponent::CameraComponent(GameObject* _tracing, const int _winWidth, const int _winHeight, 
 	InputHandler* _inputHandler) {
-	tracingObject = true;
+	tracingObject = false;
 	tracing = _tracing;
 	windowWidth = _winWidth;
 	windowHeight = _winHeight;

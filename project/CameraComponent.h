@@ -35,7 +35,7 @@ private:
 public:
 	void setTracingObject(bool _tracingObject);
 private:
-	glm::vec3 staticCameraPos { 50, 50, 0 }; 
+	glm::vec3 staticCameraPos { 100, 100, 0 }; 
 	glm::vec3 tracingDistance{ 55, 25, 0 }; // { 50, 50, 0 }
 	glm::vec3 tracingDirectionOffs {0, 10, 0};
 	

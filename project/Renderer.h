@@ -38,7 +38,7 @@ class Renderer {
 	ShadowMap* shadowMap = nullptr;
 	GLuint shadowMapProgram = 0;
 	GameObject* background = nullptr;
-	GameObject* landingPad;
+	GameObject* landingPad = nullptr;
 
 public:
 	void setShadowMapProgram(GLuint _shadowMapProgram);
