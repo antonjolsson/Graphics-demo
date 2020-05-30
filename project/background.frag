@@ -9,7 +9,15 @@ in vec2 texCoord;
 uniform mat4 inv_PV;
 uniform vec3 camera_pos;
 uniform float environment_multiplier;
+uniform bool fog;
+uniform vec3 fogColor;
+uniform float fogDensity;
+
 #define PI 3.14159265359
+
+vec4 addFog(vec4 shading) {
+	return pow(fogDensity, 3) * vec4(fogColor, 1) + (1 - pow(fogDensity, 3)) * vec4(shading);
+}
 
 void main()
 {
@@ -28,5 +36,5 @@ void main()
 
 	//fragmentColor = environment_multiplier * texture(environmentMap, lookup); // Original code?
 
-	fragmentColor = texture(environmentMap, lookup);
+	fragmentColor = fog ? addFog(texture(environmentMap, lookup)) : texture(environmentMap, lookup);
 }

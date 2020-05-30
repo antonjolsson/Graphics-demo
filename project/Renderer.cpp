@@ -38,6 +38,7 @@ void setMatrixUniforms(const GLuint _currentShaderProgram, const mat4& _viewMatr
 	labhelper::setUniformSlow(_currentShaderProgram, "modelViewMatrix", _viewMatrix * _modelMatrix);
 	labhelper::setUniformSlow(_currentShaderProgram, "normalMatrix",
 		inverse(transpose(_viewMatrix * _modelMatrix)));
+	labhelper::setUniformSlow(_currentShaderProgram, "modelMatrix", _modelMatrix);
 }
 
 void Renderer::drawScene(const GLuint _shaderProgram, const mat4 _viewMatrix, const mat4 _projMatrix, const mat4 _lightViewMatrix,
@@ -97,6 +98,11 @@ void Renderer::setLightUniforms(const GLuint _currentShaderProgram, mat4 _viewMa
 
 	// camera
 	labhelper::setUniformSlow(_currentShaderProgram, "viewInverse", inverse(_viewMatrix));
+
+	labhelper::setUniformSlow(_currentShaderProgram, "fog", fog);
+	labhelper::setUniformSlow(_currentShaderProgram, "fogColor", fogColor);
+	labhelper::setUniformSlow(_currentShaderProgram, "fogDensity", fogDensity);
+	labhelper::setUniformSlow(_currentShaderProgram, "depthRange", depthRange);
 }
 
 void Renderer::drawFromCamera(const mat4 _projMatrix, const mat4 _viewMatrix, const mat4 _lightViewMatrix, 
@@ -106,7 +112,13 @@ void Renderer::drawFromCamera(const mat4 _projMatrix, const mat4 _viewMatrix, co
 	glClearColor(0.2f, 0.2f, 0.8f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	if (background != nullptr) background->getComponent<EnvironmentComponent>()->draw(_viewMatrix, _projMatrix, camera);
+	if (background != nullptr) {
+		const vec4 viewSpaceLightPosition = _viewMatrix * vec4((*lights)[0]->getTransform().position, 1.0f);
+		glUseProgram(background->getComponent<EnvironmentComponent>()->environmentProgram);
+		setLightUniforms(background->getComponent<EnvironmentComponent>()->environmentProgram, _viewMatrix, 
+			_lightViewMatrix, _lightProjMatrix, viewSpaceLightPosition);
+		background->getComponent<EnvironmentComponent>()->draw(_viewMatrix, _projMatrix, camera);
+	}
 	drawScene(0, _viewMatrix, _projMatrix, _lightViewMatrix,
 		_lightProjMatrix);
 }

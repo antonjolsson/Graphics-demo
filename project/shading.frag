@@ -51,6 +51,8 @@ in vec3 viewSpaceNormal;
 in vec3 viewSpacePosition;
 in vec4 shadowMapCoord;
 
+in vec3 worldPosition;
+
 ///////////////////////////////////////////////////////////////////////////////
 // Input uniform variables
 ///////////////////////////////////////////////////////////////////////////////
@@ -59,6 +61,12 @@ uniform vec3 viewSpaceLightPosition;
 uniform vec3 viewSpaceLightDir;
 uniform float spotOuterAngle;
 uniform float spotInnerAngle;
+
+uniform bool fog;
+uniform vec3 fogColor;
+uniform float fogDensity;
+
+uniform float depthRange;
 
 ///////////////////////////////////////////////////////////////////////////////
 // Output color
@@ -138,6 +146,16 @@ vec3 calculateIndirectIllumination(vec3 wo, vec3 n)
 	return material_reflectivity * microfacet_term + (1 - material_reflectivity) * diffuse_term;
 }
 
+vec3 getViewSpaceDepth() {
+	return vec3(clamp(1 - (1.f / depthRange) * (viewSpacePosition.z + depthRange), 0, 1));
+}
+
+vec4 addFog(vec3 shading, float depth) {
+	float invHeight = clamp(1.f / (0.4 * (worldPosition.y + 0.01)), 0, 1);
+	float heightAdjustedDepth = clamp((0.2f * depth + 1.8f * invHeight) / 2.f, 0, 1);
+	return fogDensity * heightAdjustedDepth * vec4(fogColor, 1) + (1 - fogDensity * heightAdjustedDepth) * vec4(shading, 1);
+}
+
 void main()
 {
 	float visibility = textureProj( shadowMapTex, shadowMapCoord );
@@ -171,9 +189,10 @@ void main()
 	}
 
 	vec3 shading = direct_illumination_term + indirect_illumination_term + emission_term;
-	//vec3 shading = vec3(visibility);
 
-	fragmentColor = vec4(shading, 1.f);
+	//fragmentColor = vec4(shading, 1.f);
+	//fragmentColor = 0.05 * vec4(worldPosition.y);
+	fragmentColor = fog ? addFog(shading, getViewSpaceDepth().z) : vec4(shading, 1.f);
 
 	return;
 }

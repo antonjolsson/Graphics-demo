@@ -1,17 +1,5 @@
 #pragma once
 #include <vector>
-
-
-
-#include "AudioComponent.h"
-#include "AudioComponent.h"
-#include "AudioComponent.h"
-#include "AudioComponent.h"
-#include "AudioComponent.h"
-#include "AudioComponent.h"
-#include "AudioComponent.h"
-#include "AudioComponent.h"
-#include "AudioComponent.h"
 #include "AudioComponent.h"
 #include "InputHandler.h"
 #include "ModelRenderComponent.h"
@@ -21,6 +9,15 @@
 #include "Ship.h"
 
 class Renderer {
+
+	
+public:
+	bool fog = false;
+	float depthRange = 200;
+	float fogDensity = 0.24;
+	
+private:
+	vec3 fogColor {1, 1, 1};
 	
 	const int AA_SAMPLES = 16;
 	float environmentMultiplier = 2.5f;

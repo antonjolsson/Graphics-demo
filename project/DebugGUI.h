@@ -3,7 +3,7 @@
 
 namespace debug_gui {
 
-	inline void showDebugGUI(SDL_Window* _gWindow, Ship* _ship, GameObject* _camera, GameObject* _sun) {
+	inline void showDebugGUI(SDL_Window* _gWindow, Ship* _ship, GameObject* _camera, GameObject* _sun, Renderer* _renderer) {
 		auto* cameraComp = _camera->getComponent<CameraComponent>();
 			// Inform imgui of new frame
 		ImGui_ImplSdlGL3_NewFrame(_gWindow);
@@ -58,6 +58,9 @@ namespace debug_gui {
 		ImGui::SliderFloat("Sun y-pos: ", &sunPos.y, -300.0f, 300.0f);
 		ImGui::SliderFloat("Sun z-pos: ", &sunPos.z, -300.0f, 300.0f);
 		_sun->setPosition(sunPos);
+		ImGui::Checkbox("Fog", &_renderer->fog);
+		ImGui::SliderFloat("Fog density: ", &_renderer->fogDensity, 0, 1);
+		ImGui::SliderFloat("Depth range: ", &_renderer->depthRange, 100, 400);
 		
 		// ----------------------------------------------------------
 

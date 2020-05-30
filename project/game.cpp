@@ -70,7 +70,7 @@ void Game::update(const float _dt, const int _windowWidth, const int _windowHeig
         gameObject->update(_dt);
     camera->update(_dt, _windowWidth, _windowHeight);
     renderer->draw();
-	if (debugGUI) debug_gui::showDebugGUI(gWindow, ship, camera, light);
+	if (debugGUI) debug_gui::showDebugGUI(gWindow, ship, camera, light, renderer);
     //gui->update(score);
 }
 
@@ -196,12 +196,6 @@ void Game::initShip(const bool _showHitbox) {
 
 void Game::initRenderer(InputHandler* _engine, const bool _showHitbox, const int _winWidth, const int _winHeight, 
     std::vector<GameObject*>* _lights, GameObject* _background) {
-	//auto* renderComponents = new std::vector<RenderComponent*>();
-    /*for (auto go : gameObjects) {
-        auto renderComponent = go->getComponent<RenderComponent>();
-        if (renderComponent != nullptr)
-            renderComponents->push_back(renderComponent);
-    }*/
     renderer = new Renderer(_engine, camera, renderComponents, _showHitbox, _winWidth, _winHeight, _lights, ship, 
         _background, landingPad);
     renderer->setRenderShadows(true);
