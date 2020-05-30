@@ -99,7 +99,7 @@ auto CameraComponent::update(const float _dt, const int _windowHeight, const int
 		traceObject();
 	}
 	moveCamera(_dt);
-}
+} 
 
 glm::mat4 CameraComponent::getProjMatrix() const {
 	return glm::perspective(glm::radians(fieldOfView), float(windowWidth) / float(windowHeight), nearPlane, farPlane);
@@ -107,4 +107,12 @@ glm::mat4 CameraComponent::getProjMatrix() const {
 
 glm::mat4 CameraComponent::getViewMatrix() const {
 	return lookAt(go->getTransform().position, go->getTransform().position + cameraDirection, go->Y_AXIS);
+}
+
+glm::mat4 CameraComponent::getViewMatrix(const int _i, const int _n, const float _aperture) const {
+	const glm::vec3 right = normalize(cross(cameraDirection, go->Y_AXIS));
+	const glm::vec3 up = -normalize(cross(cameraDirection, right));
+
+	const glm::vec3 bokeh = cosf(_i * 2.f * M_PI / _n) * right + sinf(_i * 2.f * M_PI / _n) * up;
+	return lookAt(go->getTransform().position + _aperture * bokeh, tracing->getPosition(), go->Y_AXIS);
 }

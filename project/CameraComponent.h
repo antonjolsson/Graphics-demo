@@ -19,6 +19,7 @@ public:
 	float getNearPlane() const;
 	float getFarPlane() const;
 	void setMouseMovable(bool _mouseMovable);
+	glm::mat4 getViewMatrix(int _i, int _n, float _aperture) const;
 private:
 	float nearPlane = 5.f;
 	float farPlane = 900.f;

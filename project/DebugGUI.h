@@ -61,6 +61,8 @@ namespace debug_gui {
 		ImGui::Checkbox("Fog", &_renderer->fog);
 		ImGui::SliderFloat("Fog density: ", &_renderer->fogDensity, 0, 1);
 		ImGui::SliderFloat("Depth range: ", &_renderer->depthRange, 100, 400);
+		ImGui::Checkbox("Depth-of-field", &_renderer->depthOfField);
+		ImGui::SliderFloat("Aperture size: ", &_renderer->aperture, 0.01, 1);
 		
 		// ----------------------------------------------------------
 

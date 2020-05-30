@@ -1,3 +1,4 @@
+// ReSharper disable CppInconsistentNaming
 #pragma once
 #include <vector>
 #include "AudioComponent.h"
@@ -15,14 +16,19 @@ public:
 	bool fog = false;
 	float depthRange = 200;
 	float fogDensity = 0.24;
+	mat4 prevVPMatrix {1.f};
 	
+	bool depthOfField = true;
+	float aperture = 0.3;
+	int diaphragmPolygons = 10;
+
 private:
 	vec3 fogColor {1, 1, 1};
 	
 	const int AA_SAMPLES = 16;
 	float environmentMultiplier = 2.5f;
 	bool renderShadows = true;
-	InputHandler* engine;
+	InputHandler* inputHandler;
 	GameObject* camera;
 	const std::vector<RenderComponent*>* renderComponents;
 	bool showHitbox = false;
@@ -37,18 +43,26 @@ private:
 	GameObject* background = nullptr;
 	GameObject* landingPad = nullptr;
 
+	std::vector<FboInfo> fboList;
+
+	GLuint postFXProgram{};
+
 public:
 	void setShadowMapProgram(GLuint _shadowMapProgram);
 
-	Renderer(InputHandler* _engine, GameObject* _camera, std::vector<RenderComponent*>* _renderComponents, bool _showHitbox,
+	void createFrameBuffers(const int _winWidth, const int _winHeight);
+	Renderer(InputHandler* _inputHandler, GameObject* _camera, std::vector<RenderComponent*>* _renderComponents, bool _showHitbox,
 	         int _winWidth, int _winHeight, std::vector<GameObject*>* _lights, Ship* _ship, GameObject* _background, GameObject* _landingPad);
 	void setRenderShadows(bool _renderShadows);
-	void drawScene(GLuint _shaderProgram, mat4 _viewMatrix, mat4 _projMatrix, mat4 _lightViewMatrix, mat4 _lightProjMatrix) const;
-	void drawShadowMap(mat4 _lightViewMatrix, mat4 _lightProjMatrix) const;
-	void setLightUniforms(const GLuint _currentShaderProgram, mat4 _viewMatrix, mat4 _lightViewMatrix, mat4 _lightProjMatrix, 
-		const vec4 _viewSpaceLightPosition) const;
-	void drawFromCamera(mat4 _projMatrix, mat4 _viewMatrix, mat4 _lightViewMatrix, mat4 _lightProjMatrix) const;
+	void setMatrixUniforms(GLuint _currentShaderProgram, const mat4& _viewMatrix, const mat4& _projectionMatrix, mat4 _modelMatrix);
+	void drawScene(GLuint _shaderProgram, mat4 _viewMatrix, mat4 _projMatrix, mat4 _lightViewMatrix, mat4 _lightProjMatrix);
+	void drawShadowMap(mat4 _lightViewMatrix, mat4 _lightProjMatrix);
+	void setLightUniforms(GLuint _currentShaderProgram, mat4 _viewMatrix, mat4 _lightViewMatrix, mat4 _lightProjMatrix,
+	                      vec4 _viewSpaceLightPosition) const;
+	void setFrameBuffer(GLuint _frameBufferId) const;
+	void drawFromCamera(mat4 _projMatrix, mat4 _viewMatrix, mat4 _lightViewMatrix, mat4 _lightProjMatrix);
+	void draw();
 	void drawBackground(const mat4& _viewMatrix, const mat4& _projectionMatrix);
-	void draw() const;
+	void drawWithMotionBlur();
 
 };

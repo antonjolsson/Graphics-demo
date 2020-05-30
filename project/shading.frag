@@ -68,10 +68,17 @@ uniform float fogDensity;
 
 uniform float depthRange;
 
+uniform mat4 prevVPMatrix;
+
 ///////////////////////////////////////////////////////////////////////////////
 // Output color
 ///////////////////////////////////////////////////////////////////////////////
 layout(location = 0) out vec4 fragmentColor;
+
+///////////////////////////////////////////////////////////////////////////////
+// Motion blur
+///////////////////////////////////////////////////////////////////////////////
+vec3 velocity;
 
 float getFresnel(vec3 wh, vec3 wi, vec3 wo) {
 	return material_fresnel + (1 - material_fresnel) * pow(1 - dot(wh, wi), 5);
@@ -156,8 +163,17 @@ vec4 addFog(vec3 shading, float depth) {
 	return fogDensity * heightAdjustedDepth * vec4(fogColor, 1) + (1 - fogDensity * heightAdjustedDepth) * vec4(shading, 1);
 }
 
+// Doesn't work... yet!
+void computePixelVelocity() {
+	vec3 previousScreenPos = (prevVPMatrix * vec4(worldPosition, 1)).xyz;
+	velocity = gl_FragCoord.xyz - previousScreenPos;
+
+}
+
 void main()
 {
+	//computePixelVelocity();
+
 	float visibility = textureProj( shadowMapTex, shadowMapCoord );
 	float attenuation = 1.0;
 
@@ -190,8 +206,7 @@ void main()
 
 	vec3 shading = direct_illumination_term + indirect_illumination_term + emission_term;
 
-	//fragmentColor = vec4(shading, 1.f);
-	//fragmentColor = 0.05 * vec4(worldPosition.y);
+	//fragmentColor = vec4(velocity, 1);
 	fragmentColor = fog ? addFog(shading, getViewSpaceDepth().z) : vec4(shading, 1.f);
 
 	return;

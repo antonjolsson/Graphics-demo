@@ -10,10 +10,18 @@ void Renderer::setShadowMapProgram(const GLuint _shadowMapProgram) {
 	shadowMapProgram = _shadowMapProgram;
 }
 
-Renderer::Renderer(InputHandler* _engine, GameObject* _camera, std::vector<RenderComponent*>* _renderComponents, 
+void Renderer::createFrameBuffers(const int _winWidth, const int _winHeight) {
+	const int numFbos = 10;
+	for (int i = 0; i < numFbos; i++) {
+		fboList.emplace_back(FboInfo(1));
+		fboList[i].resize(_winWidth, _winHeight);
+	}
+}
+
+Renderer::Renderer(InputHandler* _inputHandler, GameObject* _camera, std::vector<RenderComponent*>* _renderComponents, 
                    const bool _showHitbox, const int _winWidth, const int _winHeight, std::vector<GameObject*>* _lights,
                    Ship* _ship, GameObject* _background, GameObject* _landingPad) :
-	engine(_engine), camera(_camera), renderComponents(_renderComponents), showHitbox(_showHitbox), winWidth(_winWidth),
+	inputHandler(_inputHandler), camera(_camera), renderComponents(_renderComponents), showHitbox(_showHitbox), winWidth(_winWidth),
 	winHeight(_winHeight), lights(_lights) {
 	ship = _ship;
 	landingPad = _landingPad;
@@ -22,6 +30,12 @@ Renderer::Renderer(InputHandler* _engine, GameObject* _camera, std::vector<Rende
 	glEnable(GL_DEPTH_TEST); // enable Z-buffering
 	glEnable(GL_CULL_FACE);  // enables backface culling
 	glActiveTexture(GL_TEXTURE0);
+
+	if (depthOfField) {
+		createFrameBuffers(winWidth, winHeight);
+		postFXProgram = labhelper::loadShaderProgram("../project/postFX.vert", 
+			"../project/postFX.frag");
+	}
 }
 
 void Renderer::setRenderShadows(const bool _renderShadows) {
@@ -31,10 +45,12 @@ void Renderer::setRenderShadows(const bool _renderShadows) {
 	}
 }
 
-void setMatrixUniforms(const GLuint _currentShaderProgram, const mat4& _viewMatrix, const mat4& _projectionMatrix, 
+void Renderer::setMatrixUniforms(const GLuint _currentShaderProgram, const mat4& _viewMatrix, const mat4& _projectionMatrix, 
                        const mat4 _modelMatrix) {
+	labhelper::setUniformSlow(_currentShaderProgram, "prevVPMatrix", prevVPMatrix);
 	labhelper::setUniformSlow(_currentShaderProgram, "modelViewProjectionMatrix",
 		_projectionMatrix * _viewMatrix * _modelMatrix);
+	prevVPMatrix = _projectionMatrix * _viewMatrix;
 	labhelper::setUniformSlow(_currentShaderProgram, "modelViewMatrix", _viewMatrix * _modelMatrix);
 	labhelper::setUniformSlow(_currentShaderProgram, "normalMatrix",
 		inverse(transpose(_viewMatrix * _modelMatrix)));
@@ -42,7 +58,7 @@ void setMatrixUniforms(const GLuint _currentShaderProgram, const mat4& _viewMatr
 }
 
 void Renderer::drawScene(const GLuint _shaderProgram, const mat4 _viewMatrix, const mat4 _projMatrix, const mat4 _lightViewMatrix,
-                         const mat4 _lightProjMatrix) const {
+                         const mat4 _lightProjMatrix){
 	const vec4 viewSpaceLightPosition = _viewMatrix * vec4((*lights)[0]->getTransform().position, 1.0f);
 	for (auto renderComponent : *renderComponents) {
 		const GLuint compShaderProgram = _shaderProgram == 0 ? renderComponent->getShaderProgram() : _shaderProgram;
@@ -59,7 +75,7 @@ void Renderer::drawScene(const GLuint _shaderProgram, const mat4 _viewMatrix, co
 	}
 }
 
-void Renderer::drawShadowMap(const mat4 _lightViewMatrix, const mat4 _lightProjMatrix) const {
+void Renderer::drawShadowMap(const mat4 _lightViewMatrix, const mat4 _lightProjMatrix) {
 	shadowMap->draw();
 	drawScene(shadowMapProgram, _lightViewMatrix, _lightProjMatrix, _lightViewMatrix,
 		_lightProjMatrix);
@@ -105,13 +121,18 @@ void Renderer::setLightUniforms(const GLuint _currentShaderProgram, mat4 _viewMa
 	labhelper::setUniformSlow(_currentShaderProgram, "depthRange", depthRange);
 }
 
-void Renderer::drawFromCamera(const mat4 _projMatrix, const mat4 _viewMatrix, const mat4 _lightViewMatrix, 
-	const mat4 _lightProjMatrix) const {
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+void Renderer::setFrameBuffer(const GLuint _frameBufferId) const {
+	glBindFramebuffer(GL_FRAMEBUFFER, _frameBufferId);
 	glViewport(0, 0, winWidth, winHeight);
 	glClearColor(0.2f, 0.2f, 0.8f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+}
 
+void Renderer::drawFromCamera(const mat4 _projMatrix, const mat4 _viewMatrix, const mat4 _lightViewMatrix, 
+                              const mat4 _lightProjMatrix){
+	if (!depthOfField)
+		setFrameBuffer(0);
+		
 	if (background != nullptr) {
 		const vec4 viewSpaceLightPosition = _viewMatrix * vec4((*lights)[0]->getTransform().position, 1.0f);
 		glUseProgram(background->getComponent<EnvironmentComponent>()->environmentProgram);
@@ -123,7 +144,12 @@ void Renderer::drawFromCamera(const mat4 _projMatrix, const mat4 _viewMatrix, co
 		_lightProjMatrix);
 }
 
-void Renderer::draw() const {
+void Renderer::draw(){
+	if (depthOfField) {
+		drawWithMotionBlur();
+		return;
+	}
+	
 	// TODO: abstract common fields and methods for matrices!
 	
 	const mat4 projMatrix = cameraComponent->getProjMatrix();
@@ -137,4 +163,40 @@ void Renderer::draw() const {
 		drawShadowMap(lightViewMatrix, lightProjMatrix);
 
 	drawFromCamera(projMatrix, viewMatrix, lightViewMatrix, lightProjMatrix);
+}
+
+void Renderer::drawWithMotionBlur(){
+	// TODO: abstract common fields and methods for matrices!
+	
+	const mat4 projMatrix = cameraComponent->getProjMatrix();
+
+	for(int i = 0; i < diaphragmPolygons; i++) {
+		setFrameBuffer(fboList[i].framebufferId);
+		
+		const mat4 viewMatrix = cameraComponent->getViewMatrix(i, diaphragmPolygons, aperture);
+		const mat4 lightProjMatrix = (*lights)[0]->getComponent<LightComponent>()->getProjMatrix();
+		const mat4 lightViewMatrix = (*lights)[0]->getComponent<LightComponent>()->getViewMatrix();
+		
+		if (background != nullptr) background->getComponent<EnvironmentComponent>()->bindEnvMaps();
+
+		if (renderShadows) {
+			drawShadowMap(lightViewMatrix, lightProjMatrix);
+		}
+
+		setFrameBuffer(fboList[i].framebufferId);
+
+		drawFromCamera(projMatrix, viewMatrix, lightViewMatrix, lightProjMatrix);
+	}
+	
+	setFrameBuffer(0);
+	glUseProgram(postFXProgram);
+	for (int i = 0; i < diaphragmPolygons; i++) {
+		glActiveTexture(GL_TEXTURE0 + i);
+		glBindTexture(GL_TEXTURE_2D, fboList[i].colorTextureTargets[0]);
+	}
+	
+	labhelper::drawFullScreenQuad();
+
+	glUseProgram(0);
+	CHECK_GL_ERROR();
 }
