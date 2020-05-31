@@ -14,13 +14,13 @@ void Renderer::setShadowMapProgram(const GLuint _shadowMapProgram) {
 void Renderer::createFrameBuffers(const int _winWidth, const int _winHeight) {
 	const int numFbos = 10;
 	for (int i = 0; i < numFbos; i++) {
-		fboList.emplace_back(FboInfo(1));
+		fboList.emplace_back(Fbo(1));
 		fboList[i].resize(_winWidth, _winHeight);
 	}
 	depthNormalBuffer.resize(_winWidth, _winHeight);
 }
 
-void Renderer::genRandRotText() {
+void Renderer::genRandRotTex() {
 	glGenTextures(1, &randRotTex);
 	glBindTexture(GL_TEXTURE_2D,randRotTex);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
@@ -49,7 +49,7 @@ Renderer::Renderer(InputHandler* _inputHandler, GameObject* _camera, std::vector
 	textureProgram = labhelper::loadShaderProgram("../project/texture.vert", 
 		"../project/texture.frag");
 	
-	genRandRotText();
+	genRandRotTex();
 }
 
 void Renderer::setRenderShadows(const bool _renderShadows) {
@@ -75,7 +75,6 @@ void Renderer::setMatrixUniforms(const GLuint _currentShaderProgram, const mat4&
 void Renderer::drawScene(const RenderPass _renderPass, const mat4 _viewMatrix, const mat4 _projMatrix, const mat4 _lightViewMatrix,
                          const mat4 _lightProjMatrix){
 	const vec4 viewSpaceLightPosition = _viewMatrix * vec4((*lights)[0]->getTransform().position, 1.0f);
-	//setFrameBuffer(depthNormalBuffer.framebufferId);
 	for (auto renderComponent : *renderComponents) {
 		GLuint compShaderProgram;
 		switch (_renderPass) {
@@ -233,7 +232,7 @@ void Renderer::draw(){
 		               lightProjMatrix, renderPass);
 	}
 
-	drawTextureToScreen(depthNormalBuffer.colorTextureTargets[0]);
+	drawTextureToScreen(depthNormalBuffer.depthBuffer);
 }
 
 void Renderer::drawWithDOF(){

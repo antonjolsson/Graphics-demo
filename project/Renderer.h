@@ -44,7 +44,7 @@ private:
 	GLuint ssaoInputProgram;
 	GLuint randRotTex{};
 	float randomRotations[64 * 64]{};
-	FboInfo depthNormalBuffer = FboInfo(1);
+	Fbo depthNormalBuffer = Fbo(1);
 	
 	vec3 fogColor {1, 1, 1};
 	
@@ -66,7 +66,7 @@ private:
 	GameObject* background = nullptr;
 	GameObject* landingPad = nullptr;
 
-	std::vector<FboInfo> fboList;
+	std::vector<Fbo> fboList;
 
 	GLuint dofProgram{};
 	GLuint textureProgram;
@@ -75,7 +75,7 @@ public:
 	void setShadowMapProgram(GLuint _shadowMapProgram);
 
 	void createFrameBuffers(const int _winWidth, const int _winHeight);
-	void genRandRotText();
+	void genRandRotTex();
 	Renderer(InputHandler* _inputHandler, GameObject* _camera, std::vector<RenderComponent*>* _renderComponents, bool _showHitbox,
 	         int _winWidth, int _winHeight, std::vector<GameObject*>* _lights, Ship* _ship, GameObject* _background, GameObject* _landingPad);
 	void setRenderShadows(bool _renderShadows);

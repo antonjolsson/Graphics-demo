@@ -3,7 +3,7 @@
 #include <GL/glew.h>
 #include <vector>
 
-class FboInfo {
+class Fbo {
 public:
 	GLuint framebufferId;
 	std::vector<GLuint> colorTextureTargets; 
@@ -12,8 +12,8 @@ public:
 	int height;
 	bool isComplete;
 
-	FboInfo(int numberOfColorBuffers = 1);
+	explicit Fbo(int _numberOfColorBuffers = 1);
 		
-	void resize(int w, int h);
+	void resize(int _w, int _h);
 	bool checkFramebufferComplete(void);
 };

@@ -2,16 +2,16 @@
 #include <cstdint>
 #include <labhelper.h>
 
-FboInfo::FboInfo(int numberOfColorBuffers)
+Fbo::Fbo(int _numberOfColorBuffers)
     : isComplete(false), framebufferId(UINT32_MAX), depthBuffer(UINT32_MAX), width(0), height(0)
 {
-	colorTextureTargets.resize(numberOfColorBuffers, UINT32_MAX);
+	colorTextureTargets.resize(_numberOfColorBuffers, UINT32_MAX);
 };
 
-void FboInfo::resize(int w, int h)
+void Fbo::resize(int _w, int _h)
 {
-	width = w;
-	height = h;
+	width = _w;
+	height = _h;
 
 	///////////////////////////////////////////////////////////////////////
 	// if no texture indices yet, allocate
@@ -83,7 +83,7 @@ void FboInfo::resize(int w, int h)
 	}
 }
 
-bool FboInfo::checkFramebufferComplete(void)
+bool Fbo::checkFramebufferComplete(void)
 {
 	// Check that our FBO is correctly set up, this can fail if we have
 	// incompatible formats in a buffer, or for example if we specify an

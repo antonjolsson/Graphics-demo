@@ -13,9 +13,9 @@ class ShadowMap {
 		BORDER = 2
 	};
 
-	FboInfo shadowMapFB;
+	Fbo shadowMapFB;
 public:
-	FboInfo getShadowMapFB() const;
+	Fbo getShadowMapFB() const;
 private:
 	int shadowMapResolution = 20000; // 1024
 	int shadowMapClampMode = ClampMode::BORDER;

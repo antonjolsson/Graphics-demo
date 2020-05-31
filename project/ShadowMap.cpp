@@ -2,7 +2,7 @@
 
 #include <glm/detail/type_vec4.hpp>
 
-FboInfo ShadowMap::getShadowMapFB() const {
+Fbo ShadowMap::getShadowMapFB() const {
 	return shadowMapFB;
 }
 
