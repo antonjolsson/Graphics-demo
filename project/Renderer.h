@@ -1,6 +1,16 @@
 // ReSharper disable CppInconsistentNaming
 #pragma once
 #include <vector>
+
+
+
+#include "AudioComponent.h"
+#include "AudioComponent.h"
+#include "AudioComponent.h"
+#include "AudioComponent.h"
+#include "AudioComponent.h"
+#include "AudioComponent.h"
+#include "AudioComponent.h"
 #include "AudioComponent.h"
 #include "InputHandler.h"
 #include "ModelRenderComponent.h"
@@ -22,7 +32,22 @@ public:
 	float aperture = 0.3;
 	int diaphragmPolygons = 10;
 
+	bool ssao = false;
+	
 private:
+
+	enum RenderPass {STANDARD, SHADOW, VIEW_NORMAL};
+	std::map<int, RenderPass> renderPassMap {{1, VIEW_NORMAL}, {0, STANDARD}};
+	
+	int ssaoSamples = 16;
+	float ssaoRadius = 1;
+	GLuint ssaoInputProgram;
+	GLuint randRotTex{};
+	float randomRotations[64 * 64]{};
+	FboInfo normalBuffer = FboInfo(1);
+	
+	GLuint hfViewNormalProgram;
+	
 	vec3 fogColor {1, 1, 1};
 	
 	const int AA_SAMPLES = 16;
@@ -51,16 +76,18 @@ public:
 	void setShadowMapProgram(GLuint _shadowMapProgram);
 
 	void createFrameBuffers(const int _winWidth, const int _winHeight);
+	void genRandRotText();
 	Renderer(InputHandler* _inputHandler, GameObject* _camera, std::vector<RenderComponent*>* _renderComponents, bool _showHitbox,
 	         int _winWidth, int _winHeight, std::vector<GameObject*>* _lights, Ship* _ship, GameObject* _background, GameObject* _landingPad);
 	void setRenderShadows(bool _renderShadows);
 	void setMatrixUniforms(GLuint _currentShaderProgram, const mat4& _viewMatrix, const mat4& _projectionMatrix, mat4 _modelMatrix);
-	void drawScene(GLuint _shaderProgram, mat4 _viewMatrix, mat4 _projMatrix, mat4 _lightViewMatrix, mat4 _lightProjMatrix);
+	void drawScene(const ::Renderer::RenderPass _renderPass, mat4 _viewMatrix, mat4 _projMatrix, mat4 _lightViewMatrix, mat4 _lightProjMatrix);
 	void drawShadowMap(mat4 _lightViewMatrix, mat4 _lightProjMatrix);
 	void setLightUniforms(GLuint _currentShaderProgram, mat4 _viewMatrix, mat4 _lightViewMatrix, mat4 _lightProjMatrix,
 	                      vec4 _viewSpaceLightPosition) const;
 	void setFrameBuffer(GLuint _frameBufferId) const;
-	void drawFromCamera(mat4 _projMatrix, mat4 _viewMatrix, mat4 _lightViewMatrix, mat4 _lightProjMatrix);
+	void drawFromCamera(mat4 _projMatrix, mat4 _viewMatrix, mat4 _lightViewMatrix, mat4 _lightProjMatrix, RenderPass _renderPass);
+	void prepareSSAO();
 	void draw();
 	void drawBackground(const mat4& _viewMatrix, const mat4& _projectionMatrix);
 	void drawWithDOF();

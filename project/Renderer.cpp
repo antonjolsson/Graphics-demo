@@ -1,6 +1,25 @@
+// ReSharper disable IdentifierTypo
 #include "Renderer.h"
 #include <glm/gtx/transform.hpp>
 
+
+
+#include "AudioComponent.h"
+#include "AudioComponent.h"
+#include "AudioComponent.h"
+#include "AudioComponent.h"
+#include "AudioComponent.h"
+#include "AudioComponent.h"
+#include "AudioComponent.h"
+#include "AudioComponent.h"
+#include "AudioComponent.h"
+#include "AudioComponent.h"
+#include "AudioComponent.h"
+#include "AudioComponent.h"
+#include "AudioComponent.h"
+#include "AudioComponent.h"
+#include "AudioComponent.h"
+#include "AudioComponent.h"
 #include "EnvironmentComponent.h"
 #include "LightComponent.h"
 #include "RenderComponent.h"
@@ -16,6 +35,16 @@ void Renderer::createFrameBuffers(const int _winWidth, const int _winHeight) {
 		fboList.emplace_back(FboInfo(1));
 		fboList[i].resize(_winWidth, _winHeight);
 	}
+	normalBuffer.resize(_winWidth, _winHeight);
+}
+
+void Renderer::genRandRotText() {
+	glGenTextures(1, &randRotTex);
+	glBindTexture(GL_TEXTURE_2D,randRotTex);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 }
 
 Renderer::Renderer(InputHandler* _inputHandler, GameObject* _camera, std::vector<RenderComponent*>* _renderComponents, 
@@ -33,6 +62,11 @@ Renderer::Renderer(InputHandler* _inputHandler, GameObject* _camera, std::vector
 
 	createFrameBuffers(winWidth, winHeight);
 	dofProgram = labhelper::loadShaderProgram("../project/postFX.vert", "../project/dof.frag");
+	
+	ssaoInputProgram = labhelper::loadShaderProgram("../project/ssaoInput.vert", 
+		"../project/ssaoInput.frag");
+	
+	genRandRotText();
 }
 
 void Renderer::setRenderShadows(const bool _renderShadows) {
@@ -54,11 +88,21 @@ void Renderer::setMatrixUniforms(const GLuint _currentShaderProgram, const mat4&
 	labhelper::setUniformSlow(_currentShaderProgram, "modelMatrix", _modelMatrix);
 }
 
-void Renderer::drawScene(const GLuint _shaderProgram, const mat4 _viewMatrix, const mat4 _projMatrix, const mat4 _lightViewMatrix,
+void Renderer::drawScene(const RenderPass _renderPass, const mat4 _viewMatrix, const mat4 _projMatrix, const mat4 _lightViewMatrix,
                          const mat4 _lightProjMatrix){
 	const vec4 viewSpaceLightPosition = _viewMatrix * vec4((*lights)[0]->getTransform().position, 1.0f);
 	for (auto renderComponent : *renderComponents) {
-		const GLuint compShaderProgram = _shaderProgram == 0 ? renderComponent->getShaderProgram() : _shaderProgram;
+		GLuint compShaderProgram;
+		switch (_renderPass) {
+		case SHADOW:
+			compShaderProgram = shadowMapProgram;
+			break;
+		case VIEW_NORMAL:
+			compShaderProgram = renderComponent->getViewNormalProgram();
+			break;
+		case STANDARD: default: 
+			compShaderProgram = renderComponent->getDefaultProgram();
+		}
 		glUseProgram(compShaderProgram);
 		setLightUniforms(compShaderProgram, _viewMatrix, _lightViewMatrix, _lightProjMatrix,
 			viewSpaceLightPosition);
@@ -74,8 +118,8 @@ void Renderer::drawScene(const GLuint _shaderProgram, const mat4 _viewMatrix, co
 
 void Renderer::drawShadowMap(const mat4 _lightViewMatrix, const mat4 _lightProjMatrix) {
 	shadowMap->draw();
-	drawScene(shadowMapProgram, _lightViewMatrix, _lightProjMatrix, _lightViewMatrix,
-		_lightProjMatrix);
+	drawScene(SHADOW, _lightViewMatrix, _lightProjMatrix, _lightViewMatrix,
+	          _lightProjMatrix);
 	if (landingPad != nullptr) {
 		labhelper::Material& screen = landingPad->getComponent<ModelRenderComponent>()->getModel()->m_materials[8];
 		screen.m_emission_texture.gl_id = shadowMap->getShadowMapFB().colorTextureTargets[0];
@@ -125,20 +169,39 @@ void Renderer::setFrameBuffer(const GLuint _frameBufferId) const {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
-void Renderer::drawFromCamera(const mat4 _projMatrix, const mat4 _viewMatrix, const mat4 _lightViewMatrix, 
-                              const mat4 _lightProjMatrix){
+void Renderer::drawFromCamera(const mat4 _projMatrix, const mat4 _viewMatrix, const mat4 _lightViewMatrix,
+                              const mat4 _lightProjMatrix, const RenderPass _renderPass){
 	if (!depthOfField)
 		setFrameBuffer(0);
 		
-	if (background != nullptr) {
+	if (background != nullptr && _renderPass == STANDARD) {
 		const vec4 viewSpaceLightPosition = _viewMatrix * vec4((*lights)[0]->getTransform().position, 1.0f);
 		glUseProgram(background->getComponent<EnvironmentComponent>()->environmentProgram);
 		setLightUniforms(background->getComponent<EnvironmentComponent>()->environmentProgram, _viewMatrix, 
 			_lightViewMatrix, _lightProjMatrix, viewSpaceLightPosition);
 		background->getComponent<EnvironmentComponent>()->draw(_viewMatrix, _projMatrix, camera);
 	}
-	drawScene(0, _viewMatrix, _projMatrix, _lightViewMatrix,
-		_lightProjMatrix);
+	drawScene(_renderPass, _viewMatrix, _projMatrix, _lightViewMatrix,
+	          _lightProjMatrix);
+}
+
+void Renderer::prepareSSAO() {
+	std::vector<vec3> sampleHemisphere;
+	for (int i = 0; i < ssaoSamples; ++i) {
+		vec3 sample = labhelper::cosineSampleHemisphere();
+		sample *= labhelper::randf();
+		sampleHemisphere.push_back(sample);
+	}
+
+	for (float& randomRotation : randomRotations) {
+		randomRotation = labhelper::randf();
+	}
+
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, randRotTex);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_R16F, 64, 64, 0, GL_RED, GL_FLOAT, 
+		randomRotations);
+
 }
 
 void Renderer::draw(){
@@ -146,24 +209,33 @@ void Renderer::draw(){
 		drawWithDOF();
 		return;
 	}
-	
-	// TODO: abstract common fields and methods for matrices!
-	
-	const mat4 projMatrix = cameraComponent->getProjMatrix();
-	const mat4 viewMatrix = cameraComponent->getViewMatrix();
-	const mat4 lightProjMatrix = (*lights)[0]->getComponent<LightComponent>()->getProjMatrix();
-	const mat4 lightViewMatrix = (*lights)[0]->getComponent<LightComponent>()->getViewMatrix();
 
-	if (background != nullptr) background->getComponent<EnvironmentComponent>()->bindEnvMaps();
+	int iteration = 0;
+	if (ssao) {
+		prepareSSAO();
+		iteration = 1;
+	}
 
-	if (renderShadows) 
-		drawShadowMap(lightViewMatrix, lightProjMatrix);
+	for (; iteration >= 0; --iteration) {
+		const RenderPass renderPass = renderPassMap[iteration];
+		
+		const mat4 projMatrix = cameraComponent->getProjMatrix();
+		const mat4 viewMatrix = cameraComponent->getViewMatrix();
+		const mat4 lightProjMatrix = (*lights)[0]->getComponent<LightComponent>()->getProjMatrix();
+		const mat4 lightViewMatrix = (*lights)[0]->getComponent<LightComponent>()->getViewMatrix();
 
-	drawFromCamera(projMatrix, viewMatrix, lightViewMatrix, lightProjMatrix);
+		if (background != nullptr && renderPass == STANDARD) 
+			background->getComponent<EnvironmentComponent>()->bindEnvMaps();
+
+		if (renderShadows && renderPass == STANDARD) 
+			drawShadowMap(lightViewMatrix, lightProjMatrix);
+
+		drawFromCamera(projMatrix, viewMatrix, lightViewMatrix,
+		               lightProjMatrix, renderPass);
+	}
 }
 
 void Renderer::drawWithDOF(){
-	// TODO: abstract common fields and methods for matrices!
 	
 	const mat4 projMatrix = cameraComponent->getProjMatrix();
 
@@ -182,7 +254,8 @@ void Renderer::drawWithDOF(){
 
 		setFrameBuffer(fboList[i].framebufferId);
 
-		drawFromCamera(projMatrix, viewMatrix, lightViewMatrix, lightProjMatrix);
+		drawFromCamera(projMatrix, viewMatrix, lightViewMatrix, lightProjMatrix,
+			STANDARD);
 	}
 	
 	setFrameBuffer(0);

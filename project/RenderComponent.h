@@ -10,11 +10,13 @@ protected:
 	
 	glm::mat4 modelMatrix{0};
 	GLuint shaderProgram = 0;
+	GLuint viewNormalProgram;
 	
 public:
 	
-	GLuint getShaderProgram() const;
+	GLuint getDefaultProgram() const;
 	virtual void render(const GLuint _compShaderProgram){}
-	glm::mat4 getModelMatrix() const;;
-
+	glm::mat4 getModelMatrix() const;
+	GLuint getViewNormalProgram() const;
+	RenderComponent();
 };

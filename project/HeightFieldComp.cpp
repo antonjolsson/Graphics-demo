@@ -30,6 +30,8 @@ HeightFieldComp::HeightFieldComp(const std::string& _heightfieldPath, const std:
 	loadHeightField(_heightfieldPath);
 	loadDiffuseTexture(_terrainPhotoPath);
 	shaderProgram = HEIGHTFIELD_PROGRAM;
+	viewNormalProgram = labhelper::loadShaderProgram("../project/heightfield.vert",
+		"../project/viewNormal.frag");
 }
 
 void HeightFieldComp::loadHeightField(const std::string& _heightFieldPath)
