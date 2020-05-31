@@ -8,5 +8,5 @@ layout(location = 0) out vec4 fragmentColor;
 
 void main()
 {
-	fragmentColor = vec4(viewSpaceNormal, 1);
+	fragmentColor = vec4(normalize(viewSpaceNormal), 1);
 }

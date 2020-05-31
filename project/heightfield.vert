@@ -46,10 +46,9 @@ void main()
 	vec3 adjustedPosition = getHeightAdjustedPos(vec2(0, 0));
 	gl_Position = modelViewProjectionMatrix * vec4(adjustedPosition, 1.0);
 	texCoord = texCoordIn;
-	//shadowMapCoord = lightMatrix * vec4(viewSpacePosition, 1.f);
 	vec3 normalIn = getEstnormal();
 	viewSpaceNormal = (normalMatrix * vec4(normalIn, 0.0)).xyz;
-	//viewSpacePosition = (modelViewMatrix * vec4(position, 1.0)).xyz;
+
 	viewSpacePosition = (modelViewMatrix * vec4(adjustedPosition, 1.0)).xyz;
 	shadowMapCoord = lightMatrix * vec4(viewSpacePosition, 1.f);
 

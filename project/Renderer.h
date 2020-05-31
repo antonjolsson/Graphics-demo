@@ -32,8 +32,8 @@ public:
 	float aperture = 0.3;
 	int diaphragmPolygons = 10;
 
-	bool ssao = false;
-	
+	bool ssao = true;
+
 private:
 
 	enum RenderPass {STANDARD, SHADOW, VIEW_NORMAL};
@@ -44,9 +44,7 @@ private:
 	GLuint ssaoInputProgram;
 	GLuint randRotTex{};
 	float randomRotations[64 * 64]{};
-	FboInfo normalBuffer = FboInfo(1);
-	
-	GLuint hfViewNormalProgram;
+	FboInfo depthNormalBuffer = FboInfo(1);
 	
 	vec3 fogColor {1, 1, 1};
 	
@@ -71,6 +69,7 @@ private:
 	std::vector<FboInfo> fboList;
 
 	GLuint dofProgram{};
+	GLuint textureProgram;
 
 public:
 	void setShadowMapProgram(GLuint _shadowMapProgram);
@@ -88,6 +87,7 @@ public:
 	void setFrameBuffer(GLuint _frameBufferId) const;
 	void drawFromCamera(mat4 _projMatrix, mat4 _viewMatrix, mat4 _lightViewMatrix, mat4 _lightProjMatrix, RenderPass _renderPass);
 	void prepareSSAO();
+	void drawTextureToScreen(unsigned _texture) const;
 	void draw();
 	void drawBackground(const mat4& _viewMatrix, const mat4& _projectionMatrix);
 	void drawWithDOF();

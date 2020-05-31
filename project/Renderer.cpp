@@ -2,24 +2,6 @@
 #include "Renderer.h"
 #include <glm/gtx/transform.hpp>
 
-
-
-#include "AudioComponent.h"
-#include "AudioComponent.h"
-#include "AudioComponent.h"
-#include "AudioComponent.h"
-#include "AudioComponent.h"
-#include "AudioComponent.h"
-#include "AudioComponent.h"
-#include "AudioComponent.h"
-#include "AudioComponent.h"
-#include "AudioComponent.h"
-#include "AudioComponent.h"
-#include "AudioComponent.h"
-#include "AudioComponent.h"
-#include "AudioComponent.h"
-#include "AudioComponent.h"
-#include "AudioComponent.h"
 #include "EnvironmentComponent.h"
 #include "LightComponent.h"
 #include "RenderComponent.h"
@@ -35,7 +17,7 @@ void Renderer::createFrameBuffers(const int _winWidth, const int _winHeight) {
 		fboList.emplace_back(FboInfo(1));
 		fboList[i].resize(_winWidth, _winHeight);
 	}
-	normalBuffer.resize(_winWidth, _winHeight);
+	depthNormalBuffer.resize(_winWidth, _winHeight);
 }
 
 void Renderer::genRandRotText() {
@@ -62,9 +44,10 @@ Renderer::Renderer(InputHandler* _inputHandler, GameObject* _camera, std::vector
 
 	createFrameBuffers(winWidth, winHeight);
 	dofProgram = labhelper::loadShaderProgram("../project/postFX.vert", "../project/dof.frag");
-	
 	ssaoInputProgram = labhelper::loadShaderProgram("../project/ssaoInput.vert", 
 		"../project/ssaoInput.frag");
+	textureProgram = labhelper::loadShaderProgram("../project/texture.vert", 
+		"../project/texture.frag");
 	
 	genRandRotText();
 }
@@ -83,6 +66,7 @@ void Renderer::setMatrixUniforms(const GLuint _currentShaderProgram, const mat4&
 		_projectionMatrix * _viewMatrix * _modelMatrix);
 	prevVPMatrix = _projectionMatrix * _viewMatrix;
 	labhelper::setUniformSlow(_currentShaderProgram, "modelViewMatrix", _viewMatrix * _modelMatrix);
+	mat4 normal = inverse(transpose(_viewMatrix * _modelMatrix));
 	labhelper::setUniformSlow(_currentShaderProgram, "normalMatrix",
 		inverse(transpose(_viewMatrix * _modelMatrix)));
 	labhelper::setUniformSlow(_currentShaderProgram, "modelMatrix", _modelMatrix);
@@ -91,6 +75,7 @@ void Renderer::setMatrixUniforms(const GLuint _currentShaderProgram, const mat4&
 void Renderer::drawScene(const RenderPass _renderPass, const mat4 _viewMatrix, const mat4 _projMatrix, const mat4 _lightViewMatrix,
                          const mat4 _lightProjMatrix){
 	const vec4 viewSpaceLightPosition = _viewMatrix * vec4((*lights)[0]->getTransform().position, 1.0f);
+	//setFrameBuffer(depthNormalBuffer.framebufferId);
 	for (auto renderComponent : *renderComponents) {
 		GLuint compShaderProgram;
 		switch (_renderPass) {
@@ -171,8 +156,11 @@ void Renderer::setFrameBuffer(const GLuint _frameBufferId) const {
 
 void Renderer::drawFromCamera(const mat4 _projMatrix, const mat4 _viewMatrix, const mat4 _lightViewMatrix,
                               const mat4 _lightProjMatrix, const RenderPass _renderPass){
-	if (!depthOfField)
-		setFrameBuffer(0);
+	if (!depthOfField) {
+		if (_renderPass == STANDARD)
+			setFrameBuffer(0);
+		else setFrameBuffer(depthNormalBuffer.framebufferId);
+	}
 		
 	if (background != nullptr && _renderPass == STANDARD) {
 		const vec4 viewSpaceLightPosition = _viewMatrix * vec4((*lights)[0]->getTransform().position, 1.0f);
@@ -201,7 +189,18 @@ void Renderer::prepareSSAO() {
 	glBindTexture(GL_TEXTURE_2D, randRotTex);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_R16F, 64, 64, 0, GL_RED, GL_FLOAT, 
 		randomRotations);
+}
 
+void Renderer::drawTextureToScreen(const unsigned _texture) const {
+	setFrameBuffer(0);
+	glUseProgram(textureProgram);
+
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, _texture);
+
+	labhelper::drawFullScreenQuad();
+
+	glUseProgram(0);
 }
 
 void Renderer::draw(){
@@ -216,7 +215,7 @@ void Renderer::draw(){
 		iteration = 1;
 	}
 
-	for (; iteration >= 0; --iteration) {
+	for (; iteration >= 1; --iteration) {
 		const RenderPass renderPass = renderPassMap[iteration];
 		
 		const mat4 projMatrix = cameraComponent->getProjMatrix();
@@ -233,6 +232,8 @@ void Renderer::draw(){
 		drawFromCamera(projMatrix, viewMatrix, lightViewMatrix,
 		               lightProjMatrix, renderPass);
 	}
+
+	drawTextureToScreen(depthNormalBuffer.colorTextureTargets[0]);
 }
 
 void Renderer::drawWithDOF(){

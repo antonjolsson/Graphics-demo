@@ -11,7 +11,9 @@ class HeightFieldComp : public RenderComponent {
 
 	const GLuint HEIGHTFIELD_PROGRAM = labhelper::loadShaderProgram("../project/heightfield.vert",
 		"../project/shading.frag");
-	
+	const GLuint HEIGHTFIELD_VN_PROGRAM = labhelper::loadShaderProgram("../project/heightfield.vert",
+		"../project/viewNormal.frag");
+
 public:
 	int m_meshResolution; // triangles edges per quad side
 	GLuint m_texid_hf;

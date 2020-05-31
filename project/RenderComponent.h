@@ -9,7 +9,7 @@ class RenderComponent : public Component {
 protected:
 	
 	glm::mat4 modelMatrix{0};
-	GLuint shaderProgram = 0;
+	GLuint defaultProgram = 0;
 	GLuint viewNormalProgram;
 	
 public:
@@ -17,6 +17,6 @@ public:
 	GLuint getDefaultProgram() const;
 	virtual void render(const GLuint _compShaderProgram){}
 	glm::mat4 getModelMatrix() const;
-	GLuint getViewNormalProgram() const;
+	virtual GLuint getViewNormalProgram() const;
 	RenderComponent();
 };

@@ -3,7 +3,7 @@
 #include "labhelper.h"
 
 GLuint RenderComponent::getDefaultProgram() const {
-	return shaderProgram;
+	return defaultProgram;
 }
 
 glm::mat4 RenderComponent::getModelMatrix() const {
@@ -15,5 +15,5 @@ GLuint RenderComponent::getViewNormalProgram() const {
 }
 
 RenderComponent::RenderComponent() {
-	viewNormalProgram = labhelper::loadShaderProgram("../project/shading.vert", "../project/viewNormal.frag");
+	// viewNormalProgram = labhelper::loadShaderProgram("../project/shading.vert", "../project/viewNormal.frag");
 }

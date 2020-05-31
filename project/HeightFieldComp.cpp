@@ -29,9 +29,8 @@ HeightFieldComp::HeightFieldComp(const std::string& _heightfieldPath, const std:
 	generateMesh(tesselation);
 	loadHeightField(_heightfieldPath);
 	loadDiffuseTexture(_terrainPhotoPath);
-	shaderProgram = HEIGHTFIELD_PROGRAM;
-	viewNormalProgram = labhelper::loadShaderProgram("../project/heightfield.vert",
-		"../project/viewNormal.frag");
+	defaultProgram = HEIGHTFIELD_PROGRAM;
+	viewNormalProgram = HEIGHTFIELD_VN_PROGRAM;
 }
 
 void HeightFieldComp::loadHeightField(const std::string& _heightFieldPath)
@@ -173,3 +172,4 @@ void HeightFieldComp::update(float _dt) {
 	modelMatrix = mat4 ({terrainScaling});
 	modelMatrix[3] = vec4{ 0, 0, 0, 1.0 };
 }
+
