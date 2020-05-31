@@ -18,7 +18,7 @@ public:
 	float fogDensity = 0.24;
 	mat4 prevVPMatrix {1.f};
 	
-	bool depthOfField = true;
+	bool depthOfField = false;
 	float aperture = 0.3;
 	int diaphragmPolygons = 10;
 
@@ -45,7 +45,7 @@ private:
 
 	std::vector<FboInfo> fboList;
 
-	GLuint postFXProgram{};
+	GLuint dofProgram{};
 
 public:
 	void setShadowMapProgram(GLuint _shadowMapProgram);
@@ -63,6 +63,6 @@ public:
 	void drawFromCamera(mat4 _projMatrix, mat4 _viewMatrix, mat4 _lightViewMatrix, mat4 _lightProjMatrix);
 	void draw();
 	void drawBackground(const mat4& _viewMatrix, const mat4& _projectionMatrix);
-	void drawWithMotionBlur();
+	void drawWithDOF();
 
 };

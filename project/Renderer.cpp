@@ -31,11 +31,8 @@ Renderer::Renderer(InputHandler* _inputHandler, GameObject* _camera, std::vector
 	glEnable(GL_CULL_FACE);  // enables backface culling
 	glActiveTexture(GL_TEXTURE0);
 
-	if (depthOfField) {
-		createFrameBuffers(winWidth, winHeight);
-		postFXProgram = labhelper::loadShaderProgram("../project/postFX.vert", 
-			"../project/postFX.frag");
-	}
+	createFrameBuffers(winWidth, winHeight);
+	dofProgram = labhelper::loadShaderProgram("../project/postFX.vert", "../project/dof.frag");
 }
 
 void Renderer::setRenderShadows(const bool _renderShadows) {
@@ -146,7 +143,7 @@ void Renderer::drawFromCamera(const mat4 _projMatrix, const mat4 _viewMatrix, co
 
 void Renderer::draw(){
 	if (depthOfField) {
-		drawWithMotionBlur();
+		drawWithDOF();
 		return;
 	}
 	
@@ -165,7 +162,7 @@ void Renderer::draw(){
 	drawFromCamera(projMatrix, viewMatrix, lightViewMatrix, lightProjMatrix);
 }
 
-void Renderer::drawWithMotionBlur(){
+void Renderer::drawWithDOF(){
 	// TODO: abstract common fields and methods for matrices!
 	
 	const mat4 projMatrix = cameraComponent->getProjMatrix();
@@ -189,7 +186,7 @@ void Renderer::drawWithMotionBlur(){
 	}
 	
 	setFrameBuffer(0);
-	glUseProgram(postFXProgram);
+	glUseProgram(dofProgram);
 	for (int i = 0; i < diaphragmPolygons; i++) {
 		glActiveTexture(GL_TEXTURE0 + i);
 		glBindTexture(GL_TEXTURE_2D, fboList[i].colorTextureTargets[0]);

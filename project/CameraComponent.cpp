@@ -114,5 +114,6 @@ glm::mat4 CameraComponent::getViewMatrix(const int _i, const int _n, const float
 	const glm::vec3 up = -normalize(cross(cameraDirection, right));
 
 	const glm::vec3 bokeh = cosf(_i * 2.f * M_PI / _n) * right + sinf(_i * 2.f * M_PI / _n) * up;
-	return lookAt(go->getTransform().position + _aperture * bokeh, tracing->getPosition(), go->Y_AXIS);
+	return lookAt(go->getTransform().position + _aperture * bokeh, tracing->getPosition() + tracingDirectionOffs,
+		go->Y_AXIS);
 }
