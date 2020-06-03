@@ -91,9 +91,9 @@ public:
 	void drawFromCamera(mat4 _projMatrix, mat4 _viewMatrix, mat4 _lightViewMatrix, mat4 _lightProjMatrix, RenderPass _renderPass);
 	void setRandRotTex();
 	void prepareSSAO();
-	void drawTexture(const GLuint _sourceTexture, const GLuint _targetId, const GLuint _program) const;
+	void drawTexture(GLuint _sourceTexture, GLuint _targetId, GLuint _program);
 	void drawSSAOTexture();
-	void setActiveTexture(int _textureUnit, GLuint _texture);
+	void bindTexture(GLenum _textureUnit, GLuint _texture);
 	void draw();
 	void drawBackground(const mat4& _viewMatrix, const mat4& _projectionMatrix);
 	void drawWithDOF();

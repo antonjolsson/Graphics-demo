@@ -42,7 +42,7 @@ Renderer::Renderer(InputHandler* _inputHandler, GameObject* _camera, std::vector
 	cameraComponent = camera->getComponent<CameraComponent>();
 	glEnable(GL_DEPTH_TEST); // enable Z-buffering
 	glEnable(GL_CULL_FACE);  // enables backface culling
-	glActiveTexture(GL_TEXTURE0);
+	//glActiveTexture(GL_TEXTURE0);
 
 	createFrameBuffers(winWidth, winHeight);
 	dofProgram = labhelper::loadShaderProgram("../project/postFX.vert", "../project/dof.frag");
@@ -94,9 +94,7 @@ void Renderer::drawScene(const RenderPass _renderPass, const mat4 _viewMatrix, c
 			viewSpaceLightPosition);
 		setMatrixUniforms(compShaderProgram, _viewMatrix, _projMatrix, renderComponent->getModelMatrix());
 
-		// What's this doing?
-		glActiveTexture(GL_TEXTURE10);
-		glBindTexture(GL_TEXTURE_2D,shadowMap->getShadowMapFB().depthBuffer);
+		bindTexture(GL_TEXTURE10, shadowMap->getShadowMapFB().depthBuffer);
 
 		renderComponent->render(compShaderProgram);
 	}
@@ -185,8 +183,7 @@ void Renderer::setRandRotTex() {
 		randomRotation = labhelper::randf();
 	}
 
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, randRotTex);
+	bindTexture(GL_TEXTURE0, randRotTex);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_R16F, 64, 64, 0, GL_RED, GL_FLOAT, 
 	             randomRotations);
 }
@@ -204,15 +201,10 @@ void Renderer::prepareSSAO() {
 
 void Renderer::drawSSAOTexture() {
 	glUseProgram(ssaoInputProgram);
-	
-	glActiveTexture(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_2D, randRotTex);
-	
-	glActiveTexture(GL_TEXTURE2);
-	glBindTexture(GL_TEXTURE_2D, viewNormalBuffer.depthBuffer);
 
-	glActiveTexture(GL_TEXTURE3);
-	glBindTexture(GL_TEXTURE_2D, viewNormalBuffer.colorTextureTargets[2]);
+	bindTexture(GL_TEXTURE1, randRotTex);
+	bindTexture(GL_TEXTURE2, viewNormalBuffer.depthBuffer);
+	bindTexture(GL_TEXTURE3, viewNormalBuffer.colorTextureTargets[2]);
 
 	labhelper::setUniformSlow(ssaoInputProgram, "inverseProjMatrix",
 	                          inverse(cameraComponent->getProjMatrix()));
@@ -224,18 +216,17 @@ void Renderer::drawSSAOTexture() {
 	drawTexture(viewNormalBuffer.colorTextureTargets[0], ssaoTexture.framebufferId, ssaoInputProgram);
 }
 
-void Renderer::setActiveTexture(const int _textureUnit, const GLuint _texture) {
-	glActiveTexture(GL_TEXTURE0 + _textureUnit);
+void Renderer::bindTexture(const GLenum _textureUnit, const GLuint _texture) {
+	glActiveTexture(_textureUnit);
 	glBindTexture(GL_TEXTURE_2D, _texture);
-	//boundTextures[_textureUnit - GL_TEXTURE0] = _texture; 
+	boundTextures[_textureUnit - GL_TEXTURE0] = _texture; 
 }
 
-void Renderer::drawTexture(const GLuint _sourceTexture, const GLuint _targetId, const GLuint _program) const {
+void Renderer::drawTexture(const GLuint _sourceTexture, const GLuint _targetId, const GLuint _program) {
 	setClearFrameBuffer(_targetId);
 	glUseProgram(_program);
 
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, _sourceTexture);
+	bindTexture(GL_TEXTURE0, _sourceTexture);
 
 	labhelper::drawFullScreenQuad();
 
@@ -278,7 +269,7 @@ void Renderer::draw(){
 	if (ssao) {
 		if (showOnlySSAO)
 			drawTexture(ssaoTexture.colorTextureTargets[0], 0, textureProgram);
-		else setActiveTexture(9, ssaoTexture.colorTextureTargets[0]);
+		else bindTexture(GL_TEXTURE9, ssaoTexture.colorTextureTargets[0]);
 	}
 }
 
@@ -308,8 +299,7 @@ void Renderer::drawWithDOF(){
 	setClearFrameBuffer(0);
 	glUseProgram(dofProgram);
 	for (int i = 0; i < diaphragmPolygons; i++) {
-		glActiveTexture(GL_TEXTURE0 + i);
-		glBindTexture(GL_TEXTURE_2D, fboList[i].colorTextureTargets[0]);
+		bindTexture(GL_TEXTURE0 + i, fboList[i].colorTextureTargets[0]);
 	}
 	
 	labhelper::drawFullScreenQuad();
