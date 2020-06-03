@@ -35,7 +35,7 @@ public:
 private:
 	
 	GLuint currentProgram = 0;
-	Fbo currentFbo;
+	GLuint currentFboId = 0;
 	std::array<GLuint, 16> boundTextures{};
 
 	enum RenderPass {STANDARD, SHADOW, VIEW_NORMAL};
@@ -46,8 +46,8 @@ private:
 	GLuint randRotTex{};
 	float randomRotations[64 * 64]{};
 	Fbo viewNormalBuffer = Fbo(3);
-	Fbo ssaoTexture = Fbo(1);
-	vec3 sampleHemisphere[16];
+	Fbo ssaoBuffer = Fbo(1);
+	vec3 sampleHemisphere[16]{};
 	
 	vec3 fogColor {1, 1, 1};
 	
@@ -69,7 +69,7 @@ private:
 	GameObject* background = nullptr;
 	GameObject* landingPad = nullptr;
 
-	std::vector<Fbo> fboList;
+	std::vector<Fbo> dofFboList;
 
 	GLuint dofProgram{};
 	GLuint textureProgram;
@@ -85,13 +85,16 @@ public:
 	void setMatrixUniforms(GLuint _currentShaderProgram, const mat4& _viewMatrix, const mat4& _projectionMatrix, mat4 _modelMatrix);
 	void drawScene(const ::Renderer::RenderPass _renderPass, mat4 _viewMatrix, mat4 _projMatrix, mat4 _lightViewMatrix, mat4 _lightProjMatrix);
 	void drawShadowMap(mat4 _lightViewMatrix, mat4 _lightProjMatrix);
+	void setFXUniforms(GLuint _currentShaderProgram) const;
 	void setLightUniforms(GLuint _currentShaderProgram, mat4 _viewMatrix, mat4 _lightViewMatrix, mat4 _lightProjMatrix,
 	                      vec4 _viewSpaceLightPosition) const;
-	void setClearFrameBuffer(GLuint _frameBufferId) const;
+	void bindFrameBuffer(GLuint _frameBufferId);
+	void setClearFrameBuffer(GLuint _frameBufferId);
 	void drawFromCamera(mat4 _projMatrix, mat4 _viewMatrix, mat4 _lightViewMatrix, mat4 _lightProjMatrix, RenderPass _renderPass);
 	void setRandRotTex();
 	void prepareSSAO();
 	void drawTexture(GLuint _sourceTexture, GLuint _targetId, GLuint _program);
+	void useProgram(GLuint _program);
 	void drawSSAOTexture();
 	void bindTexture(GLenum _textureUnit, GLuint _texture);
 	void draw();
