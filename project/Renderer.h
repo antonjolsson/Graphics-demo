@@ -28,10 +28,10 @@ public:
 	int ssaoSamples = 16;
 	float ssaoRadius = 1.8;
 
-	bool toneMapping = false;
+	bool toneMapping = true;
 	float gamma = 0.54;
 	float exposure = 2.23;
-	bool showOnlySSAO = true;
+	bool showOnlySSAO = false;
 
 private:
 	
@@ -102,7 +102,6 @@ public:
 	void drawSSAO();
 	void bindTexture(GLenum _textureUnit, GLuint _texture);
 	void draw();
-	void drawBackground(const mat4& _viewMatrix, const mat4& _projectionMatrix);
 	void drawWithDOF();
 
 };
