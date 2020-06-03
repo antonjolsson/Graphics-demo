@@ -23,7 +23,7 @@ public:
 private:
 	float nearPlane = 5.f;
 	float farPlane = 900.f;
-	glm::vec3 staticCameraDirection {0.f};
+	glm::vec3 staticCameraDirection = glm::normalize(glm::vec3{-0.9, -0.37, 0}); // vec3{0};
 	glm::vec3 cameraDirection {0.f};
 
 public:
@@ -36,8 +36,8 @@ private:
 public:
 	void setTracingObject(bool _tracingObject);
 private:
-	glm::vec3 staticCameraPos { 100, 100, 0 }; 
-	glm::vec3 tracingDistance{ 55, 25, 0 }; // { 50, 50, 0 }
+	glm::vec3 staticCameraPos { 40, 31, 4 };  // 100, 100, 0
+	glm::vec3 tracingDistance{ 55, 25, 0 };
 	glm::vec3 tracingDirectionOffs {0, 10, 0};
 	
 	int windowWidth;

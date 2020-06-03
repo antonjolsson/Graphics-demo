@@ -1,6 +1,7 @@
 // ReSharper disable IdentifierTypo
 #include "Renderer.h"
 #include <glm/gtx/transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 #include "EnvironmentComponent.h"
 #include "LightComponent.h"
@@ -17,7 +18,8 @@ void Renderer::createFrameBuffers(const int _winWidth, const int _winHeight) {
 		fboList.emplace_back(Fbo(1));
 		fboList[i].resize(_winWidth, _winHeight);
 	}
-	depthNormalBuffer.resize(_winWidth, _winHeight);
+	viewNormalBuffer.resize(_winWidth, _winHeight);
+	ssaoTexture.resize(_winWidth, _winHeight);
 }
 
 void Renderer::genRandRotTex() {
@@ -49,7 +51,7 @@ Renderer::Renderer(InputHandler* _inputHandler, GameObject* _camera, std::vector
 	textureProgram = labhelper::loadShaderProgram("../project/texture.vert", 
 		"../project/texture.frag");
 	
-	genRandRotTex();
+	prepareSSAO();
 }
 
 void Renderer::setRenderShadows(const bool _renderShadows) {
@@ -144,9 +146,12 @@ void Renderer::setLightUniforms(const GLuint _currentShaderProgram, mat4 _viewMa
 	labhelper::setUniformSlow(_currentShaderProgram, "fogColor", fogColor);
 	labhelper::setUniformSlow(_currentShaderProgram, "fogDensity", fogDensity);
 	labhelper::setUniformSlow(_currentShaderProgram, "depthRange", depthRange);
+	labhelper::setUniformSlow(_currentShaderProgram, "toneMapping", toneMapping);
+	labhelper::setUniformSlow(_currentShaderProgram, "gamma", gamma);
+	labhelper::setUniformSlow(_currentShaderProgram, "exposure", exposure);
 }
 
-void Renderer::setFrameBuffer(const GLuint _frameBufferId) const {
+void Renderer::setClearFrameBuffer(const GLuint _frameBufferId) const {
 	glBindFramebuffer(GL_FRAMEBUFFER, _frameBufferId);
 	glViewport(0, 0, winWidth, winHeight);
 	glClearColor(0.2f, 0.2f, 0.8f, 1.0f);
@@ -157,8 +162,8 @@ void Renderer::drawFromCamera(const mat4 _projMatrix, const mat4 _viewMatrix, co
                               const mat4 _lightProjMatrix, const RenderPass _renderPass){
 	if (!depthOfField) {
 		if (_renderPass == STANDARD)
-			setFrameBuffer(0);
-		else setFrameBuffer(depthNormalBuffer.framebufferId);
+			setClearFrameBuffer(0);
+		else setClearFrameBuffer(viewNormalBuffer.framebufferId);
 	}
 		
 	if (background != nullptr && _renderPass == STANDARD) {
@@ -172,14 +177,7 @@ void Renderer::drawFromCamera(const mat4 _projMatrix, const mat4 _viewMatrix, co
 	          _lightProjMatrix);
 }
 
-void Renderer::prepareSSAO() {
-	std::vector<vec3> sampleHemisphere;
-	for (int i = 0; i < ssaoSamples; ++i) {
-		vec3 sample = labhelper::cosineSampleHemisphere();
-		sample *= labhelper::randf();
-		sampleHemisphere.push_back(sample);
-	}
-
+void Renderer::setRandRotTex() {
 	for (float& randomRotation : randomRotations) {
 		randomRotation = labhelper::randf();
 	}
@@ -187,15 +185,50 @@ void Renderer::prepareSSAO() {
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, randRotTex);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_R16F, 64, 64, 0, GL_RED, GL_FLOAT, 
-		randomRotations);
+	             randomRotations);
 }
 
-void Renderer::drawTextureToScreen(const unsigned _texture) const {
-	setFrameBuffer(0);
-	glUseProgram(textureProgram);
+void Renderer::prepareSSAO() {
+	for (int i = 0; i < ssaoSamples; i++) {
+		vec3 sample = labhelper::cosineSampleHemisphere();
+		sample *= labhelper::randf();
+		sampleHemisphere[i] = sample;
+	}
+
+	genRandRotTex();
+	setRandRotTex();
+}
+
+void Renderer::drawSSAOTexture() {
+	glUseProgram(ssaoInputProgram);
+	
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D, randRotTex);
+	
+	glActiveTexture(GL_TEXTURE2);
+	glBindTexture(GL_TEXTURE_2D, viewNormalBuffer.depthBuffer);
+
+	glActiveTexture(GL_TEXTURE3);
+	glBindTexture(GL_TEXTURE_2D, viewNormalBuffer.colorTextureTargets[2]);
+
+	mat4 projMatrix = cameraComponent->getProjMatrix();
+	mat4 invProjMatrix = inverse(cameraComponent->getProjMatrix());
+	labhelper::setUniformSlow(ssaoInputProgram, "inverseProjMatrix",
+		inverse(cameraComponent->getProjMatrix()));
+	labhelper::setUniformSlow(ssaoInputProgram, "projectionMatrix", cameraComponent->getProjMatrix());
+	labhelper::setUniformSlow(ssaoInputProgram, "samples", ssaoSamples, sampleHemisphere);
+	labhelper::setUniformSlow(ssaoInputProgram, "hemisphereRadius", ssaoRadius);
+	labhelper::setUniformSlow(ssaoInputProgram, "numOfSamples", ssaoSamples);
+	
+	drawTexture(viewNormalBuffer.colorTextureTargets[0], ssaoTexture.framebufferId, ssaoInputProgram);
+}
+
+void Renderer::drawTexture(const GLuint _sourceTexture, const GLuint _targetId, const GLuint _program) const {
+	setClearFrameBuffer(_targetId);
+	glUseProgram(_program);
 
 	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, _texture);
+	glBindTexture(GL_TEXTURE_2D, _sourceTexture);
 
 	labhelper::drawFullScreenQuad();
 
@@ -210,11 +243,11 @@ void Renderer::draw(){
 
 	int iteration = 0;
 	if (ssao) {
-		prepareSSAO();
+		setRandRotTex();
 		iteration = 1;
 	}
-
-	for (; iteration >= 1; --iteration) {
+	
+	for (; iteration >= 0; --iteration) {
 		const RenderPass renderPass = renderPassMap[iteration];
 		
 		const mat4 projMatrix = cameraComponent->getProjMatrix();
@@ -230,9 +263,12 @@ void Renderer::draw(){
 
 		drawFromCamera(projMatrix, viewMatrix, lightViewMatrix,
 		               lightProjMatrix, renderPass);
-	}
 
-	drawTextureToScreen(depthNormalBuffer.depthBuffer);
+		if (renderPass == VIEW_NORMAL)
+			drawSSAOTexture();
+	}
+	
+	if (ssao) drawTexture(ssaoTexture.colorTextureTargets[0], 0, textureProgram);
 }
 
 void Renderer::drawWithDOF(){
@@ -240,7 +276,7 @@ void Renderer::drawWithDOF(){
 	const mat4 projMatrix = cameraComponent->getProjMatrix();
 
 	for(int i = 0; i < diaphragmPolygons; i++) {
-		setFrameBuffer(fboList[i].framebufferId);
+		setClearFrameBuffer(fboList[i].framebufferId);
 		
 		const mat4 viewMatrix = cameraComponent->getViewMatrix(i, diaphragmPolygons, aperture);
 		const mat4 lightProjMatrix = (*lights)[0]->getComponent<LightComponent>()->getProjMatrix();
@@ -252,13 +288,13 @@ void Renderer::drawWithDOF(){
 			drawShadowMap(lightViewMatrix, lightProjMatrix);
 		}
 
-		setFrameBuffer(fboList[i].framebufferId);
+		setClearFrameBuffer(fboList[i].framebufferId);
 
 		drawFromCamera(projMatrix, viewMatrix, lightViewMatrix, lightProjMatrix,
 			STANDARD);
 	}
 	
-	setFrameBuffer(0);
+	setClearFrameBuffer(0);
 	glUseProgram(dofProgram);
 	for (int i = 0; i < diaphragmPolygons; i++) {
 		glActiveTexture(GL_TEXTURE0 + i);

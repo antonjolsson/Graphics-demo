@@ -2,15 +2,6 @@
 #pragma once
 #include <vector>
 
-
-
-#include "AudioComponent.h"
-#include "AudioComponent.h"
-#include "AudioComponent.h"
-#include "AudioComponent.h"
-#include "AudioComponent.h"
-#include "AudioComponent.h"
-#include "AudioComponent.h"
 #include "AudioComponent.h"
 #include "InputHandler.h"
 #include "ModelRenderComponent.h"
@@ -33,18 +24,25 @@ public:
 	int diaphragmPolygons = 10;
 
 	bool ssao = true;
+	int ssaoSamples = 16;
+	float ssaoRadius = 1.8;
+
+	bool toneMapping = false;
+	float gamma = 0.54;
+	float exposure = 2.23;
 
 private:
 
 	enum RenderPass {STANDARD, SHADOW, VIEW_NORMAL};
 	std::map<int, RenderPass> renderPassMap {{1, VIEW_NORMAL}, {0, STANDARD}};
 	
-	int ssaoSamples = 16;
-	float ssaoRadius = 1;
+	
 	GLuint ssaoInputProgram;
 	GLuint randRotTex{};
 	float randomRotations[64 * 64]{};
-	Fbo depthNormalBuffer = Fbo(1);
+	Fbo viewNormalBuffer = Fbo(3);
+	Fbo ssaoTexture = Fbo(1);
+	vec3 sampleHemisphere[16];
 	
 	vec3 fogColor {1, 1, 1};
 	
@@ -84,10 +82,12 @@ public:
 	void drawShadowMap(mat4 _lightViewMatrix, mat4 _lightProjMatrix);
 	void setLightUniforms(GLuint _currentShaderProgram, mat4 _viewMatrix, mat4 _lightViewMatrix, mat4 _lightProjMatrix,
 	                      vec4 _viewSpaceLightPosition) const;
-	void setFrameBuffer(GLuint _frameBufferId) const;
+	void setClearFrameBuffer(GLuint _frameBufferId) const;
 	void drawFromCamera(mat4 _projMatrix, mat4 _viewMatrix, mat4 _lightViewMatrix, mat4 _lightProjMatrix, RenderPass _renderPass);
+	void setRandRotTex();
 	void prepareSSAO();
-	void drawTextureToScreen(unsigned _texture) const;
+	void drawTexture(const GLuint _sourceTexture, const GLuint _targetId, const GLuint _program) const;
+	void drawSSAOTexture();
 	void draw();
 	void drawBackground(const mat4& _viewMatrix, const mat4& _projectionMatrix);
 	void drawWithDOF();

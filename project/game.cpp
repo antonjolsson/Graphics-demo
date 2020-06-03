@@ -216,7 +216,7 @@ Game::Game(InputHandler* _inputHandler, const bool _showHitbox, const int _winWi
     
 	const auto background = initBackground();
     initTerrain(_showHitbox);
-	//initLandingPad(_showHitbox);
+	initLandingPad(_showHitbox);
 	initShip(_showHitbox);
     initEnemies(_inputHandler, _showHitbox);
 	

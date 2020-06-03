@@ -63,6 +63,12 @@ namespace debug_gui {
 		ImGui::SliderFloat("Depth range: ", &_renderer->depthRange, 100, 400);
 		ImGui::Checkbox("Depth-of-field", &_renderer->depthOfField);
 		ImGui::SliderFloat("Aperture size: ", &_renderer->aperture, 0.01, 1);
+		ImGui::Checkbox("SSAO", &_renderer->ssao);
+		ImGui::SliderFloat("SSAO radius: ", &_renderer->ssaoRadius, 0, 5);
+		ImGui::SliderInt("SSAO samples: ", &_renderer->ssaoSamples, 0, 50);
+		ImGui::Checkbox("Tone mapping", &_renderer->toneMapping);
+		ImGui::SliderFloat("Gamma: ", &_renderer->gamma, 0, 5);
+		ImGui::SliderFloat("Exposure: ", &_renderer->exposure, 0, 5);
 		
 		// ----------------------------------------------------------
 

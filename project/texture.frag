@@ -15,4 +15,5 @@ vec4 textureRect(in sampler2D tex, vec2 rectangleCoord)
 void main()
 {
 	fragmentColor = textureRect(inputTexture, gl_FragCoord.xy);
+
 }

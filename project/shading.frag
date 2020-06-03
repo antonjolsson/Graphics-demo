@@ -70,6 +70,10 @@ uniform float depthRange;
 
 uniform mat4 prevVPMatrix;
 
+uniform bool toneMapping;
+uniform float gamma;
+uniform float exposure;
+
 ///////////////////////////////////////////////////////////////////////////////
 // Output color
 ///////////////////////////////////////////////////////////////////////////////
@@ -170,6 +174,20 @@ void computePixelVelocity() {
 
 }
 
+vec3 exposureToneMapping(vec3 color) {  
+    // exposure tone mapping
+    vec3 mapped = vec3(1.0) - exp(-color * exposure);
+    // gamma correction 
+    return pow(mapped, vec3(1.0 / gamma));
+}
+
+vec3 reinhardtToneMapping(vec3 color) {  
+    // reinhard tone mapping
+    vec3 mapped = color / (color + vec3(1.0));
+    // gamma correction 
+    return pow(mapped, vec3(1.0 / gamma));
+}
+
 void main()
 {
 	//computePixelVelocity();
@@ -207,6 +225,10 @@ void main()
 	vec3 shading = direct_illumination_term + indirect_illumination_term + emission_term;
 
 	//fragmentColor = vec4(velocity, 1);
+
+	if (toneMapping) 
+		shading = exposureToneMapping(shading);
+
 	fragmentColor = fog ? addFog(shading, getViewSpaceDepth().z) : vec4(shading, 1.f);
 
 	return;
