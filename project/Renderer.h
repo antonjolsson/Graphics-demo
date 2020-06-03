@@ -24,13 +24,14 @@ public:
 	int diaphragmPolygons = 10;
 
 	bool ssao = true;
+	bool blurredSSAO = true;
 	int ssaoSamples = 16;
 	float ssaoRadius = 1.8;
 
 	bool toneMapping = false;
 	float gamma = 0.54;
 	float exposure = 2.23;
-	bool showOnlySSAO = false;
+	bool showOnlySSAO = true;
 
 private:
 	
@@ -41,12 +42,13 @@ private:
 	enum RenderPass {STANDARD, SHADOW, VIEW_NORMAL};
 	std::map<int, RenderPass> renderPassMap {{1, VIEW_NORMAL}, {0, STANDARD}};
 	
-	
 	GLuint ssaoInputProgram;
+	GLuint horizontalBlurProgram;
+	GLuint verticalBlurProgram;
 	GLuint randRotTex{};
 	float randomRotations[64 * 64]{};
 	Fbo viewNormalBuffer = Fbo(3);
-	Fbo ssaoBuffer = Fbo(1);
+	Fbo horizontalBlurBuffer, verticalBlurBuffer, ssaoNoiseBuffer, ssaoBlurBuffer;
 	vec3 sampleHemisphere[16]{};
 	
 	vec3 fogColor {1, 1, 1};
@@ -78,7 +80,8 @@ public:
 	void setShadowMapProgram(GLuint _shadowMapProgram);
 
 	void createFrameBuffers(const int _winWidth, const int _winHeight);
-	void genRandRotTex();
+	void genRandomRotationsTex();
+	void createPrograms();
 	Renderer(InputHandler* _inputHandler, GameObject* _camera, std::vector<RenderComponent*>* _renderComponents, bool _showHitbox,
 	         int _winWidth, int _winHeight, std::vector<GameObject*>* _lights, Ship* _ship, GameObject* _background, GameObject* _landingPad);
 	void setRenderShadows(bool _renderShadows);
@@ -91,11 +94,12 @@ public:
 	void bindFrameBuffer(GLuint _frameBufferId);
 	void setClearFrameBuffer(GLuint _frameBufferId);
 	void drawFromCamera(mat4 _projMatrix, mat4 _viewMatrix, mat4 _lightViewMatrix, mat4 _lightProjMatrix, RenderPass _renderPass);
-	void setRandRotTex();
+	void setRandomRotationsTex();
 	void prepareSSAO();
 	void drawTexture(GLuint _sourceTexture, GLuint _targetId, GLuint _program);
 	void useProgram(GLuint _program);
-	void drawSSAOTexture();
+	void createSSAOTexture();
+	void drawSSAO();
 	void bindTexture(GLenum _textureUnit, GLuint _texture);
 	void draw();
 	void drawBackground(const mat4& _viewMatrix, const mat4& _projectionMatrix);

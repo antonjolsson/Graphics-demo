@@ -66,6 +66,7 @@ namespace debug_gui {
 		ImGui::SliderFloat("Aperture size: ", &_renderer->aperture, 0.01, 1);
 		
 		ImGui::Checkbox("SSAO", &_renderer->ssao);
+		ImGui::Checkbox("Blurred SSAO", &_renderer->blurredSSAO);
 		ImGui::Checkbox("Show only SSAO", &_renderer->showOnlySSAO);
 		ImGui::SliderFloat("SSAO radius: ", &_renderer->ssaoRadius, 0, 5);
 		ImGui::SliderInt("SSAO samples: ", &_renderer->ssaoSamples, 0, 50);

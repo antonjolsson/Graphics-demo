@@ -22,7 +22,6 @@ void Renderer::bindTexture(const GLenum _textureUnit, const GLuint _texture) {
 }
 
 void Renderer::setClearFrameBuffer(const GLuint _frameBufferId) {
-	//glBindFramebuffer(GL_FRAMEBUFFER, _frameBufferId);
 	bindFrameBuffer(_frameBufferId);
 	glViewport(0, 0, winWidth, winHeight);
 	glClearColor(0.2f, 0.2f, 0.8f, 1.0f);
@@ -32,6 +31,17 @@ void Renderer::setClearFrameBuffer(const GLuint _frameBufferId) {
 void Renderer::bindFrameBuffer(const GLuint _frameBufferId) {
 	glBindFramebuffer(GL_FRAMEBUFFER, _frameBufferId);
 	currentFboId = _frameBufferId;
+}
+
+void Renderer::drawTexture(const GLuint _sourceTexture, const GLuint _targetId, const GLuint _program) {
+	setClearFrameBuffer(_targetId);
+	useProgram(_program);
+
+	bindTexture(GL_TEXTURE0, _sourceTexture);
+
+	labhelper::drawFullScreenQuad();
+
+	useProgram(0);
 }
 
 // ******************************************************************************
@@ -46,17 +56,31 @@ void Renderer::createFrameBuffers(const int _winWidth, const int _winHeight) {
 		dofFboList.emplace_back(Fbo(1));
 		dofFboList[i].resize(_winWidth, _winHeight);
 	}
-	viewNormalBuffer.resize(_winWidth, _winHeight);
-	ssaoBuffer.resize(_winWidth, _winHeight);
+	for (auto* fbo : std::vector<Fbo*> {&viewNormalBuffer, &ssaoNoiseBuffer, &ssaoBlurBuffer, &verticalBlurBuffer, 
+		&horizontalBlurBuffer}) {
+		(*fbo).resize(_winWidth, _winHeight);
+	}
 }
 
-void Renderer::genRandRotTex() {
+void Renderer::genRandomRotationsTex() {
 	glGenTextures(1, &randRotTex);
 	glBindTexture(GL_TEXTURE_2D,randRotTex);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+}
+
+void Renderer::createPrograms() {
+	dofProgram = labhelper::loadShaderProgram("../project/postFX.vert", "../project/dof.frag");
+	ssaoInputProgram = labhelper::loadShaderProgram("../project/ssaoInput.vert", 
+	                                                "../project/ssaoInput.frag");
+	verticalBlurProgram = labhelper::loadShaderProgram("../project/postFX.vert", 
+	                                                "../project/vertical_blur.frag");
+	horizontalBlurProgram = labhelper::loadShaderProgram("../project/postFX.vert", 
+	                                                "../project/horizontal_blur.frag");
+	textureProgram = labhelper::loadShaderProgram("../project/texture.vert", 
+	                                              "../project/texture.frag");
 }
 
 Renderer::Renderer(InputHandler* _inputHandler, GameObject* _camera, std::vector<RenderComponent*>* _renderComponents, 
@@ -72,11 +96,7 @@ Renderer::Renderer(InputHandler* _inputHandler, GameObject* _camera, std::vector
 	glEnable(GL_CULL_FACE);  // enables backface culling
 
 	createFrameBuffers(winWidth, winHeight);
-	dofProgram = labhelper::loadShaderProgram("../project/postFX.vert", "../project/dof.frag");
-	ssaoInputProgram = labhelper::loadShaderProgram("../project/ssaoInput.vert", 
-		"../project/ssaoInput.frag");
-	textureProgram = labhelper::loadShaderProgram("../project/texture.vert", 
-		"../project/texture.frag");
+	createPrograms();
 	
 	prepareSSAO();
 }
@@ -124,21 +144,6 @@ void Renderer::drawScene(const RenderPass _renderPass, const mat4 _viewMatrix, c
 		bindTexture(GL_TEXTURE10, shadowMap->getShadowMapFB().depthBuffer);
 
 		renderComponent->render(compShaderProgram);
-	}
-}
-
-void Renderer::drawShadowMap(const mat4 _lightViewMatrix, const mat4 _lightProjMatrix) {
-	shadowMap->draw();
-	drawScene(SHADOW, _lightViewMatrix, _lightProjMatrix, _lightViewMatrix,
-	          _lightProjMatrix);
-	if (landingPad != nullptr) {
-		labhelper::Material& screen = landingPad->getComponent<ModelRenderComponent>()->getModel()->m_materials[8];
-		screen.m_emission_texture.gl_id = shadowMap->getShadowMapFB().colorTextureTargets[0];
-	}
-
-	if (shadowMap->usesPolygonOffset())
-	{
-		glDisable(GL_POLYGON_OFFSET_FILL);
 	}
 }
 
@@ -201,7 +206,22 @@ void Renderer::drawFromCamera(const mat4 _projMatrix, const mat4 _viewMatrix, co
 	          _lightProjMatrix);
 }
 
-void Renderer::setRandRotTex() {
+void Renderer::drawShadowMap(const mat4 _lightViewMatrix, const mat4 _lightProjMatrix) {
+	shadowMap->draw();
+	drawScene(SHADOW, _lightViewMatrix, _lightProjMatrix, _lightViewMatrix,
+	          _lightProjMatrix);
+	if (landingPad != nullptr) {
+		labhelper::Material& screen = landingPad->getComponent<ModelRenderComponent>()->getModel()->m_materials[8];
+		screen.m_emission_texture.gl_id = shadowMap->getShadowMapFB().colorTextureTargets[0];
+	}
+
+	if (shadowMap->usesPolygonOffset())
+	{
+		glDisable(GL_POLYGON_OFFSET_FILL);
+	}
+}
+
+void Renderer::setRandomRotationsTex() {
 	for (float& randomRotation : randomRotations) {
 		randomRotation = labhelper::randf();
 	}
@@ -218,11 +238,11 @@ void Renderer::prepareSSAO() {
 		sampleHemisphere[i] = sample;
 	}
 
-	genRandRotTex();
-	setRandRotTex();
+	genRandomRotationsTex();
+	setRandomRotationsTex();
 }
 
-void Renderer::drawSSAOTexture() {
+void Renderer::createSSAOTexture() {
 	useProgram(ssaoInputProgram);
 
 	bindTexture(GL_TEXTURE1, randRotTex);
@@ -236,18 +256,21 @@ void Renderer::drawSSAOTexture() {
 	labhelper::setUniformSlow(ssaoInputProgram, "hemisphereRadius", ssaoRadius);
 	labhelper::setUniformSlow(ssaoInputProgram, "numOfSamples", ssaoSamples);
 	
-	drawTexture(viewNormalBuffer.colorTextureTargets[0], ssaoBuffer.framebufferId, ssaoInputProgram);
+	drawTexture(viewNormalBuffer.colorTextureTargets[0], ssaoNoiseBuffer.framebufferId, ssaoInputProgram);
+	
+	if (blurredSSAO) {
+		drawTexture(ssaoNoiseBuffer.colorTextureTargets[0], verticalBlurBuffer.framebufferId, verticalBlurProgram);
+		drawTexture(verticalBlurBuffer.colorTextureTargets[0], horizontalBlurBuffer.framebufferId, horizontalBlurProgram);
+		drawTexture(horizontalBlurBuffer.colorTextureTargets[0], ssaoBlurBuffer.framebufferId, textureProgram);
+	}
 }
 
-void Renderer::drawTexture(const GLuint _sourceTexture, const GLuint _targetId, const GLuint _program) {
-	setClearFrameBuffer(_targetId);
-	useProgram(_program);
-
-	bindTexture(GL_TEXTURE0, _sourceTexture);
-
-	labhelper::drawFullScreenQuad();
-
-	useProgram(0);
+void Renderer::drawSSAO() {
+	if (showOnlySSAO)
+		drawTexture(blurredSSAO ? ssaoBlurBuffer.colorTextureTargets[0] : ssaoNoiseBuffer.colorTextureTargets[0], 
+		            0, textureProgram);
+	else bindTexture(GL_TEXTURE9,blurredSSAO ? ssaoBlurBuffer.colorTextureTargets[0] : 
+		                             ssaoNoiseBuffer.colorTextureTargets[0]);
 }
 
 void Renderer::draw(){
@@ -256,11 +279,7 @@ void Renderer::draw(){
 		return;
 	}
 
-	int iteration = 0;
-	if (ssao) {
-		//setRandRotTex();
-		iteration = 1;
-	}
+	int iteration = ssao ? 1 : 0;
 	
 	for (; iteration >= 0; --iteration) {
 		const RenderPass renderPass = renderPassMap[iteration];
@@ -280,14 +299,10 @@ void Renderer::draw(){
 		               lightProjMatrix, renderPass);
 
 		if (renderPass == VIEW_NORMAL)
-			drawSSAOTexture();
+			createSSAOTexture();
 	}
 	
-	if (ssao) {
-		if (showOnlySSAO)
-			drawTexture(ssaoBuffer.colorTextureTargets[0], 0, textureProgram);
-		else bindTexture(GL_TEXTURE9, ssaoBuffer.colorTextureTargets[0]);
-	}
+	if (ssao) drawSSAO();
 }
 
 void Renderer::drawWithDOF(){
