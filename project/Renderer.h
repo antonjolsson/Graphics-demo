@@ -33,6 +33,10 @@ public:
 	bool showOnlySSAO = false;
 
 private:
+	
+	GLuint currentProgram = 0;
+	Fbo currentFbo;
+	std::array<GLuint, 16> boundTextures{};
 
 	enum RenderPass {STANDARD, SHADOW, VIEW_NORMAL};
 	std::map<int, RenderPass> renderPassMap {{1, VIEW_NORMAL}, {0, STANDARD}};

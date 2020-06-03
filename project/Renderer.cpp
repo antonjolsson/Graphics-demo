@@ -227,6 +227,7 @@ void Renderer::drawSSAOTexture() {
 void Renderer::setActiveTexture(const int _textureUnit, const GLuint _texture) {
 	glActiveTexture(GL_TEXTURE0 + _textureUnit);
 	glBindTexture(GL_TEXTURE_2D, _texture);
+	//boundTextures[_textureUnit - GL_TEXTURE0] = _texture; 
 }
 
 void Renderer::drawTexture(const GLuint _sourceTexture, const GLuint _targetId, const GLuint _program) const {
