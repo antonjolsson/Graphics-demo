@@ -83,7 +83,6 @@ void main()
 	float randomRot = 2 * pi * texture(randomRotTex, texCoord * textureSize(randomRotTex, 0)).x;
 	mat3 zRotMatrix = createRotMatrix(randomRot);
 
-	//test
 	vsNormal = zRotMatrix * vsNormal;
 
 	// GOOD
@@ -155,6 +154,6 @@ void main()
 
 	if (numValidSamples == 0) hemisphericalVisibility = 1.0;
 
-	testDisplay(hemisphericalVisibility);
+	fragmentColor = vec4(hemisphericalVisibility);
 }
 

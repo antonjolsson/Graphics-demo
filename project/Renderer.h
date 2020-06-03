@@ -30,6 +30,7 @@ public:
 	bool toneMapping = false;
 	float gamma = 0.54;
 	float exposure = 2.23;
+	bool showOnlySSAO = false;
 
 private:
 
@@ -88,6 +89,7 @@ public:
 	void prepareSSAO();
 	void drawTexture(const GLuint _sourceTexture, const GLuint _targetId, const GLuint _program) const;
 	void drawSSAOTexture();
+	void setActiveTexture(int _textureUnit, GLuint _texture);
 	void draw();
 	void drawBackground(const mat4& _viewMatrix, const mat4& _projectionMatrix);
 	void drawWithDOF();

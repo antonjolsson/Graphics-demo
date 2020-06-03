@@ -84,6 +84,19 @@ layout(location = 0) out vec4 fragmentColor;
 ///////////////////////////////////////////////////////////////////////////////
 vec3 velocity;
 
+// SSAO
+uniform bool ssao;
+layout(binding = 9) uniform sampler2D ssaoMap;
+
+vec4 textureRect(in sampler2D tex, vec2 rectangleCoord)
+{
+	return texture(tex, rectangleCoord / textureSize(tex, 0));
+}
+
+void testDisplay(float f){
+	fragmentColor = vec4(f);
+}
+
 float getFresnel(vec3 wh, vec3 wi, vec3 wo) {
 	return material_fresnel + (1 - material_fresnel) * pow(1 - dot(wh, wi), 5);
 }
@@ -143,6 +156,7 @@ vec3 calculateIndirectIllumination(vec3 wo, vec3 n)
 	vec3 irradiance = (environment_multiplier * texture(irradianceMap, lookup)).xyz;
 
 	vec3 diffuse_term = getMatColor() * (1.0 / PI) * irradiance;
+	//if (ssao) diffuse_term *= textureRect(ssaoMap, gl_FragCoord.xy).x;
 
 	vec3 wi = -(viewInverse * vec4(reflect(wo, n), 0)).xyz;
 	lookup = getSphericalCoords(wi);
@@ -211,6 +225,8 @@ void main()
 
 	// Indirect illumination
 	vec3 indirect_illumination_term = calculateIndirectIllumination(wo, n);
+	// SSAO application;
+	if (ssao) indirect_illumination_term *= textureRect(ssaoMap, gl_FragCoord.xy).x;
 
 	///////////////////////////////////////////////////////////////////////////
 	// Add emissive term. If emissive texture exists, sample this term.
@@ -230,6 +246,8 @@ void main()
 		shading = exposureToneMapping(shading);
 
 	fragmentColor = fog ? addFog(shading, getViewSpaceDepth().z) : vec4(shading, 1.f);
+
+	//testDisplay(textureRect(ssaoMap, gl_FragCoord.xy).x);
 
 	return;
 }

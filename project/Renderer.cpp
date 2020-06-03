@@ -146,9 +146,12 @@ void Renderer::setLightUniforms(const GLuint _currentShaderProgram, mat4 _viewMa
 	labhelper::setUniformSlow(_currentShaderProgram, "fogColor", fogColor);
 	labhelper::setUniformSlow(_currentShaderProgram, "fogDensity", fogDensity);
 	labhelper::setUniformSlow(_currentShaderProgram, "depthRange", depthRange);
+	
 	labhelper::setUniformSlow(_currentShaderProgram, "toneMapping", toneMapping);
 	labhelper::setUniformSlow(_currentShaderProgram, "gamma", gamma);
 	labhelper::setUniformSlow(_currentShaderProgram, "exposure", exposure);
+
+	labhelper::setUniformSlow(_currentShaderProgram, "ssao", ssao);
 }
 
 void Renderer::setClearFrameBuffer(const GLuint _frameBufferId) const {
@@ -211,16 +214,19 @@ void Renderer::drawSSAOTexture() {
 	glActiveTexture(GL_TEXTURE3);
 	glBindTexture(GL_TEXTURE_2D, viewNormalBuffer.colorTextureTargets[2]);
 
-	mat4 projMatrix = cameraComponent->getProjMatrix();
-	mat4 invProjMatrix = inverse(cameraComponent->getProjMatrix());
 	labhelper::setUniformSlow(ssaoInputProgram, "inverseProjMatrix",
-		inverse(cameraComponent->getProjMatrix()));
+	                          inverse(cameraComponent->getProjMatrix()));
 	labhelper::setUniformSlow(ssaoInputProgram, "projectionMatrix", cameraComponent->getProjMatrix());
 	labhelper::setUniformSlow(ssaoInputProgram, "samples", ssaoSamples, sampleHemisphere);
 	labhelper::setUniformSlow(ssaoInputProgram, "hemisphereRadius", ssaoRadius);
 	labhelper::setUniformSlow(ssaoInputProgram, "numOfSamples", ssaoSamples);
 	
 	drawTexture(viewNormalBuffer.colorTextureTargets[0], ssaoTexture.framebufferId, ssaoInputProgram);
+}
+
+void Renderer::setActiveTexture(const int _textureUnit, const GLuint _texture) {
+	glActiveTexture(GL_TEXTURE0 + _textureUnit);
+	glBindTexture(GL_TEXTURE_2D, _texture);
 }
 
 void Renderer::drawTexture(const GLuint _sourceTexture, const GLuint _targetId, const GLuint _program) const {
@@ -243,7 +249,7 @@ void Renderer::draw(){
 
 	int iteration = 0;
 	if (ssao) {
-		setRandRotTex();
+		//setRandRotTex();
 		iteration = 1;
 	}
 	
@@ -268,7 +274,11 @@ void Renderer::draw(){
 			drawSSAOTexture();
 	}
 	
-	if (ssao) drawTexture(ssaoTexture.colorTextureTargets[0], 0, textureProgram);
+	if (ssao) {
+		if (showOnlySSAO)
+			drawTexture(ssaoTexture.colorTextureTargets[0], 0, textureProgram);
+		else setActiveTexture(9, ssaoTexture.colorTextureTargets[0]);
+	}
 }
 
 void Renderer::drawWithDOF(){
