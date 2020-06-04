@@ -268,14 +268,6 @@ void Renderer::createSSAOTexture() {
 	}
 }
 
-void Renderer::applySSAO() {
-	if (showOnlySSAO)
-		drawTexture(blurredSSAO ? ssaoBlurBuffer.colorTextureTargets[0] : ssaoNoiseBuffer.colorTextureTargets[0], 
-		            0, textureProgram);
-	else bindTexture(GL_TEXTURE9,blurredSSAO ? ssaoBlurBuffer.colorTextureTargets[0] : 
-		                             ssaoNoiseBuffer.colorTextureTargets[0]);
-}
-
 void Renderer::applyMotionBlur() {
 	useProgram(motionBlurProgram);
 }
@@ -296,25 +288,29 @@ void Renderer::draw(){
 		const mat4 lightProjMatrix = (*lights)[0]->getComponent<LightComponent>()->getProjMatrix();
 		const mat4 lightViewMatrix = (*lights)[0]->getComponent<LightComponent>()->getViewMatrix();
 
-		if (background != nullptr && renderPass == STANDARD) 
-			background->getComponent<EnvironmentComponent>()->bindEnvMaps();
-
-		if (renderShadows && renderPass == STANDARD) 
-			drawShadowMap(lightViewMatrix, lightProjMatrix);
+		if (renderPass == STANDARD) {
+			if (background != nullptr)
+				background->getComponent<EnvironmentComponent>()->bindEnvMaps();
+			
+			if (renderShadows)
+				drawShadowMap(lightViewMatrix, lightProjMatrix);
+			
+			bindTexture(GL_TEXTURE9,blurredSSAO ? ssaoBlurBuffer.colorTextureTargets[0] : 
+		                             ssaoNoiseBuffer.colorTextureTargets[0]);
+		}	
 
 		drawFromCamera(projMatrix, viewMatrix, lightViewMatrix,
 		               lightProjMatrix, renderPass);
 
 		if (renderPass == VIEW_NORMAL)
 			createSSAOTexture();
-
-		else if (renderPass == STANDARD) {
-			if (ssao) applySSAO();
-		}
 	}
-	
-	
+
 	if (motionBlur) applyMotionBlur();
+
+	if (ssao & showOnlySSAO)
+		drawTexture(blurredSSAO ? ssaoBlurBuffer.colorTextureTargets[0] : ssaoNoiseBuffer.colorTextureTargets[0], 
+		            0, textureProgram);
 }
 
 void Renderer::drawWithDOF(){

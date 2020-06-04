@@ -104,7 +104,6 @@ public:
 	void drawTexture(GLuint _sourceTexture, GLuint _targetId, GLuint _program);
 	void useProgram(GLuint _program);
 	void createSSAOTexture();
-	void applySSAO();
 	void bindTexture(GLenum _textureUnit, GLuint _texture);
 	void applyMotionBlur();
 	void draw();
