@@ -158,6 +158,7 @@ void Renderer::setFXUniforms(const GLuint _currentShaderProgram) const {
 	labhelper::setUniformSlow(_currentShaderProgram, "exposure", exposure);
 
 	labhelper::setUniformSlow(_currentShaderProgram, "ssao", ssao);
+	labhelper::setUniformSlow(_currentShaderProgram, "ssaoIntensity", ssaoIntensity);
 }
 
 void Renderer::setLightUniforms(const GLuint _currentShaderProgram, mat4 _viewMatrix, const mat4 _lightViewMatrix,

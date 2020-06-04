@@ -32,6 +32,7 @@ public:
 	float gamma = 0.54;
 	float exposure = 2.23;
 	bool showOnlySSAO = false;
+	float ssaoIntensity = 1.5;
 
 private:
 	
@@ -42,9 +43,9 @@ private:
 	enum RenderPass {STANDARD, SHADOW, VIEW_NORMAL};
 	std::map<int, RenderPass> renderPassMap {{1, VIEW_NORMAL}, {0, STANDARD}};
 	
-	GLuint ssaoInputProgram;
-	GLuint horizontalBlurProgram;
-	GLuint verticalBlurProgram;
+	GLuint ssaoInputProgram{};
+	GLuint horizontalBlurProgram{};
+	GLuint verticalBlurProgram{};
 	GLuint randRotTex{};
 	float randomRotations[64 * 64]{};
 	Fbo viewNormalBuffer = Fbo(3);
@@ -53,7 +54,6 @@ private:
 	
 	vec3 fogColor {1, 1, 1};
 	
-	const int AA_SAMPLES = 16;
 	float environmentMultiplier = 2.5f;
 	bool renderShadows = true;
 	InputHandler* inputHandler;
@@ -74,7 +74,7 @@ private:
 	std::vector<Fbo> dofFboList;
 
 	GLuint dofProgram{};
-	GLuint textureProgram;
+	GLuint textureProgram{};
 
 public:
 	void setShadowMapProgram(GLuint _shadowMapProgram);

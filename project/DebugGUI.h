@@ -80,8 +80,9 @@ namespace debug_gui {
 			ImGui::Checkbox("SSAO on", &_renderer->ssao);
 			ImGui::Checkbox("Blurred SSAO", &_renderer->blurredSSAO);
 			ImGui::Checkbox("Show only SSAO", &_renderer->showOnlySSAO);
-			ImGui::SliderFloat("SSAO radius: ", &_renderer->ssaoRadius, 0, 5);
-			ImGui::SliderInt("SSAO samples: ", &_renderer->ssaoSamples, 0, 50);
+			ImGui::SliderFloat("Radius: ", &_renderer->ssaoRadius, 0, 5);
+			ImGui::SliderInt("Samples: ", &_renderer->ssaoSamples, 0, 50);
+			ImGui::SliderFloat("Intensity: ", &_renderer->ssaoIntensity, 0, 5);
 		}
 
 		if (ImGui::CollapsingHeader("Tone mapping", "tone", true, false)) {

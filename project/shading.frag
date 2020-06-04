@@ -84,9 +84,12 @@ layout(location = 0) out vec4 fragmentColor;
 ///////////////////////////////////////////////////////////////////////////////
 vec3 velocity;
 
-// SSAO
+///////////////////////////////////////////////////////////////////////////////
+// Motion blur
+///////////////////////////////////////////////////////////////////////////////
 uniform bool ssao;
 layout(binding = 9) uniform sampler2D ssaoMap;
+uniform float ssaoIntensity;
 
 vec4 textureRect(in sampler2D tex, vec2 rectangleCoord)
 {
@@ -156,7 +159,7 @@ vec3 calculateIndirectIllumination(vec3 wo, vec3 n)
 	vec3 irradiance = (environment_multiplier * texture(irradianceMap, lookup)).xyz;
 
 	vec3 diffuse_term = getMatColor() * (1.0 / PI) * irradiance;
-	//if (ssao) diffuse_term *= textureRect(ssaoMap, gl_FragCoord.xy).x;
+	if (ssao) diffuse_term *= pow(textureRect(ssaoMap, gl_FragCoord.xy).x, ssaoIntensity);
 
 	vec3 wi = -(viewInverse * vec4(reflect(wo, n), 0)).xyz;
 	lookup = getSphericalCoords(wi);
@@ -226,7 +229,7 @@ void main()
 	// Indirect illumination
 	vec3 indirect_illumination_term = calculateIndirectIllumination(wo, n);
 	// SSAO application;
-	if (ssao) indirect_illumination_term *= textureRect(ssaoMap, gl_FragCoord.xy).x;
+	//if (ssao) indirect_illumination_term *= pow(textureRect(ssaoMap, gl_FragCoord.xy).x, ssaoIntensity);
 
 	///////////////////////////////////////////////////////////////////////////
 	// Add emissive term. If emissive texture exists, sample this term.
