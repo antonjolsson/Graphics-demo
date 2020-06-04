@@ -80,12 +80,7 @@ uniform float exposure;
 layout(location = 0) out vec4 fragmentColor;
 
 ///////////////////////////////////////////////////////////////////////////////
-// Motion blur
-///////////////////////////////////////////////////////////////////////////////
-vec3 velocity;
-
-///////////////////////////////////////////////////////////////////////////////
-// Motion blur
+// SSAO
 ///////////////////////////////////////////////////////////////////////////////
 uniform bool ssao;
 layout(binding = 9) uniform sampler2D ssaoMap;
@@ -98,6 +93,10 @@ vec4 textureRect(in sampler2D tex, vec2 rectangleCoord)
 
 void testDisplay(float f){
 	fragmentColor = vec4(f);
+}
+
+void testDisplay(vec3 v){
+	fragmentColor = vec4(v, 1);
 }
 
 float getFresnel(vec3 wh, vec3 wi, vec3 wo) {
@@ -187,7 +186,7 @@ vec4 addFog(vec3 shading, float depth) {
 // Doesn't work... yet!
 void computePixelVelocity() {
 	vec3 previousScreenPos = (prevVPMatrix * vec4(worldPosition, 1)).xyz;
-	velocity = gl_FragCoord.xyz - previousScreenPos;
+	vec3 velocity = gl_FragCoord.xyz - previousScreenPos;
 
 }
 
@@ -249,8 +248,6 @@ void main()
 		shading = exposureToneMapping(shading);
 
 	fragmentColor = fog ? addFog(shading, getViewSpaceDepth().z) : vec4(shading, 1.f);
-
-	//testDisplay(textureRect(ssaoMap, gl_FragCoord.xy).x);
 
 	return;
 }

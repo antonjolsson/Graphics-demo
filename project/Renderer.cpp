@@ -57,7 +57,7 @@ void Renderer::createFrameBuffers(const int _winWidth, const int _winHeight) {
 		dofFboList[i].resize(_winWidth, _winHeight);
 	}
 	for (auto* fbo : std::vector<Fbo*> {&viewNormalBuffer, &ssaoNoiseBuffer, &ssaoBlurBuffer, &verticalBlurBuffer, 
-		&horizontalBlurBuffer}) {
+		&horizontalBlurBuffer, &motionBlurBuffer}) {
 		(*fbo).resize(_winWidth, _winHeight);
 	}
 }
@@ -81,6 +81,8 @@ void Renderer::createPrograms() {
 	                                                "../project/horizontal_blur.frag");
 	textureProgram = labhelper::loadShaderProgram("../project/texture.vert", 
 	                                              "../project/texture.frag");
+	motionBlurProgram = labhelper::loadShaderProgram("../project/texture.vert", 
+	                                              "../project/motionBlur.frag");
 }
 
 Renderer::Renderer(InputHandler* _inputHandler, GameObject* _camera, std::vector<RenderComponent*>* _renderComponents, 
@@ -266,12 +268,16 @@ void Renderer::createSSAOTexture() {
 	}
 }
 
-void Renderer::drawSSAO() {
+void Renderer::applySSAO() {
 	if (showOnlySSAO)
 		drawTexture(blurredSSAO ? ssaoBlurBuffer.colorTextureTargets[0] : ssaoNoiseBuffer.colorTextureTargets[0], 
 		            0, textureProgram);
 	else bindTexture(GL_TEXTURE9,blurredSSAO ? ssaoBlurBuffer.colorTextureTargets[0] : 
 		                             ssaoNoiseBuffer.colorTextureTargets[0]);
+}
+
+void Renderer::applyMotionBlur() {
+	useProgram(motionBlurProgram);
 }
 
 void Renderer::draw(){
@@ -301,9 +307,14 @@ void Renderer::draw(){
 
 		if (renderPass == VIEW_NORMAL)
 			createSSAOTexture();
+
+		else if (renderPass == STANDARD) {
+			if (ssao) applySSAO();
+		}
 	}
 	
-	if (ssao) drawSSAO();
+	
+	if (motionBlur) applyMotionBlur();
 }
 
 void Renderer::drawWithDOF(){

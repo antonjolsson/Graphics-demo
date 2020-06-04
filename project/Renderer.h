@@ -34,6 +34,8 @@ public:
 	bool showOnlySSAO = false;
 	float ssaoIntensity = 1.5;
 
+	bool motionBlur = true;
+
 private:
 	
 	GLuint currentProgram = 0;
@@ -76,6 +78,9 @@ private:
 	GLuint dofProgram{};
 	GLuint textureProgram{};
 
+	Fbo motionBlurBuffer;
+	GLuint motionBlurProgram = 0;
+
 public:
 	void setShadowMapProgram(GLuint _shadowMapProgram);
 
@@ -99,8 +104,9 @@ public:
 	void drawTexture(GLuint _sourceTexture, GLuint _targetId, GLuint _program);
 	void useProgram(GLuint _program);
 	void createSSAOTexture();
-	void drawSSAO();
+	void applySSAO();
 	void bindTexture(GLenum _textureUnit, GLuint _texture);
+	void applyMotionBlur();
 	void draw();
 	void drawWithDOF();
 
