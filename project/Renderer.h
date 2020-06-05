@@ -17,7 +17,7 @@ public:
 	bool fog = false;
 	float depthRange = 200;
 	float fogDensity = 0.24;
-	mat4 prevVPMatrix {1.f};
+	
 	
 	bool depthOfField = false;
 	float aperture = 0.3;
@@ -34,7 +34,7 @@ public:
 	bool showOnlySSAO = false;
 	float ssaoIntensity = 1.5;
 
-	bool motionBlur = true;
+	bool motionBlur = false;
 
 private:
 	
@@ -55,10 +55,11 @@ private:
 	vec3 sampleHemisphere[16]{};
 	
 	vec3 fogColor {1, 1, 1};
+
+	InputHandler* inputHandler;
 	
 	float environmentMultiplier = 2.5f;
 	bool renderShadows = true;
-	InputHandler* inputHandler;
 	GameObject* camera;
 	const std::vector<RenderComponent*>* renderComponents;
 	bool showHitbox = false;
@@ -80,6 +81,8 @@ private:
 
 	Fbo motionBlurBuffer;
 	GLuint motionBlurProgram = 0;
+	mat4 prevVPMatrix {1.f};
+	mat4 prevProjMatrix {1.f};
 
 public:
 	void setShadowMapProgram(GLuint _shadowMapProgram);
@@ -90,7 +93,7 @@ public:
 	Renderer(InputHandler* _inputHandler, GameObject* _camera, std::vector<RenderComponent*>* _renderComponents, bool _showHitbox,
 	         int _winWidth, int _winHeight, std::vector<GameObject*>* _lights, Ship* _ship, GameObject* _background, GameObject* _landingPad);
 	void setRenderShadows(bool _renderShadows);
-	void setMatrixUniforms(GLuint _currentShaderProgram, const mat4& _viewMatrix, const mat4& _projectionMatrix, mat4 _modelMatrix);
+	void setMatrixUniforms(GLuint _currentShaderProgram, const mat4& _viewMatrix, const mat4& _projectionMatrix, mat4 _modelMatrix) const;
 	void drawScene(const ::Renderer::RenderPass _renderPass, mat4 _viewMatrix, mat4 _projMatrix, mat4 _lightViewMatrix, mat4 _lightProjMatrix);
 	void drawShadowMap(mat4 _lightViewMatrix, mat4 _lightProjMatrix);
 	void setFXUniforms(GLuint _currentShaderProgram) const;
@@ -105,7 +108,7 @@ public:
 	void useProgram(GLuint _program);
 	void createSSAOTexture();
 	void bindTexture(GLenum _textureUnit, GLuint _texture);
-	void applyMotionBlur();
+	void applyMotionBlur(mat4 _viewMatrix, mat4 _projMatrix);
 	void draw();
 	void drawWithDOF();
 

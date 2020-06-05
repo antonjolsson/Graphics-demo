@@ -242,8 +242,6 @@ void main()
 
 	vec3 shading = direct_illumination_term + indirect_illumination_term + emission_term;
 
-	//fragmentColor = vec4(velocity, 1);
-
 	if (toneMapping) 
 		shading = exposureToneMapping(shading);
 

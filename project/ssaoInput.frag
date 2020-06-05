@@ -97,8 +97,6 @@ void main()
 
 	mat3 tbn = mat3(vsTangent, vsBiTangent, vsNormal); // local base
 
-	
-	//tbn = zRotMatrix * tbn;
 	mat4 tbn4 = mat4(vec4(vsTangent, 1), vec4(vsBiTangent, 1), vec4(vsNormal, 1), vec4(0));
 	tbn4 = rotationZ(randomRot) * tbn4;
 	tbn = mat3(tbn4);
@@ -134,10 +132,7 @@ void main()
 		// Wrong?
 		testDisplay(distance(vsBlockerPos, vsSamplePos) / 100);
 
-		//testDisplay(blockerDepth);
-		//testDisplay(sampleCoords.z);
-
-		testDisplay(abs(vsSamplePos.z) / 20);
+		testDisplay(ndc);
 		// Check that the blocker is closer than hemisphere_radius to vs_pos
 		// (otherwise skip this sample)
 		if (length(vsBlockerPos - vsPos) >= hemisphereRadius)

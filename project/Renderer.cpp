@@ -2,7 +2,14 @@
 #include "Renderer.h"
 #include <glm/gtx/transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include <iostream>
 
+
+
+#include "AudioComponent.h"
+#include "AudioComponent.h"
+#include "AudioComponent.h"
+#include "AudioComponent.h"
 #include "EnvironmentComponent.h"
 #include "LightComponent.h"
 #include "RenderComponent.h"
@@ -111,11 +118,21 @@ void Renderer::setRenderShadows(const bool _renderShadows) {
 }
 
 void Renderer::setMatrixUniforms(const GLuint _currentShaderProgram, const mat4& _viewMatrix, const mat4& _projectionMatrix, 
-                       const mat4 _modelMatrix) {
+                       const mat4 _modelMatrix) const {
 	labhelper::setUniformSlow(_currentShaderProgram, "prevVPMatrix", prevVPMatrix);
+		labhelper::setUniformSlow(_currentShaderProgram, "prevProjMatrix", prevProjMatrix);
+	labhelper::setUniformSlow(_currentShaderProgram, "viewMatrix", _viewMatrix);
+	labhelper::setUniformSlow(_currentShaderProgram, "projectionMatrix", _projectionMatrix);
 	labhelper::setUniformSlow(_currentShaderProgram, "modelViewProjectionMatrix",
 		_projectionMatrix * _viewMatrix * _modelMatrix);
-	prevVPMatrix = _projectionMatrix * _viewMatrix;
+	labhelper::setUniformSlow(_currentShaderProgram, "viewProjectionMatrix",
+		_projectionMatrix * _viewMatrix);
+	mat4 viewProjectionMatrix = _projectionMatrix * _viewMatrix;
+	labhelper::setUniformSlow(_currentShaderProgram, "inverseViewProjMatrix",
+		inverse(_projectionMatrix * _viewMatrix));
+	mat4 inverseProjMatrix = inverse(_projectionMatrix);
+	labhelper::setUniformSlow(_currentShaderProgram, "inverseProjMatrix",inverse(_projectionMatrix));
+	labhelper::setUniformSlow(_currentShaderProgram, "inverseViewMatrix", inverse(_viewMatrix));
 	labhelper::setUniformSlow(_currentShaderProgram, "modelViewMatrix", _viewMatrix * _modelMatrix);
 	labhelper::setUniformSlow(_currentShaderProgram, "normalMatrix",
 	                          inverse(transpose(_viewMatrix * _modelMatrix)));
@@ -192,8 +209,11 @@ void Renderer::setLightUniforms(const GLuint _currentShaderProgram, mat4 _viewMa
 void Renderer::drawFromCamera(const mat4 _projMatrix, const mat4 _viewMatrix, const mat4 _lightViewMatrix,
                               const mat4 _lightProjMatrix, const RenderPass _renderPass){
 	if (!depthOfField) {
-		if (_renderPass == STANDARD)
-			setClearFrameBuffer(0);
+		if (_renderPass == STANDARD) {
+			if (motionBlur)
+				setClearFrameBuffer(motionBlurBuffer.framebufferId);
+			else setClearFrameBuffer(0);
+		}
 		else setClearFrameBuffer(viewNormalBuffer.framebufferId);
 	}
 		
@@ -268,8 +288,29 @@ void Renderer::createSSAOTexture() {
 	}
 }
 
-void Renderer::applyMotionBlur() {
+void Renderer::applyMotionBlur(const mat4 _viewMatrix, const mat4 _projMatrix) {
+	std::cout << "projectionMatrix: " << std::endl;
+	for (int i = 0; i < 4; ++i) {
+		for (int j = 0; j < 4; ++j) {
+			std::cout << _projMatrix[i][j] << " ";
+		}
+		std::cout << std::endl;
+	}
+	std::cout << "prevProjMatrix: " << std::endl;
+	for (int i = 0; i < 4; ++i) {
+		for (int j = 0; j < 4; ++j) {
+			std::cout << prevProjMatrix[i][j] << " ";
+		}
+		std::cout << std::endl;
+	}
+	std::cout << std::endl;
+	
 	useProgram(motionBlurProgram);
+	bindTexture(GL_TEXTURE1, viewNormalBuffer.depthBuffer);
+	setMatrixUniforms(motionBlurProgram, _viewMatrix, _projMatrix, mat4(1));
+	drawTexture(motionBlurBuffer.colorTextureTargets[0], 0, currentProgram);
+	prevVPMatrix = _projMatrix * _viewMatrix;
+	prevProjMatrix = _projMatrix;
 }
 
 void Renderer::draw(){
@@ -279,14 +320,16 @@ void Renderer::draw(){
 	}
 
 	int iteration = ssao ? 1 : 0;
+
+	const mat4 projMatrix = cameraComponent->getProjMatrix();
+	const mat4 viewMatrix = cameraComponent->getViewMatrix();
+	const mat4 lightProjMatrix = (*lights)[0]->getComponent<LightComponent>()->getProjMatrix();
+	const mat4 lightViewMatrix = (*lights)[0]->getComponent<LightComponent>()->getViewMatrix();
 	
 	for (; iteration >= 0; --iteration) {
 		const RenderPass renderPass = renderPassMap[iteration];
 		
-		const mat4 projMatrix = cameraComponent->getProjMatrix();
-		const mat4 viewMatrix = cameraComponent->getViewMatrix();
-		const mat4 lightProjMatrix = (*lights)[0]->getComponent<LightComponent>()->getProjMatrix();
-		const mat4 lightViewMatrix = (*lights)[0]->getComponent<LightComponent>()->getViewMatrix();
+		
 
 		if (renderPass == STANDARD) {
 			if (background != nullptr)
@@ -294,8 +337,9 @@ void Renderer::draw(){
 			
 			if (renderShadows)
 				drawShadowMap(lightViewMatrix, lightProjMatrix);
-			
-			bindTexture(GL_TEXTURE9,blurredSSAO ? ssaoBlurBuffer.colorTextureTargets[0] : 
+
+			if (ssao)
+				bindTexture(GL_TEXTURE9,blurredSSAO ? ssaoBlurBuffer.colorTextureTargets[0] : 
 		                             ssaoNoiseBuffer.colorTextureTargets[0]);
 		}	
 
@@ -306,7 +350,7 @@ void Renderer::draw(){
 			createSSAOTexture();
 	}
 
-	if (motionBlur) applyMotionBlur();
+	if (motionBlur) applyMotionBlur(viewMatrix, projMatrix);
 
 	if (ssao & showOnlySSAO)
 		drawTexture(blurredSSAO ? ssaoBlurBuffer.colorTextureTargets[0] : ssaoNoiseBuffer.colorTextureTargets[0], 
