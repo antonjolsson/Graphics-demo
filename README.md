@@ -9,3 +9,6 @@ Techniques implemented:
 
 ![Screen](/screenshots/screenshot.png)
 
+
+Based on https://gitlab.com/chalmerscg/tda362-labs-2019
+
