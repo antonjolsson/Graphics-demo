@@ -1,7 +1,9 @@
 # Description
-This is the repository for the tutorials of the course TDA362/DIT223 Computer Graphics given at Chalmers University of
-Technology 2019. It contains resources and skeleton code which is to be filled in by students in six different lab assignments and one larger project. 
+Demo project for the course Advanced computer graphics @ Chalmers/GU, showcasing various 3D-graphics techniques. Project's foundation is the labs from the course Computer Graphics.<br>
+Techniques implemented:
+* Heightfield
+* Screen-space ambient occlusion
+* Depth-of-field
+* Tone mapping/HDR
+* Smooth, automatic third-person camera movement by lerping movement vector 
 
-The accompanying web page to this repository is located at http://www.cse.chalmers.se/edu/course/TDA362/tutorials/index.html.
-
-Instructions on how to use this repository specifically can be found at http://www.cse.chalmers.se/edu/course/TDA362/tutorials/start.html.
