@@ -74,10 +74,9 @@ float rand(vec2 co){
 
 void main()
 {
-	// GOOD
+
 	vec3 vsNormal = textureRect(viewNormalTexture, gl_FragCoord.xy).xyz;
 	float fragmentDepth = textureRect(depthTexture, gl_FragCoord.xy).r;
-	// GOOD
 	vec2 texCoord = gl_FragCoord.xy / textureSize(viewNormalTexture, 0);
 
 	float randomRot = 2 * pi * texture(randomRotTex, texCoord * textureSize(randomRotTex, 0)).x;
@@ -85,7 +84,6 @@ void main()
 
 	vsNormal = zRotMatrix * vsNormal;
 
-	// GOOD
 	// Normalized Device Coordinates (clip space)
 	vec4 ndc = vec4(texCoord.x * 2.0 - 1.0, texCoord.y * 2.0 - 1.0, fragmentDepth * 2.0 - 1.0, 1.0);
 
@@ -106,33 +104,26 @@ void main()
 
 	for (int i = 0; i < numOfSamples; i++) {
 
-		// Looks plausible
 		// Project hemishere sample onto the local base
 		vec3 hemiSample = tbn * samples[i];
 
-		//Looks OK
 		// compute view-space position of sample
 		vec3 vsSamplePos = vsPos + hemiSample * hemisphereRadius;
 		
 		// compute the ndc-coords of the sample
 		vec3 sampleCoordsNDC = homogenize(projectionMatrix * vec4(vsSamplePos, 1.0));
 
-		// Looks OK (z little high)
 		vec3 ssSampleCoords = vec3((sampleCoordsNDC.x + 1.0) / 2.0, (sampleCoordsNDC.y + 1.0) / 2.0, 
 			(sampleCoordsNDC.z + 1.0) / 2.0);
 
-		// Probably OK
 		// Sample the depth-buffer at a texture coord based on the ndc-coord of the sample
 		float blockerDepth = texture(depthTexture, ssSampleCoords.xy).r;
 
 		// Find the view-space coord of the blocker
 		vec3 vsBlockerPos = homogenize(inverseProjMatrix * vec4(sampleCoordsNDC.xy, blockerDepth * 2.0 - 1.0, 1.0));
-		//vec3 vsBlockerPos = vec3(inverseProjMatrix * vec4(homogenize(vec4(ssSampleCoords.xy, blockerDepth * 2.0 - 1.0, 1.0)),1.0));
 
-		// Wrong?
 		testDisplay(distance(vsBlockerPos, vsSamplePos) / 100);
 
-		testDisplay(ndc);
 		// Check that the blocker is closer than hemisphere_radius to vs_pos
 		// (otherwise skip this sample)
 		if (length(vsBlockerPos - vsPos) >= hemisphereRadius)

@@ -145,14 +145,14 @@ void Renderer::drawScene(const RenderPass _renderPass, const mat4 _viewMatrix, c
 	for (auto renderComponent : *renderComponents) {
 		GLuint compShaderProgram;
 		switch (_renderPass) {
-		case SHADOW:
-			compShaderProgram = shadowMapProgram;
-			break;
-		case VIEW_NORMAL:
-			compShaderProgram = renderComponent->getViewNormalProgram();
-			break;
-		case STANDARD: default: 
-			compShaderProgram = renderComponent->getDefaultProgram();
+			case SHADOW:
+				compShaderProgram = shadowMapProgram;
+				break;
+			case VIEW_NORMAL:
+				compShaderProgram = renderComponent->getViewNormalProgram();
+				break;
+			case STANDARD: default: 
+				compShaderProgram = renderComponent->getDefaultProgram();
 		}
 		useProgram(compShaderProgram);
 		setLightUniforms(compShaderProgram, _viewMatrix, _lightViewMatrix, _lightProjMatrix,
