@@ -19,7 +19,6 @@
 #include "LightComponent.h"
 #include "Renderer.h"
 #include "Camera.h"
-#include "HeightFieldComp.h"
 
 void Game::initEnemies(InputHandler*_engine, bool _debug) {
     

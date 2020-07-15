@@ -74,6 +74,9 @@ namespace debug_gui {
 
 		if (ImGui::CollapsingHeader("Heightfield", "heightfield", true, false)) {
 			ImGui::SliderFloat("Height factor", &_renderer->heightFieldScaling, 0, 0.5);
+			//ImGui::SameLine();
+			ImGui::Checkbox("Polygon mode", &_renderer->hfPolygonMode);
+			ImGui::SliderInt("Tesselation", &_renderer->tesselation, 1, 1024);
 		}
 		
 		/*if (ImGui::CollapsingHeader("Depth-of-field", "dof", true, false)) {

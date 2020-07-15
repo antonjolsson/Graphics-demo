@@ -6,6 +6,7 @@
 #include "InputHandler.h"
 #include "ModelRenderComponent.h"
 #include "CameraComponent.h"
+#include "HeightFieldComp.h"
 #include "RenderComponent.h"
 #include "ShadowMap.h"
 #include "Ship.h"
@@ -16,7 +17,7 @@ class Renderer {
 public:
 	bool fog = false;
 	float depthRange = 200;
-	float fogDensity = 0.24;
+	float fogDensity = 0.65;
 	
 	
 	bool depthOfField = false;
@@ -36,6 +37,10 @@ public:
 
 	bool motionBlur = false;
 	float heightFieldScaling = 0.2f;
+	bool hfPolygonMode = false;
+	int tesselation = 1;
+	int oldTesselation = 1;
+	HeightFieldComp* heightfield;
 
 private:
 	
@@ -112,6 +117,11 @@ public:
 	void createSSAOTexture();
 	void bindTexture(GLenum _textureUnit, GLuint _texture);
 	void applyMotionBlur(mat4 _viewMatrix, mat4 _projMatrix);
+	void setPolygonMode() const;
+
+	HeightFieldComp* getHeightfield() const;
+	void setHeightfieldParam();
+
 	void draw();
 	void drawWithDOF();
 

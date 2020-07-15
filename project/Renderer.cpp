@@ -4,15 +4,10 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <iostream>
 
-
-
-#include "AudioComponent.h"
-#include "AudioComponent.h"
-#include "AudioComponent.h"
-#include "AudioComponent.h"
 #include "EnvironmentComponent.h"
+
 #include "LightComponent.h"
-#include "RenderComponent.h"
+
 #include "Ship.h"
 
 // *** Helper methods ***********************************************************
@@ -101,6 +96,11 @@ Renderer::Renderer(InputHandler* _inputHandler, GameObject* _camera, std::vector
 	landingPad = _landingPad;
 	background = _background;
 	cameraComponent = camera->getComponent<CameraComponent>();
+
+	heightfield = getHeightfield();
+	tesselation = heightfield->getTesselation();
+	oldTesselation = tesselation;
+	
 	glEnable(GL_DEPTH_TEST); // enable Z-buffering
 	glEnable(GL_CULL_FACE);  // enables backface culling
 
@@ -168,6 +168,7 @@ void Renderer::drawScene(const RenderPass _renderPass, const mat4 _viewMatrix, c
 
 void Renderer::setFXUniforms(const GLuint _currentShaderProgram) const {
 	labhelper::setUniformSlow(_currentShaderProgram, "heightScaling", heightFieldScaling);
+	labhelper::setUniformSlow(_currentShaderProgram, "hfPolygonMode", hfPolygonMode);
 	
 	labhelper::setUniformSlow(_currentShaderProgram, "fog", fog);
 	labhelper::setUniformSlow(_currentShaderProgram, "fogColor", fogColor);
@@ -315,7 +316,38 @@ void Renderer::applyMotionBlur(const mat4 _viewMatrix, const mat4 _projMatrix) {
 	prevProjMatrix = _projMatrix;
 }
 
+void Renderer::setPolygonMode() const {
+	for (auto renderComponent : *renderComponents) {
+		auto* heightField = dynamic_cast<HeightFieldComp*>(renderComponent);
+		if (heightField != nullptr) {
+			heightField->setPolygonMode(hfPolygonMode);
+			return;
+		}
+	}
+}
+
+HeightFieldComp* Renderer::getHeightfield() const {
+	for (auto renderComponent : *renderComponents) {
+		auto* heightField = dynamic_cast<HeightFieldComp*>(renderComponent);
+		if (heightField != nullptr) {
+			return heightField;
+		}
+	}
+	return nullptr;
+}
+
+void Renderer::setHeightfieldParam() {
+	heightfield->setPolygonMode(hfPolygonMode);
+	if (tesselation != oldTesselation) {
+		heightfield->setTesselation(tesselation);
+		oldTesselation = tesselation;
+	}
+	
+}
+
 void Renderer::draw(){
+	setHeightfieldParam();
+	
 	if (depthOfField) {
 		drawWithDOF();
 		return;
@@ -331,8 +363,6 @@ void Renderer::draw(){
 	for (; iteration >= 0; --iteration) {
 		const RenderPass renderPass = renderPassMap[iteration];
 		
-		
-
 		if (renderPass == STANDARD) {
 			if (background != nullptr)
 				background->getComponent<EnvironmentComponent>()->bindEnvMaps();

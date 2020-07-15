@@ -1,4 +1,5 @@
 
+
 #include "HeightFieldComp.h"
 
 #include <iostream>
@@ -7,8 +8,6 @@
 #include <array>
 #include <glm/glm.hpp>
 #include <stb_image.h>
-
-#include "gameObject.h"
 
 using namespace glm;
 using std::string;
@@ -158,18 +157,31 @@ void HeightFieldComp::render(const GLuint _compShaderProgram)
 		return;
 	}
 	glBindVertexArray(m_vao);
-	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	if (showPolygons) glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	glDisable(GL_CULL_FACE);
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, m_texid_hf);
 	glActiveTexture(GL_TEXTURE1);
 	glBindTexture(GL_TEXTURE_2D, m_texid_diffuse);
 	glDrawElements(GL_TRIANGLES, m_numIndices, GL_UNSIGNED_INT, 0);
-	//glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	if (showPolygons) glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 }
 
 void HeightFieldComp::update(float _dt) {
 	modelMatrix = mat4 ({terrainScaling});
 	modelMatrix[3] = vec4{ 0, 0, 0, 1.0 };
+}
+
+void HeightFieldComp::setPolygonMode(const bool _hfPolygonMode) {
+	showPolygons = _hfPolygonMode;
+}
+
+void HeightFieldComp::setTesselation(const int _tesselation) {
+	tesselation = _tesselation;
+	generateMesh(_tesselation);
+}
+
+int HeightFieldComp::getTesselation() const {
+	return tesselation;
 }
 

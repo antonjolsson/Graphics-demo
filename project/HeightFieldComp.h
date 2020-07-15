@@ -1,20 +1,22 @@
+#pragma once
 #include <string>
 #include <GL/glew.h>
-#include "gameObject.h"
 #include "labhelper.h"
 #include "RenderComponent.h"
 
-class HeightFieldComp : public RenderComponent {
+class HeightFieldComp final : public RenderComponent {
 	
-	int tesselation = 1024;
+	int tesselation = 1024; // 1024
 	float terrainScaling = 250.0f;
 
 	const GLuint HEIGHTFIELD_PROGRAM = labhelper::loadShaderProgram("../project/heightfield.vert",
-		"../project/shading.frag");
+		"../project/heightfield.frag");
 	const GLuint HEIGHTFIELD_VN_PROGRAM = labhelper::loadShaderProgram("../project/heightfield.vert",
 		"../project/viewNormal.frag");
+	bool showPolygons = true;
 
 public:
+	
 	int m_meshResolution; // triangles edges per quad side
 	GLuint m_texid_hf;
 	GLuint m_texid_diffuse;
@@ -41,5 +43,8 @@ public:
 
 	// render height map
 	void update(float _dt) override;
-
+	void setPolygonMode(bool _hfPolygonMode);
+	
+	void setTesselation(int _tesselation);
+	int getTesselation() const;
 };

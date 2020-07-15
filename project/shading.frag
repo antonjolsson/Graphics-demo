@@ -35,6 +35,7 @@ uniform float environment_multiplier;
 ///////////////////////////////////////////////////////////////////////////////
 uniform vec3 point_light_color = vec3(1.0, 1.0, 1.0);
 uniform vec3 black_color = vec3(0);
+uniform vec3 white_color = vec3(1);
 uniform float point_light_intensity_multiplier = 50.0;
 layout(binding = 10) uniform sampler2DShadow shadowMapTex;
 
