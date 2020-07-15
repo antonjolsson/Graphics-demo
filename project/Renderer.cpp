@@ -167,6 +167,8 @@ void Renderer::drawScene(const RenderPass _renderPass, const mat4 _viewMatrix, c
 }
 
 void Renderer::setFXUniforms(const GLuint _currentShaderProgram) const {
+	labhelper::setUniformSlow(_currentShaderProgram, "heightScaling", heightFieldScaling);
+	
 	labhelper::setUniformSlow(_currentShaderProgram, "fog", fog);
 	labhelper::setUniformSlow(_currentShaderProgram, "fogColor", fogColor);
 	labhelper::setUniformSlow(_currentShaderProgram, "fogDensity", fogDensity);

@@ -16,6 +16,7 @@ uniform mat4 modelViewMatrix;
 uniform mat4 modelViewProjectionMatrix;
 uniform mat4 lightMatrix;
 uniform mat4 modelMatrix;
+uniform float heightScaling;
 
 ///////////////////////////////////////////////////////////////////////////////
 // Output to fragment shader
@@ -27,10 +28,10 @@ out vec4 shadowMapCoord;
 
 out vec3 worldPosition;
 
-const float HEIGHT_SCALING = 1.f / 5;
+//const float HEIGHT_SCALING = 1.f / 5;
 
 vec3 getHeightAdjustedPos(vec2 offset) {
-	return vec3(position.x + offset.x, texture(hfTexture, vec2(texCoordIn.x + offset.x, texCoordIn.y + offset.y)).r * HEIGHT_SCALING, 
+	return vec3(position.x + offset.x, texture(hfTexture, vec2(texCoordIn.x + offset.x, texCoordIn.y + offset.y)).r * heightScaling, 
 		position.z + offset.y);
 }
 

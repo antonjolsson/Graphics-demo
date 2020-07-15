@@ -35,6 +35,7 @@ public:
 	float ssaoIntensity = 1.5;
 
 	bool motionBlur = false;
+	float heightFieldScaling = 0.2f;
 
 private:
 	

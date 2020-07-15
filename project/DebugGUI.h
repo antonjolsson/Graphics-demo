@@ -31,7 +31,7 @@ namespace debug_gui {
 		ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate,
 		            ImGui::GetIO().Framerate);
 		if (ImGui::CollapsingHeader("Camera", "camera", true, false)) {
-			ImGui::SliderFloat("Field of view: ", &cameraComp->fieldOfView, 10.0f, 70.0f);
+			ImGui::SliderFloat("Field of view", &cameraComp->fieldOfView, 10.0f, 70.0f);
 			const vec3 cameraPos = _camera->getTransform().position;
 			const vec3 cameraDir = cameraComp->getCameraDirection();
 			ImGui::Text("Camera position: %.3f %.3f %.3f", cameraPos.x, cameraPos.y, cameraPos.z);
@@ -60,35 +60,40 @@ namespace debug_gui {
 
 		if (ImGui::CollapsingHeader("Sun", "sun", true, false)) {
 			vec3 sunPos = _sun->getPosition();
-			ImGui::SliderFloat("Sun x-pos: ", &sunPos.x, -300.0f, 300.0f);
-			ImGui::SliderFloat("Sun y-pos: ", &sunPos.y, -300.0f, 300.0f);
-			ImGui::SliderFloat("Sun z-pos: ", &sunPos.z, -300.0f, 300.0f);
+			ImGui::SliderFloat("Sun x-pos", &sunPos.x, -300.0f, 300.0f);
+			ImGui::SliderFloat("Sun y-pos", &sunPos.y, -300.0f, 300.0f);
+			ImGui::SliderFloat("Sun z-pos", &sunPos.z, -300.0f, 300.0f);
 			_sun->setPosition(sunPos);
 		}
 
 		if (ImGui::CollapsingHeader("Fog", "fog", true, false)) {
 			ImGui::Checkbox("Fog on", &_renderer->fog);
-			ImGui::SliderFloat("Fog density: ", &_renderer->fogDensity, 0, 1);
-			ImGui::SliderFloat("Depth range: ", &_renderer->depthRange, 100, 400);
+			ImGui::SliderFloat("Fog density", &_renderer->fogDensity, 0, 1);
+			ImGui::SliderFloat("Depth range", &_renderer->depthRange, 100, 400);
 		}
-		if (ImGui::CollapsingHeader("Depth-of-field", "dof", true, false)) {
+
+		if (ImGui::CollapsingHeader("Heightfield", "heightfield", true, false)) {
+			ImGui::SliderFloat("Height factor", &_renderer->heightFieldScaling, 0, 0.5);
+		}
+		
+		/*if (ImGui::CollapsingHeader("Depth-of-field", "dof", true, false)) {
 			ImGui::Checkbox("Depth-of-field on", &_renderer->depthOfField);
 			ImGui::SliderFloat("Aperture size: ", &_renderer->aperture, 0.01, 1);
-		}
+		}*/
 
 		if (ImGui::CollapsingHeader("SSAO", "ssao", false, false)) {
 			ImGui::Checkbox("SSAO on", &_renderer->ssao);
 			ImGui::Checkbox("Blurred SSAO", &_renderer->blurredSSAO);
 			ImGui::Checkbox("Show only SSAO", &_renderer->showOnlySSAO);
-			ImGui::SliderFloat("Radius: ", &_renderer->ssaoRadius, 0, 5);
-			ImGui::SliderInt("Samples: ", &_renderer->ssaoSamples, 0, 50);
-			ImGui::SliderFloat("Intensity: ", &_renderer->ssaoIntensity, 0, 5);
+			ImGui::SliderFloat("Radius", &_renderer->ssaoRadius, 0, 5);
+			ImGui::SliderInt("Samples", &_renderer->ssaoSamples, 0, 50);
+			ImGui::SliderFloat("Intensity", &_renderer->ssaoIntensity, 0, 5);
 		}
 
 		if (ImGui::CollapsingHeader("Tone mapping", "tone", true, false)) {
 			ImGui::Checkbox("Tone mapping on", &_renderer->toneMapping);
-			ImGui::SliderFloat("Gamma: ", &_renderer->gamma, 0, 5);
-			ImGui::SliderFloat("Exposure: ", &_renderer->exposure, 0, 5);
+			ImGui::SliderFloat("Gamma", &_renderer->gamma, 0, 5);
+			ImGui::SliderFloat("Exposure", &_renderer->exposure, 0, 5);
 		}
 		
 		// ----------------------------------------------------------

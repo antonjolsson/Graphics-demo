@@ -1,14 +1,16 @@
 {
   "ExpandedNodes": [
     "",
-    "\\bin",
     "\\build",
     "\\build\\.vs",
     "\\build\\project",
     "\\external",
     "\\external_src",
+    "\\out",
+    "\\out\\build",
+    "\\out\\build\\x64-Debug",
     "\\project"
   ],
-  "SelectedNode": "\\build\\project\\project.sln",
+  "SelectedNode": "\\build\\foreignAttack.sln",
   "PreviewInSolutionExplorer": false
 }
