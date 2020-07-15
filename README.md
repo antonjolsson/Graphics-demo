@@ -4,6 +4,7 @@ Demo project showcasing various 3D-graphics techniques, including
 * Screen-space ambient occlusion
 * Tone mapping/HDR
 * Smooth, automatic third-person camera movement by lerping movement vector
+* Fog
 
 <b>Click on image for video</b>
 [![Screen](/screenshots/screenshot.png)](https://youtu.be/RA6DiAuuyCU)
