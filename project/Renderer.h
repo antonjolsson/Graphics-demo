@@ -84,6 +84,8 @@ private:
 	mat4 prevVPMatrix {1.f};
 	mat4 prevProjMatrix {1.f};
 
+	bool showTvTestScreen = true;
+
 public:
 	void setShadowMapProgram(GLuint _shadowMapProgram);
 

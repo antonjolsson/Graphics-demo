@@ -4,10 +4,11 @@
     "\\bin",
     "\\build",
     "\\build\\.vs",
+    "\\build\\project",
     "\\external",
     "\\external_src",
     "\\project"
   ],
-  "SelectedNode": "\\build\\foreignAttack.sln",
+  "SelectedNode": "\\build\\project\\project.sln",
   "PreviewInSolutionExplorer": false
 }

@@ -233,7 +233,7 @@ void Renderer::drawShadowMap(const mat4 _lightViewMatrix, const mat4 _lightProjM
 	shadowMap->draw();
 	drawScene(SHADOW, _lightViewMatrix, _lightProjMatrix, _lightViewMatrix,
 	          _lightProjMatrix);
-	if (landingPad != nullptr) {
+	if (landingPad != nullptr && !showTvTestScreen) {
 		labhelper::Material& screen = landingPad->getComponent<ModelRenderComponent>()->getModel()->m_materials[8];
 		screen.m_emission_texture.gl_id = shadowMap->getShadowMapFB().colorTextureTargets[0];
 	}
