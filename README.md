@@ -1,5 +1,5 @@
 # Description
-Demo project for the course Advanced computer graphics @ Chalmers/GU, showcasing various 3D-graphics techniques. <br>
+Demo project showcasing various 3D-graphics techniques. <br>
 Techniques implemented include:
 * Heightfield
 * Screen-space ambient occlusion
@@ -9,6 +9,5 @@ Techniques implemented include:
 <b>Click on image for video</b>
 [![Screen](/screenshots/screenshot.png)](https://youtu.be/RA6DiAuuyCU)
 
-
-Based on https://gitlab.com/chalmerscg/tda362-labs-2019
+Made for the course Advanced computer graphics @ Chalmers/GU. Based on https://gitlab.com/chalmerscg/tda362-labs-2019
 
