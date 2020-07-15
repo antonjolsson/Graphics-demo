@@ -1,6 +1,5 @@
 # Description
-Demo project showcasing various 3D-graphics techniques. <br>
-Techniques implemented include:
+Demo project showcasing various 3D-graphics techniques, including
 * Heightfield
 * Screen-space ambient occlusion
 * Tone mapping/HDR
