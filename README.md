@@ -1,9 +1,14 @@
 # Description
-Demo project for the course Advanced computer graphics @ Chalmers/GU, showcasing various 3D-graphics techniques. Project's foundation is the labs from the course Computer Graphics.<br>
+Demo project for the course Advanced computer graphics @ Chalmers/GU, showcasing various 3D-graphics techniques. <br>
 Techniques implemented:
 * Heightfield
 * Screen-space ambient occlusion
 * Depth-of-field
 * Tone mapping/HDR
-* Smooth, automatic third-person camera movement by lerping movement vector 
+* Smooth, automatic third-person camera movement by lerping movement vector
+
+![Screen](/screenshots/screenshot.png)
+
+
+Based on https://gitlab.com/chalmerscg/tda362-labs-2019
 
